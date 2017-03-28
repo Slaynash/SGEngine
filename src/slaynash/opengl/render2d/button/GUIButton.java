@@ -18,11 +18,11 @@ public class GUIButton extends GUIElement{
 	private final EventListenerList listeners = new EventListenerList();
 	
 	
-	private boolean backgroundEnabled = true;
-	private boolean textEnable = false;
-	private Text2d text;
-	private Color textColor;
-	private Color textColorHover;
+	protected boolean backgroundEnabled = true;
+	protected boolean textEnable = false;
+	protected Text2d text;
+	protected Color textColor;
+	protected Color textColorHover;
 	
 	
 
