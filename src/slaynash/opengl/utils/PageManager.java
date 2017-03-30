@@ -32,7 +32,7 @@ public class PageManager {
 				UserInputUtil.initController();
 				while(true){
 					while(render){
-						if(Display.isCloseRequested() || (vrMode && VRUtils.iscloseRequested())){
+						if(Display.isCloseRequested() || (vrMode && VRUtils.isCloseRequested())){
 							render = false;
 							close = true;
 						}

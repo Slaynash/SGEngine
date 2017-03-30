@@ -6,13 +6,13 @@ import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.util.concurrent.TimeUnit;
 
-import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.util.vector.Matrix4f;
+import org.lwjgl.util.vector.Vector3f;
 
 import de.fruitfly.ovr.structs.Vector2i;
 import jopenvr.HmdMatrix34_t;
@@ -43,26 +43,23 @@ public class VRUtils {
 	private static IntBuffer hmdErrorStore;
 	private static TrackedDevicePose_t.ByReference hmdTrackedDevicePoseReference;
 	private static TrackedDevicePose_t[] hmdTrackedDevicePoses;
-	//private static TrackedDevicePose_t.ByReference hmdGamePoseReference;
-	//private static TrackedDevicePose_t[] hmdGamePoses;
 	
 	private static Matrix4f[] poseMatrices;
 	
-	static Matrix4f leftEyeProjectionMatrix = new Matrix4f();
+	private static Matrix4f leftEyeProjectionMatrix = new Matrix4f();
 	static Matrix4f rightEyeProjectionMatrix = new Matrix4f();
 	static Matrix4f leftEyePose = new Matrix4f();
 	static Matrix4f rightEyePose = new Matrix4f();
 	
 
-	final static VRTextureBounds_t texBounds = new VRTextureBounds_t();
+	final static VRTextureBounds_t texBoundsLeft = new VRTextureBounds_t();
+	final static VRTextureBounds_t texBoundsRight = new VRTextureBounds_t();
 	final static Texture_t texType0 = new Texture_t();
 	final static Texture_t texType1 = new Texture_t();
 	
 	private static IntBuffer hmdDisplayFrequency;
-
 	private static FloatBuffer tlastVsync;
 	private static LongBuffer _tframeCount;
-	
 	
 	
 	private static int[] fbos = new int[2];
@@ -72,14 +69,8 @@ public class VRUtils {
 	
 	private static Matrix4f hmdPose = new Matrix4f();
 	
-	private static org.lwjgl.util.vector.Vector3f leftEyeTransform;
-	private static org.lwjgl.util.vector.Vector3f rightEyeTransform;
+	private static float znear = 0.1f, zfar = 30f;
 	
-	private static final float ZNEAR = 0.1f, ZFAR = 30f;
-	
-	
-	
-
 	private static final long SLEEP_PRECISION = TimeUnit.MILLISECONDS.toNanos(4);
 	private static final long SPIN_YIELD_PRECISION = TimeUnit.MILLISECONDS.toNanos(2);
 	private static long latencyWaitTime;
@@ -88,8 +79,17 @@ public class VRUtils {
 	private static float vsyncToPhotons;
     private static double timePerFrame, frameCountRun;
     private static long frameCount;
+    
+	private static float posX, posY, posZ;
+	private static float dirX, dirY, dirZ;
+	private static float upX, upY, upZ;
 	
-	
+	public static void setViewDistance(float znear, float zfar){
+		if(VRUtils.znear == znear && VRUtils.zfar == zfar) return;
+		VRUtils.znear = znear;
+		VRUtils.zfar = zfar;
+		setupCameras();
+	}
 	
 	static boolean initVR() {
 		System.out.println("[VRUtils] initializing OpenVR...");
@@ -112,48 +112,9 @@ public class VRUtils {
 		
 		System.out.println( "OpenVR initialized & VR connected." );
 		
-		/*
-		deviceVelocity = new Vector3f[JOpenVRLibrary.k_unMaxTrackedDeviceCount];
-
-		for(int i=0;i<poseMatrices.length;i++)
-		{
-			poseMatrices[i] = new Matrix4f();
-			deviceVelocity[i] = new Vector3f(0,0,0);
-		}
-
-		HmdMatrix34_t leftEyeTransformMatrix = vrsystem.GetEyeToHeadTransform.apply(JOpenVRLibrary.EVREye.EVREye_Eye_Left);
-		printMatrix(convertToFruitflyMatrix(leftEyeTransformMatrix), "EYEPOS_LEFT");
-		OpenVRUtil.convertSteamVRMatrix3ToMatrix4f(leftEyeTransformMatrix, hmdPoseLeftEye);
-		hmdPoseLeftEye = hmdPoseLeftEye.inverted();
-		//System.out.println("left eye matrix:");
-		//for(float f:leftEyeTransformMatrix.m)
-		//	System.out.println(f);
-		/*
-		 * 1 0 0 -0.030599998 
-		 * 0 1 0 0.0
-		 * 0 0 1 0.015
-		 * /
-		leftEyeTransform = new org.lwjgl.util.vector.Vector3f(leftEyeTransformMatrix.m[3], leftEyeTransformMatrix.m[7], leftEyeTransformMatrix.m[11]);
-		
-		HmdMatrix34_t rightEyeTransformMatrix = vrsystem.GetEyeToHeadTransform.apply(JOpenVRLibrary.EVREye.EVREye_Eye_Right);
-		OpenVRUtil.convertSteamVRMatrix3ToMatrix4f(rightEyeTransformMatrix, hmdPoseRightEye);
-		hmdPoseRightEye = hmdPoseRightEye.inverted();
-		
-		rightEyeTransform = new org.lwjgl.util.vector.Vector3f(rightEyeTransformMatrix.m[3], rightEyeTransformMatrix.m[7], rightEyeTransformMatrix.m[11]);
-		
-		IntBuffer rrtsx = IntBuffer.allocate(1);
-		IntBuffer rrtsy = IntBuffer.allocate(2);
-		
-		vrsystem.GetRecommendedRenderTargetSize.apply(rrtsx, rrtsy);
-		System.out.println("Recommended Render Target Size :"+rrtsx.get()+"x"+rrtsy.get());
-		createRenderTexture(rrtsx.get(0), rrtsy.get(0));
-		*/
 		rendersize = getRenderSize();
 	    initBuffers(rendersize.x, rendersize.y, rendersize.x, rendersize.y);
 		System.out.println( "Render buffers/textures created" );
-		//hmdProjectionLeftEye = initProjectionMatrix(EYE_LEFT);
-		//hmdProjectionRightEye = initProjectionMatrix(EYE_RIGHT);
-		//initProjectionsMatricesInfos();
 		setupCameras();
 		System.out.println( "Matrices created" );
 		initialized = true;
@@ -169,7 +130,7 @@ public class VRUtils {
     }
 	
 	private static Matrix4f getHMDMatrixProjectionEye(int nEye){
-    	HmdMatrix44_t mat = vrsystem.GetProjectionMatrix.apply(nEye, ZNEAR, ZFAR, JOpenVRLibrary.EGraphicsAPIConvention.EGraphicsAPIConvention_API_OpenGL);
+    	HmdMatrix44_t mat = vrsystem.GetProjectionMatrix.apply(nEye, znear, zfar, JOpenVRLibrary.EGraphicsAPIConvention.EGraphicsAPIConvention_API_OpenGL);
     	return convertSteamVRMatrix4ToMatrix4f(mat);
     }
     
@@ -323,20 +284,25 @@ public class VRUtils {
 		}
 	}
 	
-	
 	private static void initTextureSubmitStructs(){
-		
 		// left eye
-		texBounds.uMax = 1f;
-		texBounds.uMin = 0f;
-		texBounds.vMax = 1f;
-		texBounds.vMin = 0f;
-		texBounds.setAutoSynch(false);
-		texBounds.setAutoRead(false);
-		texBounds.setAutoWrite(false);
-		texBounds.write();
-
-
+		texBoundsLeft.uMax = 1f;
+		texBoundsLeft.uMin = 0f;
+		texBoundsLeft.vMax = 1f;
+		texBoundsLeft.vMin = 0f;
+		texBoundsLeft.setAutoSynch(false);
+		texBoundsLeft.setAutoRead(false);
+		texBoundsLeft.setAutoWrite(false);
+		texBoundsLeft.write();
+		// right eye
+		texBoundsRight.uMax = 1f;
+		texBoundsRight.uMin = 0f;
+		texBoundsRight.vMax = 1f;
+		texBoundsRight.vMin = 0f;
+		texBoundsRight.setAutoSynch(false);
+		texBoundsRight.setAutoRead(false);
+		texBoundsRight.setAutoWrite(false);
+		texBoundsRight.write();
 		// texture type
 		texType0.eColorSpace = JOpenVRLibrary.EColorSpace.EColorSpace_ColorSpace_Gamma;
 		texType0.eType = JOpenVRLibrary.EGraphicsAPIConvention.EGraphicsAPIConvention_API_OpenGL;
@@ -344,372 +310,15 @@ public class VRUtils {
 		texType0.setAutoRead(false);
 		texType0.setAutoWrite(false);
 		texType0.handle = -1;
-		texType0.write();
-
-		
-		// texture type
 		texType1.eColorSpace = JOpenVRLibrary.EColorSpace.EColorSpace_ColorSpace_Gamma;
 		texType1.eType = JOpenVRLibrary.EGraphicsAPIConvention.EGraphicsAPIConvention_API_OpenGL;
 		texType1.setAutoSynch(false);
 		texType1.setAutoRead(false);
 		texType1.setAutoWrite(false);
 		texType1.handle = -1;
-		texType1.write();
 		
 		System.out.println("OpenVR Compositor initialized OK.");
 
-	}
-	/*
-	private static RenderTextureSet createRenderTexture(int lwidth, int lheight){
-		renderSize[0] = new Vector2f(lwidth, lheight);
-		renderSize[1] = new Vector2f(lwidth, lheight);
-		//----------------------------------------------------------------------------------------------------------------------------------
-		//Buffer generation
-		fbos[EYE_LEFT] = GL30.glGenFramebuffers();
-		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, fbos[EYE_LEFT]);
-		
-		
-		//----------------------------------------------------------------------------------------------------------------------------------
-		//Texture generation
-		
-		// generate left eye texture
-		leftEyeTextureId = GL11.glGenTextures();
-		int LeftEyeDepthId = GL11.glGenTextures();
-		int boundTextureId = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, leftEyeTextureId);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-		GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, lwidth, lheight, 0, GL11.GL_RGBA, GL11.GL_INT, (java.nio.ByteBuffer) null);
-		
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, LeftEyeDepthId);
-		GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-		GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL14.GL_DEPTH_COMPONENT24, lwidth, lheight, 0, GL11.GL_DEPTH_COMPONENT, GL11.GL_INT, (ByteBuffer) null);
-		
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, boundTextureId);
-
-		texType0.handle = leftEyeTextureId;
-		texType0.eColorSpace = JOpenVRLibrary.EColorSpace.EColorSpace_ColorSpace_Gamma;
-		texType0.eType = JOpenVRLibrary.EGraphicsAPIConvention.EGraphicsAPIConvention_API_OpenGL;
-		texType0.write();
-		
-		//----------------------------------------------------------------------------------------------------------------------------------
-		//Buffer setup
-		GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, leftEyeTextureId, 0);
-		GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT,  GL11.GL_TEXTURE_2D, LeftEyeDepthId, 0);
-		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
-		
-		//----------------------------------------------------------------------------------------------------------------------------------
-		//Buffer generation
-		fbos[EYE_RIGHT] = GL30.glGenFramebuffers();
-		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, fbos[EYE_RIGHT]);
-		
-		//----------------------------------------------------------------------------------------------------------------------------------
-		//Texture generation
-		
-		// generate right eye texture
-		rightEyeTextureId = GL11.glGenTextures();
-		int RightEyeDepthId = GL11.glGenTextures();
-		boundTextureId = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, rightEyeTextureId);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-		GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, lwidth, lheight, 0, GL11.GL_RGBA, GL11.GL_INT, (java.nio.ByteBuffer) null);
-		
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, RightEyeDepthId);
-		GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-		GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL14.GL_DEPTH_COMPONENT24, lwidth, lheight, 0, GL11.GL_DEPTH_COMPONENT, GL11.GL_INT, (ByteBuffer) null);
-		
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, boundTextureId);
-		texType1.handle = rightEyeTextureId;
-		texType1.eColorSpace = JOpenVRLibrary.EColorSpace.EColorSpace_ColorSpace_Gamma;
-		texType1.eType = JOpenVRLibrary.EGraphicsAPIConvention.EGraphicsAPIConvention_API_OpenGL;
-		texType1.write();
-		
-		//----------------------------------------------------------------------------------------------------------------------------------
-		//Buffer setup
-		GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, rightEyeTextureId, 0);
-		GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT,  GL11.GL_TEXTURE_2D, RightEyeDepthId, 0);
-		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
-		
-		
-
-		RenderTextureSet textureSet = new RenderTextureSet();
-		textureSet.leftEyeTextureIds.add(leftEyeTextureId);
-		textureSet.rightEyeTextureIds.add(rightEyeTextureId);
-		return textureSet;
-	}
-	*/
-	public static void setCurrentRenderEye(int renderEye){
-		if(renderEye != EYE_CENTER){
-			GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, fbos[renderEye]);
-			GL11.glViewport(0, 0, rendersize.x, rendersize.y);
-		}
-		else{
-			GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
-			GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
-		}
-	}
-	/*
-	private static void initProjectionsMatricesInfos(){
-		FloatByReference lpfLeft = new FloatByReference();
-		FloatByReference lpfRight = new FloatByReference();
-		FloatByReference lpfTop = new FloatByReference();
-		FloatByReference lpfBottom = new FloatByReference();
-		
-		vrsystem.GetProjectionRaw.apply(EYE_LEFT, lpfLeft, lpfRight, lpfTop, lpfBottom);
-		float lfRight = lpfRight.getValue();
-		float lfLeft = lpfLeft.getValue();
-		float lfTop = lpfTop.getValue();
-		float lfBottom = lpfBottom.getValue();
-		eyeMatrixInfos[EYE_LEFT] = new float[]{lfLeft, lfRight, lfBottom, lfTop};
-		
-		
-		FloatByReference rpfLeft = new FloatByReference();
-		FloatByReference rpfRight = new FloatByReference();
-		FloatByReference rpfTop = new FloatByReference();
-		FloatByReference rpfBottom = new FloatByReference();
-		
-		vrsystem.GetProjectionRaw.apply(EYE_LEFT, rpfLeft, rpfRight, rpfTop, rpfBottom);
-		float rfRight = lpfRight.getValue();
-		float rfLeft = lpfLeft.getValue();
-		float rfTop = lpfTop.getValue();
-		float rfBottom = lpfBottom.getValue();
-		eyeMatrixInfos[EYE_RIGHT] = new float[]{rfLeft, rfRight, rfBottom, rfTop};
-		
-		
-		HmdMatrix44_t pm = vrsystem.GetProjectionMatrix.apply(EYE_LEFT, zNear, zFar, JOpenVRLibrary.EGraphicsAPIConvention.EGraphicsAPIConvention_API_OpenGL);
-		
-		System.out.println("GMatrix (eye left):");
-	    System.out.println(pm.m[0]+" "+pm.m[1]+" "+pm.m[2]+" "+pm.m[3]);
-	    System.out.println(pm.m[4]+" "+pm.m[5]+" "+pm.m[6]+" "+pm.m[7]);
-	    System.out.println(pm.m[8]+" "+pm.m[9]+" "+pm.m[10]+" "+pm.m[11]);
-	    System.out.println(pm.m[12]+" "+pm.m[13]+" "+pm.m[14]+" "+pm.m[15]);
-	    
-	    hmdProjectionLeftEyeBuffer = new Matrix4f(
-	    		pm.m[0], pm.m[1], -pm.m[2], pm.m[3],
-	    		pm.m[4], pm.m[5], -pm.m[6], pm.m[7],
-	    		pm.m[8], pm.m[9], -pm.m[10], pm.m[11],
-	    		pm.m[12], pm.m[13], -pm.m[14], pm.m[15]
-	    ).toFloatBuffer();
-	    
-	    pm = vrsystem.GetProjectionMatrix.apply(EYE_RIGHT, zNear, zFar, JOpenVRLibrary.EGraphicsAPIConvention.EGraphicsAPIConvention_API_OpenGL);
-		
-		System.out.println("GMatrix (eye left):");
-	    System.out.println(pm.m[0]+" "+pm.m[1]+" "+pm.m[2]+" "+pm.m[3]);
-	    System.out.println(pm.m[4]+" "+pm.m[5]+" "+pm.m[6]+" "+pm.m[7]);
-	    System.out.println(pm.m[8]+" "+pm.m[9]+" "+pm.m[10]+" "+pm.m[11]);
-	    System.out.println(pm.m[12]+" "+pm.m[13]+" "+pm.m[14]+" "+pm.m[15]);
-	    
-	    hmdProjectionRightEyeBuffer = new Matrix4f(
-	    		pm.m[0], pm.m[1], -pm.m[2], pm.m[3],
-	    		pm.m[4], pm.m[5], -pm.m[6], pm.m[7],
-	    		pm.m[8], pm.m[9], -pm.m[10], pm.m[11],
-	    		pm.m[12], pm.m[13], -pm.m[14], pm.m[15]
-	    ).toFloatBuffer();
-	    float t = pm.m[0];
-	    float Rad2Deg = (float) (180f / Math.PI);
-	    float fov = (float) (Math.atan(1.0f / t ) * 2.0f * Rad2Deg);
-	    System.out.println("fov: "+fov);
-	    
-	}
-	
-	private static float[] initProjectionMatrix(int eye){
-		if (vrsystem == null) {
-            return new float[16];
-        }
-        float nearClip = 0.1f, farClip = 30.0f;
-        float[] m = vrsystem.GetProjectionMatrix.apply(eye, nearClip, farClip, JOpenVRLibrary.EGraphicsAPIConvention.EGraphicsAPIConvention_API_OpenGL).m;
-        //printMatrix(toMatrix4f(m), "PROJECTION "+eye);
-        //System.out.println(toMatrix4f(m).M[2][0]);
-        return m;
-        //return null;
-	}
-	*/
-	/*
-	private static float[] initProjectionMatrixOLD(int eye){
-		float zNear = 0.01f;
-		float zFar = 30f;
-		FloatByReference pfLeft = new FloatByReference();
-		FloatByReference pfRight = new FloatByReference();
-		FloatByReference pfTop = new FloatByReference();
-		FloatByReference pfBottom = new FloatByReference();
-		vrsystem.GetProjectionRaw.apply(eye, pfLeft, pfRight, pfTop, pfBottom);
-		//HmdMatrix44_t m2 = vrsystem.GetProjectionMatrix.apply(eye, zNear, zFar, 0);
-		
-		float[] m = new float[16];
-		
-		float fRight = pfRight.getValue();
-		float fLeft = pfLeft.getValue();
-		float fTop = pfTop.getValue();
-		float fBottom = pfBottom.getValue();
-	    /*
-		float idx = 1.0f / (fRight - fLeft);
-	    float idy = 1.0f / (fBottom - fTop);
-	    float idz = 1.0f / (zFar - zNear);
-	    float sx = fRight + fLeft;
-	    float sy = fBottom + fTop;
-		
-	    m[0]  = 2*idx;  m[1]  = 0.0f;   m[2]  = sx*idx;     m[3]  = 0.0f;
-	    
-	    m[4]  = 0.0f;   m[5]  = 2*idy;  m[6]  = sy*idy;     m[7]  = 0.0f;
-	    
-	    m[8]  = 0.0f;   m[9]  = 0.0f;   m[10] = -zFar*idz;  m[11] = -zFar*zNear*idz;
-	    
-	    m[12] = 0.0f;   m[13] = 0.0f;   m[14] = -1.0f;      m[15] = 0.0f;
-	    * /
-	    
-	    
-	    
-		int offset = 0;
-		
-		float r_width  = 1.0f / (fRight - fLeft);
-	    //float r_height = 1.0f / (top - bottom);
-		float r_height = 1.0f / (fBottom - fTop);
-	    float r_depth  = 1.0f / (zFar - zNear);
-	    float x =  2.0f * (r_width);
-	    float y =  2.0f * (r_height);
-	    float z =  2.0f * (r_depth);
-	    float A = (fRight + fLeft) * r_width;
-	    float B = (fTop + fBottom) * r_height;
-	    float C = (zFar + zNear) * r_depth;
-	    
-	    m[offset + 0] = x;
-	    m[offset + 3] = -A;
-	    m[offset + 5] = y;
-	    m[offset + 7] = -B;
-	    m[offset + 10] = -z;
-	    m[offset + 11] = -C;
-	    m[offset +  1] = 0.0f;
-	    m[offset +  2] = 0.0f;
-	    m[offset +  4] = 0.0f;
-	    m[offset +  6] = 0.0f;
-	    m[offset +  8] = 0.0f;
-	    m[offset +  9] = 0.0f;
-	    m[offset + 12] = 0.0f;
-	    m[offset + 13] = 0.0f;
-	    m[offset + 14] = 0.0f;
-	    m[offset + 15] = 1.0f;
-	    
-	    
-	    /*
-	    System.out.println("Matrix (eye "+(eye == EYE_LEFT ? "left" : "right")+"):");
-	    System.out.println(left);
-	    System.out.println(right);
-	    System.out.println(bottom);
-	    System.out.println(top);
-		*/
-	    /*
-	    System.out.println("CMatrix (eye "+(eye == EYE_LEFT ? "left" : "right")+"):");
-	    System.out.println(m[0]+" "+m[1]+" "+m[2]+" "+m[3]);
-	    System.out.println(m[4]+" "+m[5]+" "+m[6]+" "+m[7]);
-	    System.out.println(m[8]+" "+m[9]+" "+m[10]+" "+m[11]);
-	    System.out.println(m[12]+" "+m[13]+" "+m[14]+" "+m[15]);
-	    * /
-	    
-	    return m;
-	}
-	*/
-	/**
-	 * <b>MATRIXMODE</b> MUST BE SET TO <b>GL_PROJECTION</b> !
-	 */
-	/*
-	public static void loadProjectionMatrix(int eye){
-		GL11.glLoadIdentity();
-    	FloatBuffer bufferl = BufferUtils.createFloatBuffer(4*4);
-        bufferl.put(toFloatArray(eye == 0 ? leftEyeProjectionMatrix : rightEyeProjectionMatrix));
-        bufferl.flip();
-        GL11.glMultMatrix(bufferl);
-	}
-	
-	public static void loadModelViewMatrix(int eye){
-		GL11.glLoadIdentity();
-    	FloatBuffer bufferl = BufferUtils.createFloatBuffer(4*4);
-		Matrix4f mmul = new Matrix4f();
-    	if(eye == EYE_LEFT)
-    		 Matrix4f.mul(leftEyePose, hmdPose, mmul);
-    	else Matrix4f.mul(rightEyePose, hmdPose, mmul);
-        bufferl.put(toFloatArray(mmul));
-        bufferl.flip();
-        GL11.glMultMatrix(bufferl);
-	}
-	*/
-	
-	public static void loadProjectionMatrix(int eye){
-		GL11.glLoadIdentity();
-    	FloatBuffer bufferl = BufferUtils.createFloatBuffer(4*4);
-        (eye == 0 ? leftEyeProjectionMatrix : rightEyeProjectionMatrix).store(bufferl);
-        bufferl.flip();
-        GL11.glMultMatrix(bufferl);
-	}
-	
-	public static void loadModelViewMatrix(int eye){
-		GL11.glLoadIdentity();
-    	FloatBuffer bufferl = BufferUtils.createFloatBuffer(4*4);
-		Matrix4f mmul = new Matrix4f();
-    	if(eye == EYE_LEFT)
-    		 Matrix4f.mul(leftEyePose, hmdPose, mmul);
-    	else Matrix4f.mul(rightEyePose, hmdPose, mmul);
-        mmul.store(bufferl);
-        bufferl.flip();
-        GL11.glMultMatrix(bufferl);
-	}
-	
-	/*
-	private static float[] toFloatArray(Matrix4f m) {
-		return new float[]{
-				m.M[0][0], m.M[0][1], m.M[0][2], m.M[0][3],
-				m.M[1][0], m.M[1][1], m.M[1][2], m.M[1][3],
-				m.M[2][0], m.M[2][1], m.M[2][2], m.M[2][3],
-				m.M[3][0], m.M[3][1], m.M[3][2], m.M[3][3]
-		};
-	}
-	*/
-	/*
-	private static float[] toFloatArray(Matrix4f m) {
-		return new float[]{
-				m.m00, m.m10, m.m20, m.m30,
-				m.m01, m.m11, m.m21, m.m31,
-				m.m02, m.m12, m.m22, m.m32,
-				m.m03, m.m13, m.m23, m.m33
-		};
-	}
-	*/
-	/*
-	private static Matrix4f toMatrix4f(float[] f) {
-		return new Matrix4f(
-				f[0], f[4], f[8] , f[12],
-				f[1], f[5], f[9] , f[13],
-				f[2], f[6], f[10], f[14],
-				f[3], f[7], f[11], f[15]
-		);
-	}
-	*/
-	/*
-	public static void loadProjectionMatrix(int eye){
-		GL11.glLoadIdentity();
-    	GL11.glFrustum(eyeMatrixInfos[eye][0], eyeMatrixInfos[eye][1], eyeMatrixInfos[eye][3], eyeMatrixInfos[eye][2], zNear, zFar);
-	}
-	*/
-	
-	static void sendFramesToCompositor() {
-		if(vrCompositor.Submit == null)
-			return;
-		
-		vrCompositor.Submit.apply(
-				JOpenVRLibrary.EVREye.EVREye_Eye_Left,
-				texType0, texBounds,
-				JOpenVRLibrary.EVRSubmitFlags.EVRSubmitFlags_Submit_Default);
-
-		vrCompositor.Submit.apply(
-				JOpenVRLibrary.EVREye.EVREye_Eye_Right,
-				texType1, texBounds,
-				JOpenVRLibrary.EVRSubmitFlags.EVRSubmitFlags_Submit_Default);
-
-		vrCompositor.PostPresentHandoff.apply();
 	}
 	
 	public static void updatePose(){
@@ -774,14 +383,74 @@ public class VRUtils {
             if( hmdTrackedDevicePoses[nDevice].bPoseIsValid != 0 ){
                 hmdTrackedDevicePoses[nDevice].readField("mDeviceToAbsoluteTracking");
                 poseMatrices[nDevice] = convertSteamVRMatrix3ToMatrix4f(hmdTrackedDevicePoses[nDevice].mDeviceToAbsoluteTracking);
-            }            
+            }
         }
         
         if ( hmdTrackedDevicePoses[JOpenVRLibrary.k_unTrackedDeviceIndex_Hmd].bPoseIsValid != 0 ){
             hmdPose = (Matrix4f) poseMatrices[JOpenVRLibrary.k_unTrackedDeviceIndex_Hmd].invert();
+            Matrix4f viewMatrix = new Matrix4f();
+			hmdPose.transpose(viewMatrix);
+			viewMatrix.invert();
+			posX = viewMatrix.m03;
+			posY = viewMatrix.m13;
+			posZ = viewMatrix.m23;
+			dirX = -viewMatrix.m02;
+			dirY = -viewMatrix.m12;
+			dirZ = -viewMatrix.m22;
+			upX = viewMatrix.m01;
+			upY = viewMatrix.m11;
+			upZ = viewMatrix.m21;
         } else {
             hmdPose = new Matrix4f();
         }
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/***
+	 * <b>WARNING:</b> you must pass the MVP matrix manually after this function !
+	 * @param renderEye the eyeId you want to render to
+	 */
+	public static void setCurrentRenderEye(int renderEye){
+		if(renderEye != EYE_CENTER){
+			GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, fbos[renderEye]);
+			GL11.glViewport(0, 0, rendersize.x, rendersize.y);
+		}
+		else{
+			GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
+			GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
+		}
+	}
+	
+	static void sendFramesToCompositor() {
+		if(vrCompositor.Submit == null)
+			return;
+		
+		vrCompositor.Submit.apply(
+				JOpenVRLibrary.EVREye.EVREye_Eye_Left,
+				texType0, texBoundsLeft,
+				JOpenVRLibrary.EVRSubmitFlags.EVRSubmitFlags_Submit_Default);
+
+		vrCompositor.Submit.apply(
+				JOpenVRLibrary.EVREye.EVREye_Eye_Right,
+				texType1, texBoundsRight,
+				JOpenVRLibrary.EVRSubmitFlags.EVRSubmitFlags_Submit_Default);
+
+		vrCompositor.PostPresentHandoff.apply();//require ?
 	}
 	
 	public static void sleepNanos(long nanoDuration) {
@@ -798,58 +467,8 @@ public class VRUtils {
 			timeLeft = end - System.nanoTime();
 		} while (timeLeft > 0);
 	}
-	
-	/*
-	static void updatePose(){
-		if ( vrsystem == null || vrCompositor == null || vrCompositor.WaitGetPoses == null)
-			return;
-		
-		vrCompositor.WaitGetPoses.apply(hmdTrackedDevicePoseReference, JOpenVRLibrary.k_unMaxTrackedDeviceCount, null, 0);
 
-		for (int nDevice = 0; nDevice < JOpenVRLibrary.k_unMaxTrackedDeviceCount; ++nDevice ){
-			hmdTrackedDevicePoses[nDevice].read();
-			if ( hmdTrackedDevicePoses[nDevice].bPoseIsValid != 0 ){
-				poseMatrices[nDevice] = convertSteamVRMatrix3ToMatrix4f(hmdTrackedDevicePoses[nDevice].mDeviceToAbsoluteTracking);
-				deviceVelocity[nDevice].x = hmdTrackedDevicePoses[nDevice].vVelocity.v[0];
-				deviceVelocity[nDevice].y = hmdTrackedDevicePoses[nDevice].vVelocity.v[1];
-				deviceVelocity[nDevice].z = hmdTrackedDevicePoses[nDevice].vVelocity.v[2];
-			}
-		}
-
-		if ( hmdTrackedDevicePoses[JOpenVRLibrary.k_unTrackedDeviceIndex_Hmd].bPoseIsValid != 0 ){
-			OpenVRUtil.Matrix4fCopy(poseMatrices[JOpenVRLibrary.k_unTrackedDeviceIndex_Hmd].inverted(), hmdPose);
-			headIsTracking = true;
-		}
-		else{
-			headIsTracking = false;
-			OpenVRUtil.Matrix4fSetIdentity(hmdPose);
-			//hmdPose.M[1][3] = 1.62f;
-		}
-
-		findControllerDevices();
-
-		for (int c=0;c<2;c++){
-			if (controllerDeviceIndex[c] != -1){
-				controllerTracking[c] = true;
-				OpenVRUtil.Matrix4fCopy(poseMatrices[controllerDeviceIndex[c]], controllerPose[c]);
-			}
-			else{
-				controllerTracking[c] = false;
-				if(controllerPose[c] == null) controllerPose[c] = new Matrix4f();
-				OpenVRUtil.Matrix4fSetIdentity(controllerPose[c]);
-			}
-		}
-	}
-	
-	private static void findControllerDevices(){
-		controllerDeviceIndex[RIGHT_CONTROLLER] = -1;
-		controllerDeviceIndex[LEFT_CONTROLLER] = -1;
-		controllerDeviceIndex[LEFT_CONTROLLER]  = vrsystem.GetTrackedDeviceIndexForControllerRole.apply(JOpenVRLibrary.ETrackedControllerRole.ETrackedControllerRole_TrackedControllerRole_LeftHand);
-		controllerDeviceIndex[RIGHT_CONTROLLER] = vrsystem.GetTrackedDeviceIndexForControllerRole.apply(JOpenVRLibrary.ETrackedControllerRole.ETrackedControllerRole_TrackedControllerRole_RightHand);
-	}
-	*/
-
-	public static boolean iscloseRequested() {//TODO quit system
+	public static boolean isCloseRequested() {//TODO quit system
 		return false;
 	}
 
@@ -861,20 +480,7 @@ public class VRUtils {
 		}
 	}
 	
-	public static org.lwjgl.util.vector.Vector3f getEyePose(int eye){
-		return eye == EYE_LEFT ? leftEyeTransform : rightEyeTransform;
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	public static Matrix4f convertSteamVRMatrix3ToMatrix4f(HmdMatrix34_t hmdMatrix){
+	private static Matrix4f convertSteamVRMatrix3ToMatrix4f(HmdMatrix34_t hmdMatrix){
 		Matrix4f s = new Matrix4f();
 		s.m00 = hmdMatrix.m[0];
 		s.m10 = hmdMatrix.m[1];
@@ -898,7 +504,7 @@ public class VRUtils {
 		return s;
 	}
 	
-	public static Matrix4f convertSteamVRMatrix4ToMatrix4f(HmdMatrix44_t hmdMatrix){
+	private static Matrix4f convertSteamVRMatrix4ToMatrix4f(HmdMatrix44_t hmdMatrix){
 		Matrix4f s = new Matrix4f();
 		s.m00 = hmdMatrix.m[0];
 		s.m10 = hmdMatrix.m[1];
@@ -923,6 +529,28 @@ public class VRUtils {
 	}
 	
 	
+	public static Matrix4f getCurrentModelViewProjectionMatrix(int nEye){
+    	Matrix4f matMVP = new Matrix4f();
+    	
+    	if (nEye == JOpenVRLibrary.EVREye.EVREye_Eye_Left)
+    		Matrix4f.mul(leftEyeProjectionMatrix, leftEyePose, matMVP);
+    	else if (nEye == JOpenVRLibrary.EVREye.EVREye_Eye_Right)
+    		Matrix4f.mul(rightEyeProjectionMatrix, rightEyePose, matMVP);
+		Matrix4f.mul(matMVP, hmdPose, matMVP);
+
+    	return matMVP;
+    }
 	
+	public static Vector3f getPosition(){
+		return new Vector3f(posX, posY, posZ);
+	}
+	
+	public static Vector3f getForward(){
+		return new Vector3f(dirX, dirY, dirZ);
+	}
+	
+	public static Vector3f getUpVector(){
+		return new Vector3f(upX, upY, upZ);
+	}
 	
 }

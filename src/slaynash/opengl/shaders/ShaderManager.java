@@ -3,12 +3,15 @@ package slaynash.opengl.shaders;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
+import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -23,11 +26,13 @@ public class ShaderManager {
 	private static String shader2dLocation = Infos.getInstallPath()+"/"+Infos.getShaderPath()+"/gui";
 	private static String shader3dLocation = Infos.getInstallPath()+"/"+Infos.getShaderPath()+"/world";
 	private static String shaderLabelLocation = Infos.getInstallPath()+"/"+Infos.getShaderPath()+"/label";
+	private static String shaderVRLocation = Infos.getInstallPath()+"/"+Infos.getShaderPath()+"/vr";
 	private static String shaderAIOLocation = Infos.getInstallPath()+"/res/shaders_aio/aio";
 	
 	private static int shader2dP, shader2dV, shader2dF;
 	private static int shader3dP, shader3dV, shader3dF;
 	private static int shaderLabelP, shaderLabelV, shaderLabelF;
+	private static int shaderVRP, shaderVRV, shaderVRF;
 	private static int shaderAIOP, shaderAIOV, shaderAIOF;
 	
 	private static int shaderLabeltextureUnit = 0;
@@ -55,6 +60,11 @@ public class ShaderManager {
 	private static int[] shader3dPointLights_color_location;
 	private static int[] shader3dPointLights_attenuation_location;
 	
+	private static int shaderVRColorTexture_unit = 0;
+	private static int shaderVRColorTexture_location;
+	private static int shaderVRTransformationMatrix_location;
+	private static int shaderVRMVPMatrix_location;
+	
 	private static int shaderAIOtextureColorUnit = 0;
 	private static int shaderAIOtextureNormalUnit = 1;
 	private static int shaderAIOtextureSpecularUnit = 2;
@@ -62,6 +72,8 @@ public class ShaderManager {
 	private static int currentShader = 0;
 	private static int lastActiveShader = 0;
 	private static List<ShaderProgram> customShaders = new ArrayList<ShaderProgram>();
+	
+	private static FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
 	
 	public static void init2DShader() {
 		if(Infos.getShaderMode().equals("AIO")) initAIOShader();
@@ -79,6 +91,12 @@ public class ShaderManager {
 		if(Infos.getShaderMode().equals("AIO")) initAIOShader();
 		if(shader3dP != 0 || shaderAIOP != 0) return;
 		create3dShader(shader3dLocation);
+	}
+	
+	public static void initVRShader() {
+		if(Infos.getShaderMode().equals("AIO")) initAIOShader();
+		if(shaderVRP != 0 || shaderAIOP != 0) return;
+		createVRShader(shaderVRLocation);
 	}
 	
 	public static void initAIOShader() {
@@ -134,6 +152,22 @@ public class ShaderManager {
 		System.out.println("3d shader loaded !");
 	}
 	
+	private static void createVRShader(String shaderLocation) {
+		System.out.println("loading VR shader...");
+		shaderVRV = loadShader(shaderVRLocation+".vs",GL20.GL_VERTEX_SHADER);
+		shaderVRF = loadShader(shaderVRLocation+".fs",GL20.GL_FRAGMENT_SHADER);
+		shaderVRP = GL20.glCreateProgram();
+		System.out.println("VR shader id: "+shaderVRP);
+		GL20.glAttachShader(shaderVRP, shaderVRV);
+		GL20.glAttachShader(shaderVRP, shaderVRF);
+		bindVRShaderAttributes();
+		GL20.glLinkProgram(shaderVRP);
+		GL20.glValidateProgram(shaderVRP);
+		getAllVRShaderUniformLocations();
+		connectShaderVRTextureUnits();
+		System.out.println("VR shader loaded !");
+	}
+	
 	private static void createAIOShader(String shaderLocation) {
 		System.out.println("loading AIO shader...");
 		shaderAIOV = loadShader(shaderAIOLocation+".vs",GL20.GL_VERTEX_SHADER);
@@ -148,6 +182,7 @@ public class ShaderManager {
 		getAllLabelShaderUniformLocations();
 		getAll2dShaderUniformLocations();
 		getAll3dShaderUniformLocations();
+		getAllVRShaderUniformLocations();
 		shaderAIORenderMode_location = GL20.glGetUniformLocation(shaderAIOP,"renderMode");
 		GL20.glUseProgram(shaderAIOP);
 		currentShader = shaderAIOP;
@@ -241,6 +276,28 @@ public class ShaderManager {
 	protected static void bind3dShaderAttribute(int attribute, String variableName){
 		GL20.glBindAttribLocation(shader3dP, attribute, variableName);
 	}
+	//VR Shader
+	private static void connectShaderVRTextureUnits() {
+		GL20.glUniform1i(shaderVRColorTexture_location, shaderVRColorTexture_unit);
+	}
+
+	private static void getAllVRShaderUniformLocations() {
+		shaderVRColorTexture_location = getVRShaderUniformLocation("texture");
+		shaderVRMVPMatrix_location = getVRShaderUniformLocation("mvpMatrix");
+		shaderVRTransformationMatrix_location = getVRShaderUniformLocation("mMatrix");
+	}
+
+	private static void bindVRShaderAttributes() {
+		
+	}
+	
+	protected static int getVRShaderUniformLocation(String uniformName){
+		return GL20.glGetUniformLocation(shaderVRP,uniformName);
+	}
+	
+	protected static void bindVRShaderAttribute(int attribute, String variableName){
+		GL20.glBindAttribLocation(shaderVRP, attribute, variableName);
+	}
 	//AIO Shader
 	private static void connectShaderAIOTextureUnits() {
 		GL20.glUniform1i(shaderLabelTexture_location, shaderAIOtextureColorUnit);
@@ -248,6 +305,7 @@ public class ShaderManager {
 		GL20.glUniform1i(shader3dColorTexture_location, shaderAIOtextureColorUnit);
 		GL20.glUniform1i(shader3dNormalTexture_location, shaderAIOtextureNormalUnit);
 		GL20.glUniform1i(shader3dSpecularTexture_location, shaderAIOtextureSpecularUnit);
+		GL20.glUniform1i(shaderVRColorTexture_location, shaderAIOtextureColorUnit);
 	}
 	
 	private static void bindAIOShaderAttributes() {
@@ -323,6 +381,17 @@ public class ShaderManager {
 		GL20.glUseProgram(shader3dP);
 		currentShader = shader3dP;
 	}
+	
+	public static void startVRShader() {
+		if(shaderAIOP != 0){
+			GL20.glUseProgram(shaderAIOP);
+			GL20.glUniform1f(shaderAIORenderMode_location, 3f);
+			currentShader = shaderAIOP;
+			return;
+		}
+		GL20.glUseProgram(shaderVRP);
+		currentShader = shaderVRP;
+	}
 	/*
 	public static void start3DShader() {
 		GL20.glUseProgram(shader2dP);
@@ -378,6 +447,8 @@ public class ShaderManager {
 		if(shader2dP != 0) cleanUp(shader2dP, shader2dV, shader2dF);
 		if(shaderLabelP != 0) cleanUp(shaderLabelP, shaderLabelV, shaderLabelF);
 		if(shader3dP != 0) cleanUp(shader3dP, shader3dV, shader3dF);
+		if(shaderVRP != 0) cleanUp(shaderVRP, shaderVRV, shaderVRF);
+		if(shaderAIOP != 0) cleanUp(shaderAIOP, shaderAIOV, shaderAIOF);
 		for(ShaderProgram shader:customShaders) shader.cleanup();
 	}
 
@@ -477,6 +548,32 @@ public class ShaderManager {
 			GL20.glUniform3f(shader3dPointLights_color_location[i], l.getColor()[0], l.getColor()[1], l.getColor()[2]);
 			GL20.glUniform3f(shader3dPointLights_attenuation_location[i], l.getAttenuation()[0], l.getAttenuation()[1], l.getAttenuation()[2]);
 		}
+	}
+	
+	public static void bindVRShaderColorTextureID(int textureID) {
+		int unit = ShaderManager.bind3DTextureColorUnit();
+		//System.out.println("D:"+unit);
+		GL13.glActiveTexture(GL13.GL_TEXTURE0+unit);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
+	}
+
+	public static void bindVRShaderDefaultColorTexture() {
+		int unit = ShaderManager.bind3DTextureColorUnit();
+		GL13.glActiveTexture(GL13.GL_TEXTURE0+unit);
+		//System.out.println("D:"+unit);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, TextureManager.getDefaultTextureID());
+	}
+	
+	public static void loadVRShaderTransformationMatrix(Matrix4f matrix){
+		matrix.store(matrixBuffer);
+		matrixBuffer.flip();
+		GL20.glUniformMatrix4(shaderVRTransformationMatrix_location, false, matrixBuffer);
+	}
+	 
+	public static void loadVRShaderMVPMatrix(Matrix4f projection){
+		projection.store(matrixBuffer);
+		matrixBuffer.flip();
+		GL20.glUniformMatrix4(shaderVRMVPMatrix_location, false, matrixBuffer);
 	}
 	
 	public static void setSpecialShaderMode(boolean specialShaderMode){
