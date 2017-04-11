@@ -20,6 +20,9 @@ public class PointLight extends Entity {
 
 	@Override
 	public void render() { }
+	
+	@Override
+	public void renderVR() { }
 
 	public float[] getColor() {
 		return color;

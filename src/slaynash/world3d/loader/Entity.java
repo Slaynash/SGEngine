@@ -16,6 +16,8 @@ public abstract class Entity {
 	
 	public abstract void render();
 
+	public abstract void renderVR();
+
 	public Vector3f getPosition() {
 		return position;
 	}

@@ -18,16 +18,13 @@ import org.lwjgl.util.vector.Vector3f;
 import slaynash.opengl.Infos;
 import slaynash.opengl.textureUtils.TextureManager;
 import slaynash.opengl.utils.DisplayManager;
-import slaynash.world3d.loader.PointLight;
 
 public class ShaderManager {
-	
-	private static final int MAX_POINTLIGHTS = 4;
 	private static String shader2dLocation = Infos.getInstallPath()+"/"+Infos.getShaderPath()+"/gui";
 	private static String shader3dLocation = Infos.getInstallPath()+"/"+Infos.getShaderPath()+"/world";
 	private static String shaderLabelLocation = Infos.getInstallPath()+"/"+Infos.getShaderPath()+"/label";
 	private static String shaderVRLocation = Infos.getInstallPath()+"/"+Infos.getShaderPath()+"/vr";
-	private static String shaderAIOLocation = Infos.getInstallPath()+"/res/shaders_aio/aio";
+	private static String shaderAIOLocation = Infos.getInstallPath()+"/"+Infos.getShaderPath()+"/aio";
 	
 	private static int shader2dP, shader2dV, shader2dF;
 	private static int shader3dP, shader3dV, shader3dF;
@@ -55,13 +52,14 @@ public class ShaderManager {
 	private static int shader3dNormalTexture_location;
 	private static int shader3dSpecularTexture_location;
 	private static int shader3dSpecularFactor_location;
-	private static int shader3dPointLightNumber_location;
-	private static int[] shader3dPointLightsPosition_location;
-	private static int[] shader3dPointLights_color_location;
-	private static int[] shader3dPointLights_attenuation_location;
 	
 	private static int shaderVRColorTexture_unit = 0;
+	private static int shaderVRNormalTexture_unit = 1;
+	private static int shaderVRSpecularTexture_unit = 2;
 	private static int shaderVRColorTexture_location;
+	private static int shaderVRNormalTexture_location;
+	private static int shaderVRSpecularTexture_location;
+	private static int shaderVRSpecularFactor_location;
 	private static int shaderVRTransformationMatrix_location;
 	private static int shaderVRMVPMatrix_location;
 	
@@ -104,6 +102,13 @@ public class ShaderManager {
 		createAIOShader(shaderAIOLocation);
 	}
 
+	
+	
+	
+	
+	
+	
+	
 	private static void create2dShader(String shaderLocation) {
 		System.out.println("loading 2d shader...");
 		shader2dV = loadShader(shader2dLocation+".vs",GL20.GL_VERTEX_SHADER);
@@ -191,6 +196,12 @@ public class ShaderManager {
 		currentShader = 0;
 		System.out.println("AIO shader loaded !");
 	}
+	
+	
+	
+	
+	
+	
 	//Label Shader
 	private static void connectShaderLabelTextureUnits() {
 		GL20.glUniform1i(shaderLabelTexture_location, shaderLabeltextureUnit);
@@ -212,6 +223,14 @@ public class ShaderManager {
 	protected static void bindLabelShaderAttribute(int attribute, String variableName){
 		GL20.glBindAttribLocation(shaderLabelP, attribute, variableName);
 	}
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	//2D Shader
 	private static void connectShader2dTextureUnits() {
@@ -240,7 +259,16 @@ public class ShaderManager {
 	protected static void bind2dShaderAttribute(int attribute, String variableName){
 		GL20.glBindAttribLocation(shader2dP, attribute, variableName);
 	}
-	//3d shader
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	//3D shader
 	private static void connectShader3dTextureUnits() {
 		GL20.glUniform1i(shader3dColorTexture_location, shader3dColorTexture_unit);
 		GL20.glUniform1i(shader3dNormalTexture_location, shader3dNormalTexture_unit);
@@ -252,16 +280,6 @@ public class ShaderManager {
 		shader3dNormalTexture_location = get3dShaderUniformLocation("textureNormal");
 		shader3dSpecularTexture_location = get3dShaderUniformLocation("textureSpecular");
 		shader3dSpecularFactor_location = get3dShaderUniformLocation("specularFactor");
-		shader3dPointLightNumber_location = get3dShaderUniformLocation("pointLightNumber");
-		shader3dPointLightsPosition_location = new int[MAX_POINTLIGHTS];
-		shader3dPointLights_color_location = new int[MAX_POINTLIGHTS];
-		shader3dPointLights_attenuation_location = new int[MAX_POINTLIGHTS];
-		
-		for(int i=0;i<MAX_POINTLIGHTS;i++){
-			shader3dPointLightsPosition_location[i] = get3dShaderUniformLocation("pointlightPositions["+i+"]");
-			shader3dPointLights_color_location[i] = get3dShaderUniformLocation("pointLights["+i+"].color");
-			shader3dPointLights_attenuation_location[i] = get3dShaderUniformLocation("pointLights["+i+"].attenuation");
-		}
 	}
 
 	private static void bind3dShaderAttributes() {
@@ -276,13 +294,30 @@ public class ShaderManager {
 	protected static void bind3dShaderAttribute(int attribute, String variableName){
 		GL20.glBindAttribLocation(shader3dP, attribute, variableName);
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	//VR Shader
 	private static void connectShaderVRTextureUnits() {
 		GL20.glUniform1i(shaderVRColorTexture_location, shaderVRColorTexture_unit);
+		GL20.glUniform1i(shaderVRNormalTexture_location, shaderVRNormalTexture_unit);
+		GL20.glUniform1i(shaderVRSpecularTexture_location, shaderVRSpecularTexture_unit);
 	}
 
 	private static void getAllVRShaderUniformLocations() {
-		shaderVRColorTexture_location = getVRShaderUniformLocation("texture");
+		shaderVRColorTexture_location = get3dShaderUniformLocation("texture");
+		shaderVRNormalTexture_location = get3dShaderUniformLocation("textureNormal");
+		shaderVRSpecularTexture_location = get3dShaderUniformLocation("textureSpecular");
+		shaderVRSpecularFactor_location = get3dShaderUniformLocation("specularFactor");
 		shaderVRMVPMatrix_location = getVRShaderUniformLocation("mvpMatrix");
 		shaderVRTransformationMatrix_location = getVRShaderUniformLocation("mMatrix");
 	}
@@ -292,12 +327,25 @@ public class ShaderManager {
 	}
 	
 	protected static int getVRShaderUniformLocation(String uniformName){
-		return GL20.glGetUniformLocation(shaderVRP,uniformName);
+		if(shaderAIOP == 0) return GL20.glGetUniformLocation(shaderVRP,uniformName);
+		return GL20.glGetUniformLocation(shaderAIOP,uniformName);
 	}
 	
 	protected static void bindVRShaderAttribute(int attribute, String variableName){
 		GL20.glBindAttribLocation(shaderVRP, attribute, variableName);
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	//AIO Shader
 	private static void connectShaderAIOTextureUnits() {
 		GL20.glUniform1i(shaderLabelTexture_location, shaderAIOtextureColorUnit);
@@ -315,7 +363,23 @@ public class ShaderManager {
 	protected static void bindAIOShaderAttribute(int attribute, String variableName){
 		GL20.glBindAttribLocation(shaderAIOP, attribute, variableName);
 	}
+	
+	
+	
+	
+	
+	
 	//---------------
+	
+	public static void cleanUp() {
+		if(shader2dP != 0) cleanUp(shader2dP, shader2dV, shader2dF);
+		if(shaderLabelP != 0) cleanUp(shaderLabelP, shaderLabelV, shaderLabelF);
+		if(shader3dP != 0) cleanUp(shader3dP, shader3dV, shader3dF);
+		if(shaderVRP != 0) cleanUp(shaderVRP, shaderVRV, shaderVRF);
+		if(shaderAIOP != 0) cleanUp(shaderAIOP, shaderAIOV, shaderAIOF);
+		for(ShaderProgram shader:customShaders) shader.cleanup();
+	}
+	
 	public static void cleanUp(int shaderID, int vertexID, int fragmentID){
 		stopShader();
 		GL20.glDetachShader(shaderID, vertexID);
@@ -349,6 +413,15 @@ public class ShaderManager {
 		return shaderID;
 	}
 
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	public static void startLabelShader() {
 		if(shaderAIOP != 0){
 			GL20.glUseProgram(shaderAIOP);
@@ -392,18 +465,23 @@ public class ShaderManager {
 		GL20.glUseProgram(shaderVRP);
 		currentShader = shaderVRP;
 	}
-	/*
-	public static void start3DShader() {
-		GL20.glUseProgram(shader2dP);
-		currentShader = shader2dP;
-	}
-	*/
 
 	public static void stopShader() {
 		GL20.glUseProgram(0);
 		currentShader = 0;
 	}
 
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	public static void setTextMode() {
 		GL20.glUniform1f(shader2dTextmode_location, 1f);
 	}
@@ -412,13 +490,20 @@ public class ShaderManager {
 		GL20.glUniform1f(shader2dTextmode_location, 0f);
 	}
 
-	public static int bind2DTextureUnit() {
-		return shader2dtextureUnit;
-	}
+	
+	
+	
+	
 	
 	public static int bindLabelTextureUnit() {
 		return shaderLabeltextureUnit;
 	}
+	
+	
+	public static int bind2DTextureUnit() {
+		return shader2dtextureUnit;
+	}
+	
 	
 	public static int bind3DTextureColorUnit() {
 		if(shaderAIOP != 0) return shaderAIOtextureColorUnit;
@@ -434,7 +519,37 @@ public class ShaderManager {
 		if(shaderAIOP != 0) return shaderAIOtextureSpecularUnit;
 		return shader3dSpecularTexture_unit;
 	}
+	
 
+	public static int bindVRTextureColorUnit() {
+		if(shaderAIOP != 0) return shaderAIOtextureColorUnit;
+		return shaderVRColorTexture_unit;
+	}
+	
+	public static int bindVRTextureNormalUnit() {
+		if(shaderAIOP != 0) return shaderAIOtextureNormalUnit;
+		return shaderVRNormalTexture_unit;
+	}
+	
+	public static int bindVRTextureSpecularUnit() {
+		if(shaderAIOP != 0) return shaderAIOtextureSpecularUnit;
+		return shaderVRSpecularTexture_unit;
+	}
+
+	
+	
+
+	
+
+	public static void setLabelVisibility(float vis) {
+		GL20.glUniform1f(shaderLabelVisibility_location, vis);
+	}
+	public static void bindLabelShaderTextureID(int textureID) {
+		int unit = ShaderManager.bindLabelTextureUnit();
+		GL13.glActiveTexture(GL13.GL_TEXTURE0+unit);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
+	}
+	
 	public static void load2dColor(Vector3f colour) {
 		GL20.glUniform3f(shader2dColor_location, colour.x, colour.y, colour.z);
 	}
@@ -442,16 +557,6 @@ public class ShaderManager {
 	public static void load2dTranslation(Vector2f position) {
 		GL20.glUniform2f(shader2dTranslation_location, position.x, position.y);
 	}
-
-	public static void cleanUp() {
-		if(shader2dP != 0) cleanUp(shader2dP, shader2dV, shader2dF);
-		if(shaderLabelP != 0) cleanUp(shaderLabelP, shaderLabelV, shaderLabelF);
-		if(shader3dP != 0) cleanUp(shader3dP, shader3dV, shader3dF);
-		if(shaderVRP != 0) cleanUp(shaderVRP, shaderVRV, shaderVRF);
-		if(shaderAIOP != 0) cleanUp(shaderAIOP, shaderAIOV, shaderAIOF);
-		for(ShaderProgram shader:customShaders) shader.cleanup();
-	}
-
 	public static void set2dColorsInverted() {
 		GL20.glUniform1f(shader2dInvertColor_location, 1f);
 	}
@@ -460,28 +565,19 @@ public class ShaderManager {
 		GL20.glUniform1f(shader2dInvertColor_location, 0f);
 	}
 
-	public static void setLabelVisibility(float vis) {
-		GL20.glUniform1f(shaderLabelVisibility_location, vis);
-	}
-
 	public static void setComboBoxMode(boolean b) {
 		GL20.glUniform1f(shader2dCombomode_location, b ? 1f : 0f);
-		
 	}
 
 	public static void loadComboBoxCuts(float top, float bot) {
 		GL20.glUniform2f(shader2dCBCuts_location, -top+DisplayManager.getHeight(), -bot+DisplayManager.getHeight());
 		//System.out.println(top+">P<"+bot);
 	}
+
 	
-
-
+	
 	public static void bind2DShaderTexture(String textureLocation) {
 		bind2DShaderTextureID(TextureManager.getTextureID(textureLocation));
-	}
-	
-	public static void bind3DShaderTexture(String textureLocation) {
-		bind3DShaderColorTextureID(TextureManager.getTextureID(textureLocation));
 	}
 	
 	public static void bind2DShaderTextureID(int textureID) {
@@ -490,15 +586,11 @@ public class ShaderManager {
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
 	}
 	
-	public static void bindLabelShaderTextureID(int textureID) {
-		int unit = ShaderManager.bindLabelTextureUnit();
-		GL13.glActiveTexture(GL13.GL_TEXTURE0+unit);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
-	}
-
+	
+	
+	
 	public static void bind3DShaderColorTextureID(int textureID) {
 		int unit = ShaderManager.bind3DTextureColorUnit();
-		//System.out.println("D:"+unit);
 		GL13.glActiveTexture(GL13.GL_TEXTURE0+unit);
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
 	}
@@ -506,7 +598,6 @@ public class ShaderManager {
 	public static void bind3DShaderDefaultColorTexture() {
 		int unit = ShaderManager.bind3DTextureColorUnit();
 		GL13.glActiveTexture(GL13.GL_TEXTURE0+unit);
-		//System.out.println("D:"+unit);
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, TextureManager.getDefaultTextureID());
 	}
 	
@@ -519,7 +610,6 @@ public class ShaderManager {
 	public static void bind3DShaderDefaultNormalTexture() {
 		int unit = ShaderManager.bind3DTextureNormalUnit();
 		GL13.glActiveTexture(GL13.GL_TEXTURE0+unit);
-		//System.out.println("N:"+unit);
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, TextureManager.getTextureID("res/textures/default_normal.png"));
 	}
 	
@@ -532,36 +622,50 @@ public class ShaderManager {
 	public static void bind3DShaderDefaultSpecularTexture() {
 		int unit = ShaderManager.bind3DTextureSpecularUnit();
 		GL13.glActiveTexture(GL13.GL_TEXTURE0+unit);
-		//System.out.println("S:"+unit);
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, TextureManager.getTextureID("res/textures/default_specular.png"));
 	}
 
 	public static void bind3DSpecularFactor(float specularFactor) {
 		GL20.glUniform1f(shader3dSpecularFactor_location, specularFactor);
 	}
-
-	public static void bind3DShaderLights(List<PointLight> lights) {
-		GL20.glUniform1f(shader3dPointLightNumber_location, lights.size());
-		for(int i=0;i<lights.size() && i<MAX_POINTLIGHTS;i++){
-			PointLight l = lights.get(i);
-			GL20.glUniform3f(shader3dPointLightsPosition_location[i], l.getPosition().x, l.getPosition().y, l.getPosition().z);
-			GL20.glUniform3f(shader3dPointLights_color_location[i], l.getColor()[0], l.getColor()[1], l.getColor()[2]);
-			GL20.glUniform3f(shader3dPointLights_attenuation_location[i], l.getAttenuation()[0], l.getAttenuation()[1], l.getAttenuation()[2]);
-		}
-	}
+	
+	
+	
 	
 	public static void bindVRShaderColorTextureID(int textureID) {
-		int unit = ShaderManager.bind3DTextureColorUnit();
-		//System.out.println("D:"+unit);
+		int unit = ShaderManager.bindVRTextureColorUnit();
 		GL13.glActiveTexture(GL13.GL_TEXTURE0+unit);
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
 	}
 
 	public static void bindVRShaderDefaultColorTexture() {
-		int unit = ShaderManager.bind3DTextureColorUnit();
+		int unit = ShaderManager.bindVRTextureColorUnit();
 		GL13.glActiveTexture(GL13.GL_TEXTURE0+unit);
-		//System.out.println("D:"+unit);
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, TextureManager.getDefaultTextureID());
+	}
+	
+	public static void bindVRShaderNormalTextureID(int textureID) {
+		int unit = ShaderManager.bindVRTextureNormalUnit();
+		GL13.glActiveTexture(GL13.GL_TEXTURE0+unit);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
+	}
+	public static void bindVRShaderDefaultNormalTexture() {
+		int unit = ShaderManager.bindVRTextureNormalUnit();
+		GL13.glActiveTexture(GL13.GL_TEXTURE0+unit);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, TextureManager.getTextureID("res/textures/default_normal.png"));
+	}
+	public static void bindVRShaderSpecularTextureID(int textureID) {
+		int unit = ShaderManager.bindVRTextureSpecularUnit();
+		GL13.glActiveTexture(GL13.GL_TEXTURE0+unit);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
+	}
+	public static void bindVRShaderDefaultSpecularTexture() {
+		int unit = ShaderManager.bindVRTextureSpecularUnit();
+		GL13.glActiveTexture(GL13.GL_TEXTURE0+unit);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, TextureManager.getTextureID("res/textures/default_specular.png"));
+	}
+	public static void bindVRSpecularFactor(float specularFactor) {
+		GL20.glUniform1f(shaderVRSpecularFactor_location, specularFactor);
 	}
 	
 	public static void loadVRShaderTransformationMatrix(Matrix4f matrix){
@@ -576,6 +680,18 @@ public class ShaderManager {
 		GL20.glUniformMatrix4(shaderVRMVPMatrix_location, false, matrixBuffer);
 	}
 	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	public static void setSpecialShaderMode(boolean specialShaderMode){
 		if(specialShaderMode) lastActiveShader = currentShader;
 		else{
@@ -587,45 +703,4 @@ public class ShaderManager {
 	public static void registerShader(ShaderProgram shaderProgram) {
 		customShaders.add(shaderProgram);
 	}
-	
-	/*
-	protected void loadTransformationMatrix(Matrix4f matrix){
-		super.loadMatrix(location_transformationMatrix, matrix);
-	}
-	
-	protected void loadViewMatrix(Matrix4f viewMatrix){
-		super.loadMatrix(location_viewMatrix, viewMatrix);
-	}
-	
-	protected void loadProjectionMatrix(Matrix4f projection){
-		super.loadMatrix(location_projectionMatrix, projection);
-	}
-	
-	
-	
-	
-	public static Matrix4f createViewMatrix(Vector3f pos, Vector3f ang) {
-		Matrix4f viewMatrix = new Matrix4f();
-		viewMatrix.setIdentity();
-		Matrix4f.rotate((float) Math.toRadians(ang.x), new Vector3f(1, 0, 0), viewMatrix,
-				viewMatrix);
-		Matrix4f.rotate((float) Math.toRadians(ang.y), new Vector3f(0, 1, 0), viewMatrix, viewMatrix);
-		Vector3f cameraPos = pos;
-		Vector3f negativeCameraPos = new Vector3f(-cameraPos.x,-cameraPos.y,-cameraPos.z);
-		Matrix4f.translate(negativeCameraPos, viewMatrix, viewMatrix);
-		return viewMatrix;
-	}
-	
-	public static Matrix4f createTransformationMatrix(Vector3f translation, float rx, float ry,
-			float rz, float scale) {
-		Matrix4f matrix = new Matrix4f();
-		matrix.setIdentity();
-		Matrix4f.translate(translation, matrix, matrix);
-		Matrix4f.rotate((float) Math.toRadians(rx), new Vector3f(1,0,0), matrix, matrix);
-		Matrix4f.rotate((float) Math.toRadians(ry), new Vector3f(0,1,0), matrix, matrix);
-		Matrix4f.rotate((float) Math.toRadians(rz), new Vector3f(0,0,1), matrix, matrix);
-		Matrix4f.scale(new Vector3f(scale,scale,scale), matrix, matrix);
-		return matrix;
-	}
-	*/
 }

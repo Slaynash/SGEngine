@@ -8,9 +8,9 @@ public abstract class ShaderProgram {
 	
 	private String vertexShaderPath;
 	private String fragmentShaderPath;
-	private int shaderVertexID;
-	private int shaderFragmentID;
-	private int shaderProgramID;
+	protected int shaderVertexID;
+	protected int shaderFragmentID;
+	protected int shaderProgramID;
 
 	public ShaderProgram(String shaderPath, String vertexShaderName, String fragmentShaderName){
 		ShaderManager.registerShader(this);
