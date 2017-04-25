@@ -14,8 +14,8 @@ public abstract class ShaderProgram {
 
 	public ShaderProgram(String shaderPath, String vertexShaderName, String fragmentShaderName){
 		ShaderManager.registerShader(this);
-		vertexShaderPath = shaderPath+File.pathSeparator+vertexShaderName;
-		fragmentShaderPath = shaderPath+File.pathSeparator+fragmentShaderName;
+		vertexShaderPath = shaderPath+File.separator+vertexShaderName;
+		fragmentShaderPath = shaderPath+File.separator+fragmentShaderName;
 		
 		loadShader();
 	}
