@@ -14,6 +14,7 @@ import static org.lwjgl.opengl.GL11.glPopMatrix;
 import static org.lwjgl.opengl.GL11.glPushMatrix;
 
 import java.awt.Dimension;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +31,6 @@ import slaynash.opengl.shaders.ShaderManager;
 import slaynash.opengl.textureUtils.TextureManager;
 import slaynash.opengl.utils.DisplayManager;
 import slaynash.opengl.utils.UserInputUtil;
-import slaynash.text.utils.Localization;
 
 public class GUIManager {
 
@@ -62,6 +62,7 @@ public class GUIManager {
 	protected static GUIPopup popup;
 	private static GUIElement elementUnderMouse;
 	private static boolean menuShown = true;
+	private static String popupCloseText;
 	
 	public static void removeElement(GUIElement element){
 		if(element.hasChildrens()){
@@ -465,9 +466,21 @@ public class GUIManager {
 	}
 
 	public static void showPopup(int popupType, String text) {
+		if(popupCloseText == null){
+			try {
+				Class<?> c = Class.forName("slaynash.text.utils.Localization");
+			    Class<?>[] argTypes = new Class[] { String.class };
+			    Method getText = c.getDeclaredMethod("getText", argTypes);
+			    popupCloseText = (String)getText.invoke(null, (Object)new String("POPUP_BUTTON_CLOSE"));
+			} catch (Exception e) {
+				System.out.println("[GUIManager.class/INFO] Class slaynash.text.utils.Localization, popup closebutton text is now \""+popupCloseText+"\".");
+				popupCloseText = "Close";
+				e.printStackTrace();
+			}
+		}
 		popup = new GUIPopup(400, 150, text, text, popupType);
 		final GUIButton close = new GUIButton(new Dimension(100, 30), new Dimension(200-50, 100), popup, 0);
-		close.setText(Localization.getText("POPUP_BUTTON_CLOSE"), true);
+		close.setText(popupCloseText, true);
 		close.addGUIButtonListener(new GUIButtonListener() {
 			
 			@Override

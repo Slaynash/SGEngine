@@ -8,6 +8,5 @@
 	<classpathentry kind="lib" path="libs/JRift-1.3.0.0.1.jar"/>
 	<classpathentry kind="lib" path="libs/jna-4.2.2.jar"/>
 	<classpathentry kind="lib" path="libs/jopenvr.jar"/>
-	<classpathentry kind="lib" path="libs/textUtils.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
