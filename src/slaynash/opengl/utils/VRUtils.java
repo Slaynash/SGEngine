@@ -553,4 +553,8 @@ public class VRUtils {
 		return new Vector3f(upX, upY, upZ);
 	}
 	
+	public static Matrix4f getHmdPose(){
+		return hmdPose;
+	}
+	
 }

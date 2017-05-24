@@ -120,6 +120,7 @@ public class ShaderManager {
 		bind2dShaderAttributes();
 		GL20.glLinkProgram(shader2dP);
 		GL20.glValidateProgram(shader2dP);
+		GL20.glUseProgram(shader2dP);
 		getAll2dShaderUniformLocations();
 		connectShader2dTextureUnits();
 		System.out.println("2d shader loaded !");
@@ -136,6 +137,7 @@ public class ShaderManager {
 		bindLabelShaderAttributes();
 		GL20.glLinkProgram(shaderLabelP);
 		GL20.glValidateProgram(shaderLabelP);
+		GL20.glUseProgram(shaderLabelP);
 		getAllLabelShaderUniformLocations();
 		connectShaderLabelTextureUnits();
 		System.out.println("Label shader loaded !");
@@ -152,6 +154,7 @@ public class ShaderManager {
 		bind3dShaderAttributes();
 		GL20.glLinkProgram(shader3dP);
 		GL20.glValidateProgram(shader3dP);
+		GL20.glUseProgram(shader3dP);
 		getAll3dShaderUniformLocations();
 		connectShader3dTextureUnits();
 		System.out.println("3d shader loaded !");
@@ -168,6 +171,7 @@ public class ShaderManager {
 		bindVRShaderAttributes();
 		GL20.glLinkProgram(shaderVRP);
 		GL20.glValidateProgram(shaderVRP);
+		GL20.glUseProgram(shaderVRP);
 		getAllVRShaderUniformLocations();
 		connectShaderVRTextureUnits();
 		System.out.println("VR shader loaded !");
@@ -184,6 +188,7 @@ public class ShaderManager {
 		bindAIOShaderAttributes();
 		GL20.glLinkProgram(shaderAIOP);
 		GL20.glValidateProgram(shaderAIOP);
+		GL20.glUseProgram(shaderAIOP);
 		getAllLabelShaderUniformLocations();
 		getAll2dShaderUniformLocations();
 		getAll3dShaderUniformLocations();
