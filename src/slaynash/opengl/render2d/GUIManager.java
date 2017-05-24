@@ -512,6 +512,10 @@ public class GUIManager {
 		isPopup = false;
 	}
 	
+	public static boolean isMenuShown() {
+		return menuShown;
+	}
+	
 	public static void reset() {
 		for(GUIElement e:menuElements) {e.destroy();}
 			menuElements.clear();
