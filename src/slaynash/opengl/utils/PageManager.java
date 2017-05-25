@@ -31,7 +31,7 @@ public class PageManager {
 				if(vrMode) if(!VRUtils.initVR()) vrMode = false;
 				UserInputUtil.initController();
 				while(true){
-					while(render){
+					while(render && nextPage == null){
 						if(Display.isCloseRequested() || (vrMode && VRUtils.isCloseRequested())){
 							render = false;
 							close = true;
@@ -43,7 +43,6 @@ public class PageManager {
 						}
 						DisplayManager.updateDisplay(vrMode);
 						if(vrMode) VRUtils.sendFramesToCompositor();
-						if(nextPage != null) render = false;
 					}
 					
 					if(nextPage != null){
