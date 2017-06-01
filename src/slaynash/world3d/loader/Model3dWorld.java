@@ -1,6 +1,7 @@
 package slaynash.world3d.loader;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
 import slaynash.opengl.shaders.ShaderManager;
@@ -74,10 +75,15 @@ public class Model3dWorld extends Entity{
 
 	@Override
 	public void renderVR() {
+		/*
 		GL11.glTranslatef(getPosition().x, getPosition().y, getPosition().z);
 		GL11.glRotatef(getAngle().x, 1, 0, 0);
 		GL11.glRotatef(getAngle().y, 0, 1, 0);
 		GL11.glRotatef(getAngle().z, 0, 0, 1);
+		*/
+		ShaderManager.loadVRShaderTransformationMatrix(
+				createTransformationMatrix(getPosition(), 0, 0, 0, 1f)
+		);
 		//System.out.println("rendering "+faces.length+" faces");
 		for(TriangleFace f:faces){
 			float[] vs = f.getVertices();
@@ -116,14 +122,27 @@ public class Model3dWorld extends Entity{
 			
 			GL11.glEnd();
 		}
+		/*
 		GL11.glRotatef(-getAngle().x, 1, 0, 0);
 		GL11.glRotatef(-getAngle().y, 0, 1, 0);
 		GL11.glRotatef(-getAngle().z, 0, 0, 1);
 		GL11.glTranslatef(-getPosition().x, -getPosition().y, -getPosition().z);
+		*/
 	}
 
 	public TriangleFace[] getFaces() {
 		return faces;
+	}
+	
+	public static Matrix4f createTransformationMatrix(Vector3f translation, float rx, float ry, float rz, float scale) {
+		Matrix4f matrix = new Matrix4f();
+		matrix.setIdentity();
+		Matrix4f.translate(translation, matrix, matrix);
+		Matrix4f.rotate((float) Math.toRadians(rx), new Vector3f(1,0,0), matrix, matrix);
+		Matrix4f.rotate((float) Math.toRadians(ry), new Vector3f(0,1,0), matrix, matrix);
+		Matrix4f.rotate((float) Math.toRadians(rz), new Vector3f(0,0,1), matrix, matrix);
+		Matrix4f.scale(new Vector3f(scale,scale,scale), matrix, matrix);
+		return matrix;
 	}
 
 }

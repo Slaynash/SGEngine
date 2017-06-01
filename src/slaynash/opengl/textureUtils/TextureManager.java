@@ -43,7 +43,17 @@ public class TextureManager {
 			textureList.add(textureDef);
 			return textureDef;
 		}
-		catch (FileNotFoundException e) {e.printStackTrace();}
+		catch (FileNotFoundException e) {
+			e.printStackTrace();
+			for(TextureDef tex:textureList) if(texturePath.equals("res/textures/default.png")) return tex;
+			try {
+				TextureDef textureDef = new TextureDef(TextureLoader.getTexture("PNG", new FileInputStream(new File(Infos.getInstallPath()+"/"+"res/textures/default.png"))), texturePath);
+				textureList.add(textureDef);
+				return textureDef;
+			}
+			catch (FileNotFoundException e1) {e1.printStackTrace();}
+			catch (IOException e1) {e1.printStackTrace();}
+		}
 		catch (IOException e) {e.printStackTrace();}
 		return null;
 	}

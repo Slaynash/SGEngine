@@ -6,6 +6,7 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
+import org.lwjgl.opengl.PixelFormat;
 
 import slaynash.opengl.render2d.text2d.Text2d;
 
@@ -18,8 +19,9 @@ public class DisplayManager {
 	private static long lastFrameTime;
 	private static float delta;
 	private static long deltaMS;
-	private static boolean multisample = false;
+	private static boolean multisample = true;
 	private static int bps;
+	private static PixelFormat pf = new PixelFormat().withSamples(4);
 	
 	public static DisplayMode[] getAvailableResolutions(){//return an array of x*5
 		try {
@@ -46,7 +48,7 @@ public class DisplayManager {
 				try {
 					Display.setDisplayMode(dm);
 					Display.setFullscreen(fullscreen);
-					if(!Display.isCreated()) Display.create();
+					if(!Display.isCreated()) Display.create(pf);
 					w = Display.getWidth();
 					h = Display.getHeight();
 					fps = dm.getFrequency();
@@ -59,7 +61,7 @@ public class DisplayManager {
 		try {
 			displayMode = new DisplayMode(x, y);
 			Display.setDisplayMode(displayMode);
-			if(!Display.isCreated())Display.create();
+			if(!Display.isCreated())Display.create(pf);
 		} catch (LWJGLException e) {e.printStackTrace();}
 		
 		w = Display.getWidth();

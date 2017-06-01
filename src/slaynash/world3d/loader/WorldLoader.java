@@ -51,6 +51,8 @@ public class WorldLoader {
 			}
 			else if(mv.equals("1.3"))
 				readMap1_3(ln, command, args, reader);
+			else if(mv.equals("1.4"))
+				readMap1_4(ln, command, args, reader);
 			else{
 				error = true; errorMessage = "Version not readable. Version: "+mv; reader.close(); return;
 			}
@@ -67,6 +69,105 @@ public class WorldLoader {
 	}
 	
 	private static void readMap1_3(String ln, String command, String args, BufferedReader reader) throws IOException {
+		while((ln=reader.readLine()) != null) {
+			ln = ln.trim();
+			if(ln.startsWith("#")) continue;
+			command = ln.split(" ", 2)[0].toLowerCase();
+			if(command.equals("")) continue;
+			System.out.println("ln="+ln);
+			args = ln.split(" ", 2)[1];
+			if(command.equals("spawn")) wspwn = args;
+			else if(command.equals("name")) mn = args;
+			else if(command.equals("creator")) mcn = args;
+			else if(command.equals("worldpart")){
+				//System.out.println("creating a world part...");
+				String[] ag = args.split(" ");
+				TriangleFace[] faces = new TriangleFace[Integer.parseInt(ag[0])];
+				float[] vs = null;
+				float[] vns = null;
+				float[] uvs = null;
+				String texC = "";
+				String texN = "";
+				String texS = "";
+				float sf = 0;
+				
+				int vn = 0;
+				
+				int fn = 0;
+				while((ln=reader.readLine()) != null){
+					ln = ln.trim();
+					if(ln.startsWith("#")) continue;
+					command = ln.split(" ", 2)[0].toLowerCase();
+					if(command.equals("")) continue;
+					ag = ln.split(" ");
+					if(command.equals("endworldpart")){
+						Model3dWorld m3dw = new Model3dWorld(faces);
+						entities.add(m3dw);
+						System.out.println("m3dw created with "+faces.length+" faces !");
+						break;
+					}
+					if(command.equals("face")){
+						vs = new float[Integer.parseInt(ag[1])*3];
+						vns = new float[Integer.parseInt(ag[1])*3];
+						uvs = new float[Integer.parseInt(ag[1])*2];
+					}
+					else if(command.equals("endface")){
+						faces[fn] = new TriangleFace(vs, vns, uvs, texC, texN, texS, sf);
+						texC = "";
+						texN = "";
+						texS = "";
+						sf = 0;
+						fn++;
+						vn = 0;
+					}
+					else if(command.equals("v")){//vertices*3 normals*3 uvs*2
+						//System.out.println("loading vertices at point nb "+vn);
+						 vs[vn*3+0] = Float.parseFloat(ag[1]);
+						 vs[vn*3+1] = Float.parseFloat(ag[2]);
+						 vs[vn*3+2] = Float.parseFloat(ag[3]);
+						
+						vns[vn*3+0] = Float.parseFloat(ag[4]);
+						vns[vn*3+1] = Float.parseFloat(ag[5]);
+						vns[vn*3+2] = Float.parseFloat(ag[6]);
+						
+						uvs[vn*2+0] = Float.parseFloat(ag[7]);
+						uvs[vn*2+1] = Float.parseFloat(ag[8]);
+						vn++;
+						
+					}
+					else if(command.equals("texc")){//color texture
+						texC = ln.split(" ", 2)[1];
+					}
+					else if(command.equals("texn")){//normal texture
+						texN = ln.split(" ", 2)[1];
+					}
+					else if(command.equals("texs")){//specular texture
+						texS = ln.split(" ", 2)[1];
+					}
+					else if(command.equals("sf")){//specular factor
+						sf = Float.parseFloat(ln.split(" ", 2)[1]);
+					}
+					else{
+						System.out.println("Unknown worldpart line: "+ln);
+					}
+				}
+			}
+			else if(command.equals("model3d")){
+				//TODO model loading
+			}
+			else if(command.equals("pointlight")){
+				String[] ags = args.split(" ");
+				PointLight l = new PointLight(
+						Float.parseFloat(ags[0]), Float.parseFloat(ags[1]), Float.parseFloat(ags[2]),
+						Float.parseFloat(ags[3]), Float.parseFloat(ags[4]), Float.parseFloat(ags[5]),
+						Float.parseFloat(ags[6]), Float.parseFloat(ags[7]), Float.parseFloat(ags[8])
+				);
+				lights.add(l);
+			}
+		}
+	}
+	
+	private static void readMap1_4(String ln, String command, String args, BufferedReader reader) throws IOException {
 		while((ln=reader.readLine()) != null) {
 			ln = ln.trim();
 			if(ln.startsWith("#")) continue;

@@ -319,10 +319,10 @@ public class ShaderManager {
 	}
 
 	private static void getAllVRShaderUniformLocations() {
-		shaderVRColorTexture_location = get3dShaderUniformLocation("texture");
-		shaderVRNormalTexture_location = get3dShaderUniformLocation("textureNormal");
-		shaderVRSpecularTexture_location = get3dShaderUniformLocation("textureSpecular");
-		shaderVRSpecularFactor_location = get3dShaderUniformLocation("specularFactor");
+		shaderVRColorTexture_location = getVRShaderUniformLocation("texture");
+		shaderVRNormalTexture_location = getVRShaderUniformLocation("textureNormal");
+		shaderVRSpecularTexture_location = getVRShaderUniformLocation("textureSpecular");
+		shaderVRSpecularFactor_location = getVRShaderUniformLocation("specularFactor");
 		shaderVRMVPMatrix_location = getVRShaderUniformLocation("mvpMatrix");
 		shaderVRTransformationMatrix_location = getVRShaderUniformLocation("mMatrix");
 	}

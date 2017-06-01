@@ -44,7 +44,7 @@ public class VRUtils {
 	private static TrackedDevicePose_t.ByReference hmdTrackedDevicePoseReference;
 	private static TrackedDevicePose_t[] hmdTrackedDevicePoses;
 	
-	private static Matrix4f[] poseMatrices;
+	public static Matrix4f[] poseMatrices;
 	
 	private static Matrix4f leftEyeProjectionMatrix = new Matrix4f();
 	static Matrix4f rightEyeProjectionMatrix = new Matrix4f();
@@ -69,7 +69,7 @@ public class VRUtils {
 	
 	private static Matrix4f hmdPose = new Matrix4f();
 	
-	private static float znear = 0.1f, zfar = 30f;
+	private static float znear = 0.01f, zfar = 30f;
 	
 	private static final long SLEEP_PRECISION = TimeUnit.MILLISECONDS.toNanos(4);
 	private static final long SPIN_YIELD_PRECISION = TimeUnit.MILLISECONDS.toNanos(2);
@@ -83,6 +83,7 @@ public class VRUtils {
 	private static float posX, posY, posZ;
 	private static float dirX, dirY, dirZ;
 	private static float upX, upY, upZ;
+	private static float rightX, rightY, rightZ;
 	
 	public static void setViewDistance(float znear, float zfar){
 		if(VRUtils.znear == znear && VRUtils.zfar == zfar) return;
@@ -376,7 +377,7 @@ public class VRUtils {
         }*/
         //update controllers pose information
         // TODO VRInput._updateControllerStates();
-                
+        //handleInput();
         // read pose data from native
         for (int nDevice = 0; nDevice < JOpenVRLibrary.k_unMaxTrackedDeviceCount; ++nDevice ){
             hmdTrackedDevicePoses[nDevice].readField("bPoseIsValid");
@@ -400,6 +401,9 @@ public class VRUtils {
 			upX = viewMatrix.m01;
 			upY = viewMatrix.m11;
 			upZ = viewMatrix.m21;
+			rightX = viewMatrix.m00;
+			rightY = viewMatrix.m10;
+			rightZ = viewMatrix.m20;
         } else {
             hmdPose = new Matrix4f();
         }
@@ -553,8 +557,166 @@ public class VRUtils {
 		return new Vector3f(upX, upY, upZ);
 	}
 	
+	public static Vector3f getRightVector(){
+		return new Vector3f(rightX, rightY, rightZ);
+	}
+	
 	public static Matrix4f getHmdPose(){
 		return hmdPose;
 	}
+	/*
+	static void handleInput() {
+
+        // Process SteamVR events
+        VREvent_t event = new VREvent_t();
+        while (vrsystem.PollNextEvent.apply(event, event.size()) != 0) {
+
+            processVREvent(event);
+        }
+
+        // Process SteamVR controller state
+        for (int device = 0; device < JOpenVRLibrary.k_unMaxTrackedDeviceCount; device++) {
+        	/*
+            VRControllerState_t state = new VRControllerState_t();
+            TrackedDevicePose_t pose = new TrackedDevicePose_t();
+            
+            if (vrsystem.GetControllerStateWithPose.apply(JOpenVRLibrary.ETrackingUniverseOrigin.ETrackingUniverseOrigin_TrackingUniverseStanding, device, state, pose) != 0) {
+
+                //rbShowTrackedDevice[device] = state.ulButtonPressed == 0;
+
+                // let's test haptic impulse too..
+                if (state.ulButtonPressed != 0) {
+                    // apparently only axis ID 0 works, maximum duration value is 3999
+                    vrsystem.TriggerHapticPulse.apply(device, 0, (short) 3999);
+                }
+
+            }
+            * /
+        }
+    }
+    
+	public static void processVREvent(VREvent_t event){
+		System.out.println("Event from device "+event.trackedDeviceIndex+": "+getEventString(event.eventType));
+		switch (event.eventType) {
+			case JOpenVRLibrary.EVREventType.EVREventType_VREvent_TrackedDeviceActivated:
+				System.out.printf("Device %d attached. Setting up render model.\n", event.trackedDeviceIndex);
+				break;
+			case JOpenVRLibrary.EVREventType.EVREventType_VREvent_TrackedDeviceDeactivated:
+				System.out.printf("Device %d detached.\n", event.trackedDeviceIndex);
+				break;
+			case JOpenVRLibrary.EVREventType.EVREventType_VREvent_TrackedDeviceUpdated:
+				System.out.printf("Device %d updated.\n", event.trackedDeviceIndex);
+				break;
+		}
+	}
+
+	private static String getEventString(int eventType) {
+		switch (eventType) {
+			case 0: return "EVREventType_VREvent_None";
+			case 100: return "EVREventType_VREvent_TrackedDeviceActivated";
+			case 101: return "EVREventType_VREvent_TrackedDeviceDeactivated";
+			case 102: return "EVREventType_VREvent_TrackedDeviceUpdated";
+			case 103: return "EVREventType_VREvent_TrackedDeviceUserInteractionStarted";
+			case 104: return "EVREventType_VREvent_TrackedDeviceUserInteractionEnded";
+			case 105: return "EVREventType_VREvent_IpdChanged";
+			case 106: return "EVREventType_VREvent_EnterStandbyMode";
+			case 107: return "EVREventType_VREvent_LeaveStandbyMode";
+			case 108: return "EVREventType_VREvent_TrackedDeviceRoleChanged";
+			case 109: return "EVREventType_VREvent_WatchdogWakeUpRequested";
+			case 200: return "EVREventType_VREvent_ButtonPress";
+			case 201: return "EVREventType_VREvent_ButtonUnpress";
+			case 202: return "EVREventType_VREvent_ButtonTouch";
+			case 203: return "EVREventType_VREvent_ButtonUntouch";
+			case 300: return "EVREventType_VREvent_MouseMove";
+			case 301: return "EVREventType_VREvent_MouseButtonDown";
+			case 302: return "EVREventType_VREvent_MouseButtonUp";
+			case 303: return "EVREventType_VREvent_FocusEnter";
+			case 304: return "EVREventType_VREvent_FocusLeave";
+			case 305: return "EVREventType_VREvent_Scroll";
+			case 306: return "EVREventType_VREvent_TouchPadMove";
+			case 307: return "EVREventType_VREvent_OverlayFocusChanged";
+			case 400: return "EVREventType_VREvent_InputFocusCaptured";
+			case 401: return "EVREventType_VREvent_InputFocusReleased";
+			case 402: return "EVREventType_VREvent_SceneFocusLost";
+			case 403: return "EVREventType_VREvent_SceneFocusGained";
+			case 404: return "EVREventType_VREvent_SceneApplicationChanged";
+			case 405: return "EVREventType_VREvent_SceneFocusChanged";
+			case 406: return "EVREventType_VREvent_InputFocusChanged";
+			case 407: return "EVREventType_VREvent_SceneApplicationSecondaryRenderingStarted";
+			case 410: return "EVREventType_VREvent_HideRenderModels";
+			case 411: return "EVREventType_VREvent_ShowRenderModels";
+			case 500: return "EVREventType_VREvent_OverlayShown";
+			case 501: return "EVREventType_VREvent_OverlayHidden";
+			case 502: return "EVREventType_VREvent_DashboardActivated";
+			case 503: return "EVREventType_VREvent_DashboardDeactivated";
+			case 504: return "EVREventType_VREvent_DashboardThumbSelected";
+			case 505: return "EVREventType_VREvent_DashboardRequested";
+			case 506: return "EVREventType_VREvent_ResetDashboard";
+			case 507: return "EVREventType_VREvent_RenderToast";
+			case 508: return "EVREventType_VREvent_ImageLoaded";
+			case 509: return "EVREventType_VREvent_ShowKeyboard";
+			case 510: return "EVREventType_VREvent_HideKeyboard";
+			case 511: return "EVREventType_VREvent_OverlayGamepadFocusGained";
+			case 512: return "EVREventType_VREvent_OverlayGamepadFocusLost";
+			case 513: return "EVREventType_VREvent_OverlaySharedTextureChanged";
+			case 514: return "EVREventType_VREvent_DashboardGuideButtonDown";
+			case 515: return "EVREventType_VREvent_DashboardGuideButtonUp";
+			case 516: return "EVREventType_VREvent_ScreenshotTriggered";
+			case 517: return "EVREventType_VREvent_ImageFailed";
+			case 520: return "EVREventType_VREvent_RequestScreenshot";
+			case 521: return "EVREventType_VREvent_ScreenshotTaken";
+			case 522: return "EVREventType_VREvent_ScreenshotFailed";
+			case 523: return "EVREventType_VREvent_SubmitScreenshotToDashboard";
+			case 524: return "EVREventType_VREvent_ScreenshotProgressToDashboard";
+			case 600: return "EVREventType_VREvent_Notification_Shown";
+			case 601: return "EVREventType_VREvent_Notification_Hidden";
+			case 602: return "EVREventType_VREvent_Notification_BeginInteraction";
+			case 603: return "EVREventType_VREvent_Notification_Destroyed";
+			case 700: return "EVREventType_VREvent_Quit";
+			case 701: return "EVREventType_VREvent_ProcessQuit";
+			case 702: return "EVREventType_VREvent_QuitAborted_UserPrompt";
+			case 703: return "EVREventType_VREvent_QuitAcknowledged";
+			case 704: return "EVREventType_VREvent_DriverRequestedQuit";
+			case 800: return "EVREventType_VREvent_ChaperoneDataHasChanged";
+			case 801: return "EVREventType_VREvent_ChaperoneUniverseHasChanged";
+			case 802: return "EVREventType_VREvent_ChaperoneTempDataHasChanged";
+			case 803: return "EVREventType_VREvent_ChaperoneSettingsHaveChanged";
+			case 804: return "EVREventType_VREvent_SeatedZeroPoseReset";
+			case 820: return "EVREventType_VREvent_AudioSettingsHaveChanged";
+			case 850: return "EVREventType_VREvent_BackgroundSettingHasChanged";
+			case 851: return "EVREventType_VREvent_CameraSettingsHaveChanged";
+			case 852: return "EVREventType_VREvent_ReprojectionSettingHasChanged";
+			case 853: return "EVREventType_VREvent_ModelSkinSettingsHaveChanged";
+			case 854: return "EVREventType_VREvent_EnvironmentSettingsHaveChanged";
+			case 900: return "EVREventType_VREvent_StatusUpdate";
+			case 1000: return "EVREventType_VREvent_MCImageUpdated";
+			case 1100: return "EVREventType_VREvent_FirmwareUpdateStarted";
+			case 1101: return "EVREventType_VREvent_FirmwareUpdateFinished";
+			case 1200: return "EVREventType_VREvent_KeyboardClosed";
+			case 1201: return "EVREventType_VREvent_KeyboardCharInput";
+			case 1202: return "EVREventType_VREvent_KeyboardDone";
+			case 1300: return "EVREventType_VREvent_ApplicationTransitionStarted";
+			case 1301: return "EVREventType_VREvent_ApplicationTransitionAborted";
+			case 1302: return "EVREventType_VREvent_ApplicationTransitionNewAppStarted";
+			case 1303: return "EVREventType_VREvent_ApplicationListUpdated";
+			case 1304: return "EVREventType_VREvent_ApplicationMimeTypeLoad";
+			case 1400: return "EVREventType_VREvent_Compositor_MirrorWindowShown";
+			case 1401: return "EVREventType_VREvent_Compositor_MirrorWindowHidden";
+			case 1410: return "EVREventType_VREvent_Compositor_ChaperoneBoundsShown";
+			case 1411: return "EVREventType_VREvent_Compositor_ChaperoneBoundsHidden";
+			case 1500: return "EVREventType_VREvent_TrackedCamera_StartVideoStream";
+			case 1501: return "EVREventType_VREvent_TrackedCamera_StopVideoStream";
+			case 1502: return "EVREventType_VREvent_TrackedCamera_PauseVideoStream";
+			case 1503: return "EVREventType_VREvent_TrackedCamera_ResumeVideoStream";
+			case 1600: return "EVREventType_VREvent_PerformanceTest_EnableCapture";
+			case 1601: return "EVREventType_VREvent_PerformanceTest_DisableCapture";
+			case 1602: return "EVREventType_VREvent_PerformanceTest_FidelityLevel";
+			case 10000: return "EVREventType_VREvent_VendorSpecific_Reserved_Start";
+			case 19999: return "EVREventType_VREvent_VendorSpecific_Reserved_End";
+			default: return "UNKNOWN_EVENT";
+		}
+		
+	}
+	*/
 	
 }
