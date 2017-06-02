@@ -1,9 +1,7 @@
 package slaynash.opengl.utils;
 
 import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.nio.LongBuffer;
 import java.util.concurrent.TimeUnit;
 
 import org.lwjgl.opengl.Display;
@@ -14,10 +12,15 @@ import org.lwjgl.opengl.GL30;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
+import com.sun.jna.ptr.FloatByReference;
+import com.sun.jna.ptr.IntByReference;
+import com.sun.jna.ptr.LongByReference;
+
 import de.fruitfly.ovr.structs.Vector2i;
 import jopenvr.HmdMatrix34_t;
 import jopenvr.HmdMatrix44_t;
 import jopenvr.JOpenVRLibrary;
+import jopenvr.JOpenVRLibrary.ETextureType;
 import jopenvr.Texture_t;
 import jopenvr.TrackedDevicePose_t;
 import jopenvr.VRTextureBounds_t;
@@ -58,8 +61,8 @@ public class VRUtils {
 	final static Texture_t texType1 = new Texture_t();
 	
 	private static IntBuffer hmdDisplayFrequency;
-	private static FloatBuffer tlastVsync;
-	private static LongBuffer _tframeCount;
+	private static float tlastVsync;
+	private static long _tframeCount;
 	
 	
 	private static int[] fbos = new int[2];
@@ -131,7 +134,7 @@ public class VRUtils {
     }
 	
 	private static Matrix4f getHMDMatrixProjectionEye(int nEye){
-    	HmdMatrix44_t mat = vrsystem.GetProjectionMatrix.apply(nEye, znear, zfar, JOpenVRLibrary.EGraphicsAPIConvention.EGraphicsAPIConvention_API_OpenGL);
+    	HmdMatrix44_t mat = vrsystem.GetProjectionMatrix.apply(nEye, znear, zfar);
     	return convertSteamVRMatrix4ToMatrix4f(mat);
     }
     
@@ -150,11 +153,11 @@ public class VRUtils {
             store.x = 1344;
             store.y = 1512;
         } else {
-            IntBuffer x = IntBuffer.allocate(1);
-            IntBuffer y = IntBuffer.allocate(1);
+        	IntByReference x = new IntByReference();
+        	IntByReference y = new IntByReference();
             vrsystem.GetRecommendedRenderTargetSize.apply(x, y);
-            store.x = x.get(0)/2;
-            store.y = y.get(0);
+            store.x = x.getValue()/2;
+            store.y = y.getValue();
         }
         return store;
 	}
@@ -233,9 +236,6 @@ public class VRUtils {
 			vrsystem.read();
 			
 			System.out.println("OpenVR initialized & VR connected.");
-			
-			tlastVsync = FloatBuffer.allocate(1);
-			_tframeCount = LongBuffer.allocate(1);
 
 			hmdDisplayFrequency = IntBuffer.allocate(1);
 			hmdDisplayFrequency.put( (int) JOpenVRLibrary.ETrackedDeviceProperty.ETrackedDeviceProperty_Prop_DisplayFrequency_Float);
@@ -306,17 +306,17 @@ public class VRUtils {
 		texBoundsRight.write();
 		// texture type
 		texType0.eColorSpace = JOpenVRLibrary.EColorSpace.EColorSpace_ColorSpace_Gamma;
-		texType0.eType = JOpenVRLibrary.EGraphicsAPIConvention.EGraphicsAPIConvention_API_OpenGL;
+		texType0.eType = ETextureType.ETextureType_TextureType_OpenGL;
 		texType0.setAutoSynch(false);
 		texType0.setAutoRead(false);
 		texType0.setAutoWrite(false);
-		texType0.handle = -1;
+		//texType0.handle = -1;
 		texType1.eColorSpace = JOpenVRLibrary.EColorSpace.EColorSpace_ColorSpace_Gamma;
-		texType1.eType = JOpenVRLibrary.EGraphicsAPIConvention.EGraphicsAPIConvention_API_OpenGL;
+		texType1.eType = ETextureType.ETextureType_TextureType_OpenGL;
 		texType1.setAutoSynch(false);
 		texType1.setAutoRead(false);
 		texType1.setAutoWrite(false);
-		texType1.handle = -1;
+		//texType1.handle = -1;
 		
 		System.out.println("OpenVR Compositor initialized OK.");
 
@@ -329,9 +329,12 @@ public class VRUtils {
         } else {
             // wait
             if( latencyWaitTime > 0 ) sleepNanos(latencyWaitTime);
-                        
-            vrsystem.GetTimeSinceLastVsync.apply(tlastVsync, _tframeCount);
-            float fSecondsUntilPhotons = (float)timePerFrame - tlastVsync.get(0) + vsyncToPhotons;
+            FloatByReference fbatLastVsync = new FloatByReference();
+            LongByReference fba_tframeCount = new LongByReference();
+            vrsystem.GetTimeSinceLastVsync.apply(fbatLastVsync, fba_tframeCount);
+            tlastVsync = fbatLastVsync.getValue();
+            _tframeCount = fba_tframeCount.getValue();
+            float fSecondsUntilPhotons = (float)timePerFrame - tlastVsync + vsyncToPhotons;
             
             if( enableDebugLatency ) {
                 if( frames == 10 ) {
@@ -342,7 +345,7 @@ public class VRUtils {
             }            
             
             // handle skipping frame stuff
-            long nowCount = _tframeCount.get(0);
+            long nowCount = _tframeCount;
             if( nowCount - frameCount > 1 ) {
                 // skipped a frame!
                 if( enableDebugLatency ) System.out.println("Frame skipped!");
