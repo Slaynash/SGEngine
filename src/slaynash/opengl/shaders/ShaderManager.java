@@ -434,6 +434,7 @@ public class ShaderManager {
 			currentShader = shaderAIOP;
 			return;
 		}
+		if(shaderLabelP == 0) initLabelShader();
 		GL20.glUseProgram(shaderLabelP);
 		currentShader = shaderLabelP;
 	}
@@ -445,6 +446,7 @@ public class ShaderManager {
 			currentShader = shaderAIOP;
 			return;
 		}
+		if(shader2dP == 0) init2DShader();
 		GL20.glUseProgram(shader2dP);
 		currentShader = shader2dP;
 	}
@@ -456,6 +458,7 @@ public class ShaderManager {
 			currentShader = shaderAIOP;
 			return;
 		}
+		if(shader3dP == 0) init3DShader();
 		GL20.glUseProgram(shader3dP);
 		currentShader = shader3dP;
 	}
@@ -467,6 +470,7 @@ public class ShaderManager {
 			currentShader = shaderAIOP;
 			return;
 		}
+		if(shaderVRP == 0) initVRShader();
 		GL20.glUseProgram(shaderVRP);
 		currentShader = shaderVRP;
 	}
