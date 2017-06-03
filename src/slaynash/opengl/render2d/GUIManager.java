@@ -373,7 +373,7 @@ public class GUIManager {
 	}
 	
 	public static void setBackground(String backgroundPath){
-		GUIManager.background = TextureManager.getTexture(backgroundPath);
+		GUIManager.background = TextureManager.getTextureDef(backgroundPath).texture;
 	}
 	
 	public static void removeBackground(){

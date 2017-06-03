@@ -21,7 +21,7 @@ public class PageManager {
 	private static boolean initialized = false;
 	private static boolean vrMode = false;
 	
-	public static void init(final int x, final int y, final boolean fullscreen){//TODO events onStart and onClose
+	public static void init(final int x, final int y, final boolean fullscreen){
 		renderThread = new Thread(new Runnable() {
 			
 			@Override

@@ -25,7 +25,7 @@ public class WorldLoader {
 	
 	
 	public static void loadMap(String mapPath){
-		System.out.println("Start loading 3d map \""+mapPath+"\"...");
+		System.out.println("[WorldLoader] Start loading 3d map \""+mapPath+"\"...");
 		File mapFile = new File(mapPath);
 		BufferedReader reader = null;
 		
@@ -41,7 +41,7 @@ public class WorldLoader {
 				
 			while(!found && (ln=reader.readLine()) != null) {
 				if(ln.split(" ", 2)[0].equals("MapVersion")){
-					System.out.println("Map version: "+ln.split(" ", 2)[1]);
+					System.out.println("[WorldLoader] Map version: "+ln.split(" ", 2)[1]);
 					mv = ln.split(" ", 2)[1];
 					found = true;
 				}
@@ -61,11 +61,11 @@ public class WorldLoader {
 			command = null;
 			args = null;
 		} catch (IOException e) {error = true; errorMessage = e.getMessage(); return;}
-		System.out.println("Load finished. map properties:");
-		System.out.println("------------------------------");
-		System.out.println("Map \""+mn+"\" for loader v"+mv+", created by \""+mcn+"\".");
-		System.out.println("World spawn placed at "+wspwn.split(" ")[0]+" "+wspwn.split(" ")[1]+" "+wspwn.split(" ")[2]);
-		System.out.println("------------------------------");
+		System.out.println("[WorldLoader] Load finished. map properties:");
+		System.out.println("[WorldLoader] ------------------------------");
+		System.out.println("[WorldLoader] Map \""+mn+"\" for loader v"+mv+", created by \""+mcn+"\".");
+		System.out.println("[WorldLoader] World spawn placed at "+wspwn.split(" ")[0]+" "+wspwn.split(" ")[1]+" "+wspwn.split(" ")[2]);
+		System.out.println("[WorldLoader] ------------------------------");
 	}
 	
 	private static void readMap1_3(String ln, String command, String args, BufferedReader reader) throws IOException {
@@ -153,7 +153,7 @@ public class WorldLoader {
 				}
 			}
 			else if(command.equals("model3d")){
-				//TODO model loading
+				//Not implemented
 			}
 			else if(command.equals("pointlight")){
 				String[] ags = args.split(" ");
@@ -168,16 +168,23 @@ public class WorldLoader {
 	}
 	
 	private static void readMap1_4(String ln, String command, String args, BufferedReader reader) throws IOException {
+		float dx=0, dy=0, dz=0;
 		while((ln=reader.readLine()) != null) {
 			ln = ln.trim();
 			if(ln.startsWith("#")) continue;
 			command = ln.split(" ", 2)[0].toLowerCase();
 			if(command.equals("")) continue;
-			System.out.println("ln="+ln);
+			//System.out.println("ln="+ln);
 			args = ln.split(" ", 2)[1];
 			if(command.equals("spawn")) wspwn = args;
 			else if(command.equals("name")) mn = args;
 			else if(command.equals("creator")) mcn = args;
+			if(command.equals("mapdisplacement")){
+				String[] t = args.split(" ", 3);
+				dx = Float.parseFloat(t[0]);
+				dy = Float.parseFloat(t[1]);
+				dz = Float.parseFloat(t[2]);
+			}
 			else if(command.equals("worldpart")){
 				//System.out.println("creating a world part...");
 				String[] ag = args.split(" ");
@@ -202,7 +209,7 @@ public class WorldLoader {
 					if(command.equals("endworldpart")){
 						Model3dWorld m3dw = new Model3dWorld(faces);
 						entities.add(m3dw);
-						System.out.println("m3dw created with "+faces.length+" faces !");
+						//System.out.println("m3dw created with "+faces.length+" faces !");
 						break;
 					}
 					if(command.equals("face")){
@@ -221,9 +228,9 @@ public class WorldLoader {
 					}
 					else if(command.equals("v")){//vertices*3 normals*3 uvs*2
 						//System.out.println("loading vertices at point nb "+vn);
-						 vs[vn*3+0] = Float.parseFloat(ag[1]);
-						 vs[vn*3+1] = Float.parseFloat(ag[2]);
-						 vs[vn*3+2] = Float.parseFloat(ag[3]);
+						 vs[vn*3+0] = Float.parseFloat(ag[1])+dx;
+						 vs[vn*3+1] = Float.parseFloat(ag[2])+dy;
+						 vs[vn*3+2] = Float.parseFloat(ag[3])+dz;
 						
 						vns[vn*3+0] = Float.parseFloat(ag[4]);
 						vns[vn*3+1] = Float.parseFloat(ag[5]);
@@ -247,7 +254,7 @@ public class WorldLoader {
 						sf = Float.parseFloat(ln.split(" ", 2)[1]);
 					}
 					else{
-						System.out.println("Unknown worldpart line: "+ln);
+						System.out.println("[WorldLoader] Unknown worldpart line: "+ln);
 					}
 				}
 			}
@@ -257,7 +264,7 @@ public class WorldLoader {
 			else if(command.equals("pointlight")){
 				String[] ags = args.split(" ");
 				PointLight l = new PointLight(
-						Float.parseFloat(ags[0]), Float.parseFloat(ags[1]), Float.parseFloat(ags[2]),
+						Float.parseFloat(ags[0])+dx, Float.parseFloat(ags[1])+dy, Float.parseFloat(ags[2])+dz,
 						Float.parseFloat(ags[3]), Float.parseFloat(ags[4]), Float.parseFloat(ags[5]),
 						Float.parseFloat(ags[6]), Float.parseFloat(ags[7]), Float.parseFloat(ags[8])
 				);

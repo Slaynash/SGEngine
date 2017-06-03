@@ -110,11 +110,11 @@ public class ShaderManager {
 	
 	
 	private static void create2dShader(String shaderLocation) {
-		System.out.println("loading 2d shader...");
+		System.out.println("[ShaderManager] loading 2d shader...");
 		shader2dV = loadShader(shader2dLocation+".vs",GL20.GL_VERTEX_SHADER);
 		shader2dF = loadShader(shader2dLocation+".fs",GL20.GL_FRAGMENT_SHADER);
 		shader2dP = GL20.glCreateProgram();
-		System.out.println("2D shader id: "+shader2dP);
+		System.out.println("[ShaderManager] 2D shader id: "+shader2dP);
 		GL20.glAttachShader(shader2dP, shader2dV);
 		GL20.glAttachShader(shader2dP, shader2dF);
 		bind2dShaderAttributes();
@@ -123,15 +123,15 @@ public class ShaderManager {
 		GL20.glUseProgram(shader2dP);
 		getAll2dShaderUniformLocations();
 		connectShader2dTextureUnits();
-		System.out.println("2d shader loaded !");
+		System.out.println("[ShaderManager] 2d shader loaded !");
 	}
 	
 	private static void createLabelShader(String shaderLocation) {
-		System.out.println("Loading Label shader...");
+		System.out.println("[ShaderManager] Loading Label shader...");
 		shaderLabelV = loadShader(shaderLabelLocation+".vs",GL20.GL_VERTEX_SHADER);
 		shaderLabelF = loadShader(shaderLabelLocation+".fs",GL20.GL_FRAGMENT_SHADER);
 		shaderLabelP = GL20.glCreateProgram();
-		System.out.println("Label shader id: "+shaderLabelP);
+		System.out.println("[ShaderManager] Label shader id: "+shaderLabelP);
 		GL20.glAttachShader(shaderLabelP, shaderLabelV);
 		GL20.glAttachShader(shaderLabelP, shaderLabelF);
 		bindLabelShaderAttributes();
@@ -140,15 +140,15 @@ public class ShaderManager {
 		GL20.glUseProgram(shaderLabelP);
 		getAllLabelShaderUniformLocations();
 		connectShaderLabelTextureUnits();
-		System.out.println("Label shader loaded !");
+		System.out.println("[ShaderManager] Label shader loaded !");
 	}
 	
 	private static void create3dShader(String shaderLocation) {
-		System.out.println("loading 3d shader...");
+		System.out.println("[ShaderManager] loading 3d shader...");
 		shader3dV = loadShader(shader3dLocation+".vs",GL20.GL_VERTEX_SHADER);
 		shader3dF = loadShader(shader3dLocation+".fs",GL20.GL_FRAGMENT_SHADER);
 		shader3dP = GL20.glCreateProgram();
-		System.out.println("3D shader id: "+shader3dP);
+		System.out.println("[ShaderManager] 3D shader id: "+shader3dP);
 		GL20.glAttachShader(shader3dP, shader3dV);
 		GL20.glAttachShader(shader3dP, shader3dF);
 		bind3dShaderAttributes();
@@ -157,15 +157,15 @@ public class ShaderManager {
 		GL20.glUseProgram(shader3dP);
 		getAll3dShaderUniformLocations();
 		connectShader3dTextureUnits();
-		System.out.println("3d shader loaded !");
+		System.out.println("[ShaderManager] 3d shader loaded !");
 	}
 	
 	private static void createVRShader(String shaderLocation) {
-		System.out.println("loading VR shader...");
+		System.out.println("[ShaderManager] loading VR shader...");
 		shaderVRV = loadShader(shaderVRLocation+".vs",GL20.GL_VERTEX_SHADER);
 		shaderVRF = loadShader(shaderVRLocation+".fs",GL20.GL_FRAGMENT_SHADER);
 		shaderVRP = GL20.glCreateProgram();
-		System.out.println("VR shader id: "+shaderVRP);
+		System.out.println("[ShaderManager] VR shader id: "+shaderVRP);
 		GL20.glAttachShader(shaderVRP, shaderVRV);
 		GL20.glAttachShader(shaderVRP, shaderVRF);
 		bindVRShaderAttributes();
@@ -174,15 +174,15 @@ public class ShaderManager {
 		GL20.glUseProgram(shaderVRP);
 		getAllVRShaderUniformLocations();
 		connectShaderVRTextureUnits();
-		System.out.println("VR shader loaded !");
+		System.out.println("[ShaderManager] VR shader loaded !");
 	}
 	
 	private static void createAIOShader(String shaderLocation) {
-		System.out.println("loading AIO shader...");
+		System.out.println("[ShaderManager] loading AIO shader...");
 		shaderAIOV = loadShader(shaderAIOLocation+".vs",GL20.GL_VERTEX_SHADER);
 		shaderAIOF = loadShader(shaderAIOLocation+".fs",GL20.GL_FRAGMENT_SHADER);
 		shaderAIOP = GL20.glCreateProgram();
-		System.out.println("AIO shader id: "+shaderAIOP);
+		System.out.println("[ShaderManager] AIO shader id: "+shaderAIOP);
 		GL20.glAttachShader(shaderAIOP, shaderAIOV);
 		GL20.glAttachShader(shaderAIOP, shaderAIOF);
 		bindAIOShaderAttributes();
@@ -199,7 +199,7 @@ public class ShaderManager {
 		connectShaderAIOTextureUnits();
 		GL20.glUseProgram(0);
 		currentShader = 0;
-		System.out.println("AIO shader loaded !");
+		System.out.println("[ShaderManager] AIO shader loaded !");
 	}
 	
 	

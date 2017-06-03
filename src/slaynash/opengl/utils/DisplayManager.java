@@ -31,7 +31,7 @@ public class DisplayManager {
 		return new DisplayMode[]{};
 	}
 	
-	public static void createDisplay(int x, int y, boolean fullscreen){//TODO list available displays type and create a method for resizing/fullscreen mode
+	public static void createDisplay(int x, int y, boolean fullscreen){
 		resize(x,y,fullscreen);
 		
 		lastFrameTime = getCurrentTime();

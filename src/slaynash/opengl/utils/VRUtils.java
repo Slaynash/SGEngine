@@ -1,5 +1,7 @@
 package slaynash.opengl.utils;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.concurrent.TimeUnit;
@@ -23,9 +25,15 @@ import jopenvr.JOpenVRLibrary;
 import jopenvr.JOpenVRLibrary.ETextureType;
 import jopenvr.Texture_t;
 import jopenvr.TrackedDevicePose_t;
+import jopenvr.VREvent_t;
 import jopenvr.VRTextureBounds_t;
 import jopenvr.VR_IVRCompositor_FnTable;
 import jopenvr.VR_IVRSystem_FnTable;
+import slaynash.objLoaderCU.OBJLoader;
+import slaynash.opengl.Infos;
+import slaynash.opengl.shaders.ShaderManager;
+import slaynash.opengl.textureUtils.TextureManager;
+import slaynash.opengl.utils.vr.VRController;
 
 public class VRUtils {
 	
@@ -34,9 +42,9 @@ public class VRUtils {
 	public static final int EYE_CENTER = 2;
 	
 	
-	static String initStatus;
+	public static String initStatus;
 	private static boolean initialized;
-	static boolean initSuccess = false;
+	public static boolean initSuccess = false;
 	
 	
 	private static VR_IVRSystem_FnTable vrsystem;
@@ -44,21 +52,19 @@ public class VRUtils {
 	
 	
 	private static IntBuffer hmdErrorStore;
-	private static TrackedDevicePose_t.ByReference hmdTrackedDevicePoseReference;
-	private static TrackedDevicePose_t[] hmdTrackedDevicePoses;
-	
-	public static Matrix4f[] poseMatrices;
+	private static TrackedDevicePose_t.ByReference trackedDevicePosesReference = new TrackedDevicePose_t.ByReference();
+	private static TrackedDevicePose_t[] trackedDevicePose = (TrackedDevicePose_t[]) trackedDevicePosesReference.toArray(JOpenVRLibrary.k_unMaxTrackedDeviceCount);
 	
 	private static Matrix4f leftEyeProjectionMatrix = new Matrix4f();
-	static Matrix4f rightEyeProjectionMatrix = new Matrix4f();
-	static Matrix4f leftEyePose = new Matrix4f();
-	static Matrix4f rightEyePose = new Matrix4f();
+	private static Matrix4f rightEyeProjectionMatrix = new Matrix4f();
+	private static Matrix4f leftEyePose = new Matrix4f();
+	private static Matrix4f rightEyePose = new Matrix4f();
 	
 
-	final static VRTextureBounds_t texBoundsLeft = new VRTextureBounds_t();
-	final static VRTextureBounds_t texBoundsRight = new VRTextureBounds_t();
-	final static Texture_t texType0 = new Texture_t();
-	final static Texture_t texType1 = new Texture_t();
+	private final static VRTextureBounds_t texBoundsLeft = new VRTextureBounds_t();
+	private final static VRTextureBounds_t texBoundsRight = new VRTextureBounds_t();
+	private final static Texture_t texType0 = new Texture_t();
+	private final static Texture_t texType1 = new Texture_t();
 	
 	private static IntBuffer hmdDisplayFrequency;
 	private static float tlastVsync;
@@ -88,6 +94,13 @@ public class VRUtils {
 	private static float upX, upY, upZ;
 	private static float rightX, rightY, rightZ;
 	
+	private static Matrix4f[] mat4DevicePose = new Matrix4f[JOpenVRLibrary.k_unMaxTrackedDeviceCount];
+	private static int controllerModelid, basestationModelid;
+	private static boolean isCloseRequested = false;
+	
+	private static VRController[] controllers = new VRController[JOpenVRLibrary.k_unMaxTrackedDeviceCount];
+	private static int nValidControllers;
+	
 	public static void setViewDistance(float znear, float zfar){
 		if(VRUtils.znear == znear && VRUtils.zfar == zfar) return;
 		VRUtils.znear = znear;
@@ -95,7 +108,7 @@ public class VRUtils {
 		setupCameras();
 	}
 	
-	static boolean initVR() {
+	protected static boolean initVR() {
 		System.out.println("[VRUtils] initializing OpenVR...");
 		if(JOpenVRLibrary.VR_IsHmdPresent() == 0){
 			initStatus =  "VR Headset not detected.";
@@ -114,19 +127,18 @@ public class VRUtils {
 		
 		initTextureSubmitStructs();
 		
-		System.out.println( "OpenVR initialized & VR connected." );
+		System.out.println( "[VRUtils] OpenVR initialized & VR connected." );
 		
 		rendersize = getRenderSize();
 	    initBuffers(rendersize.x, rendersize.y, rendersize.x, rendersize.y);
-		System.out.println( "Render buffers/textures created" );
+		System.out.println( "[VRUtils] Render buffers/textures created" );
 		setupCameras();
-		System.out.println( "Matrices created" );
+		System.out.println( "[VRUtils] Matrices created" );
 		initialized = true;
 		return true;
 	}
 	
-	private static void setupCameras()
-    {
+	private static void setupCameras(){
     	leftEyeProjectionMatrix = getHMDMatrixProjectionEye(JOpenVRLibrary.EVREye.EVREye_Eye_Left);
     	rightEyeProjectionMatrix = getHMDMatrixProjectionEye(JOpenVRLibrary.EVREye.EVREye_Eye_Right);
     	leftEyePose = getHMDMatrixPoseEye(JOpenVRLibrary.EVREye.EVREye_Eye_Left);
@@ -146,7 +158,7 @@ public class VRUtils {
     	return m;
     }
 	
-	public static Vector2i getRenderSize() {
+    private static Vector2i getRenderSize() {
 		Vector2i store = new Vector2i();
         if( vrsystem == null ) {
             // 1344x1512
@@ -156,7 +168,7 @@ public class VRUtils {
         	IntByReference x = new IntByReference();
         	IntByReference y = new IntByReference();
             vrsystem.GetRecommendedRenderTargetSize.apply(x, y);
-            store.x = x.getValue()/2;
+            store.x = x.getValue();
             store.y = y.getValue();
         }
         return store;
@@ -225,7 +237,6 @@ public class VRUtils {
 		vrsystem = null;
 		JOpenVRLibrary.VR_InitInternal(hmdErrorStore, JOpenVRLibrary.EVRApplicationType.EVRApplicationType_VRApplication_Scene);
 		if( hmdErrorStore.get(0) == 0 ) {
-			// ok, try and get the vrsystem pointer..
 			vrsystem = new VR_IVRSystem_FnTable(JOpenVRLibrary.VR_GetGenericInterface(JOpenVRLibrary.IVRSystem_Version, hmdErrorStore));
 		}
 		if( vrsystem == null || hmdErrorStore.get(0) != 0 ) {
@@ -235,28 +246,15 @@ public class VRUtils {
 			vrsystem.setAutoSynch(false);
 			vrsystem.read();
 			
-			System.out.println("OpenVR initialized & VR connected.");
+			System.out.println("[VRUtils] OpenVR initialized & VR connected.");
 
 			hmdDisplayFrequency = IntBuffer.allocate(1);
 			hmdDisplayFrequency.put( (int) JOpenVRLibrary.ETrackedDeviceProperty.ETrackedDeviceProperty_Prop_DisplayFrequency_Float);
-			hmdTrackedDevicePoseReference = new TrackedDevicePose_t.ByReference();
-			hmdTrackedDevicePoses = (TrackedDevicePose_t[])hmdTrackedDevicePoseReference.toArray(JOpenVRLibrary.k_unMaxTrackedDeviceCount);
-			poseMatrices = new Matrix4f[JOpenVRLibrary.k_unMaxTrackedDeviceCount];
-			for(int i=0;i<poseMatrices.length;i++) poseMatrices[i] = new Matrix4f();
+			for(int i=0;i<mat4DevicePose.length;i++) mat4DevicePose[i] = new Matrix4f();
+			for(int i=0;i<controllers.length;i++) controllers[i] = new VRController();
 
 			timePerFrame = 1.0 / hmdDisplayFrequency.get(0);
 			
-			
-			// disable all this stuff which kills performance
-			hmdTrackedDevicePoseReference.setAutoRead(false);
-			hmdTrackedDevicePoseReference.setAutoWrite(false);
-			hmdTrackedDevicePoseReference.setAutoSynch(false);
-			for(int i=0;i<JOpenVRLibrary.k_unMaxTrackedDeviceCount;i++) {
-				hmdTrackedDevicePoses[i].setAutoRead(false);
-				hmdTrackedDevicePoses[i].setAutoWrite(false);
-				hmdTrackedDevicePoses[i].setAutoSynch(false);
-			}
-
 			initSuccess = true;
 		}
 	}
@@ -266,16 +264,16 @@ public class VRUtils {
 		if( set && vrsystem.GetFloatTrackedDeviceProperty != null ) {
 			vrCompositor = new VR_IVRCompositor_FnTable(JOpenVRLibrary.VR_GetGenericInterface(JOpenVRLibrary.IVRCompositor_Version, hmdErrorStore));
 			if(vrCompositor != null && hmdErrorStore.get(0) == 0){                
-				System.out.println("OpenVR Compositor initialized OK.");
+				System.out.println("[VRUtils] OpenVR Compositor initialized OK.");
 				vrCompositor.setAutoSynch(false);
 				vrCompositor.read();
 				vrCompositor.SetTrackingSpace.apply(JOpenVRLibrary.ETrackingUniverseOrigin.ETrackingUniverseOrigin_TrackingUniverseStanding);
 			} else {
-				throw new Exception(jopenvr.JOpenVRLibrary.VR_GetVRInitErrorAsEnglishDescription(hmdErrorStore.get(0)).getString(0));			 
+				throw new Exception(JOpenVRLibrary.VR_GetVRInitErrorAsEnglishDescription(hmdErrorStore.get(0)).getString(0));			 
 			}
 		}
 		if( vrCompositor == null ) {
-			System.out.println("Skipping VR Compositor...");
+			System.out.println("[VRUtils] Skipping VR Compositor...");
 			if( vrsystem != null ) {
 				vsyncToPhotons = vrsystem.GetFloatTrackedDeviceProperty.apply(JOpenVRLibrary.k_unTrackedDeviceIndex_Hmd, JOpenVRLibrary.ETrackedDeviceProperty.ETrackedDeviceProperty_Prop_SecondsFromVsyncToPhotons_Float, hmdErrorStore);
 			} else {
@@ -310,22 +308,20 @@ public class VRUtils {
 		texType0.setAutoSynch(false);
 		texType0.setAutoRead(false);
 		texType0.setAutoWrite(false);
-		//texType0.handle = -1;
 		texType1.eColorSpace = JOpenVRLibrary.EColorSpace.EColorSpace_ColorSpace_Gamma;
 		texType1.eType = ETextureType.ETextureType_TextureType_OpenGL;
 		texType1.setAutoSynch(false);
 		texType1.setAutoRead(false);
 		texType1.setAutoWrite(false);
-		//texType1.handle = -1;
 		
-		System.out.println("OpenVR Compositor initialized OK.");
+		System.out.println("[VRUtils] OpenVR Compositor initialized OK.");
 
 	}
 	
-	public static void updatePose(){
+	protected static void updatePose(){
         if(vrsystem == null) return;
         if(vrCompositor != null) {
-           vrCompositor.WaitGetPoses.apply(hmdTrackedDevicePoseReference, JOpenVRLibrary.k_unMaxTrackedDeviceCount, null, 0);
+           vrCompositor.WaitGetPoses.apply(trackedDevicePosesReference, JOpenVRLibrary.k_unMaxTrackedDeviceCount, null, 0);
         } else {
             // wait
             if( latencyWaitTime > 0 ) sleepNanos(latencyWaitTime);
@@ -338,8 +334,8 @@ public class VRUtils {
             
             if( enableDebugLatency ) {
                 if( frames == 10 ) {
-                    System.out.println("Waited (nanos): " + Long.toString(latencyWaitTime));
-                    System.out.println("Predict ahead time: " + Float.toString(fSecondsUntilPhotons));
+                    System.out.println("[VRUtils] Waited (nanos): " + Long.toString(latencyWaitTime));
+                    System.out.println("[VRUtils] Predict ahead time: " + Float.toString(fSecondsUntilPhotons));
                 }
                 frames = (frames + 1) % 60;            
             }            
@@ -348,7 +344,7 @@ public class VRUtils {
             long nowCount = _tframeCount;
             if( nowCount - frameCount > 1 ) {
                 // skipped a frame!
-                if( enableDebugLatency ) System.out.println("Frame skipped!");
+                if( enableDebugLatency ) System.out.println("[VRUtils] Frame skipped!");
                 frameCountRun = 0;
                 if( latencyWaitTime > 0 ) {
                     latencyWaitTime -= TimeUnit.MILLISECONDS.toNanos(1);
@@ -364,37 +360,30 @@ public class VRUtils {
             
             vrsystem.GetDeviceToAbsoluteTrackingPose.apply(
                     JOpenVRLibrary.ETrackingUniverseOrigin.ETrackingUniverseOrigin_TrackingUniverseStanding,
-                    fSecondsUntilPhotons, hmdTrackedDevicePoseReference, JOpenVRLibrary.k_unMaxTrackedDeviceCount);   
+                    fSecondsUntilPhotons, trackedDevicePosesReference, JOpenVRLibrary.k_unMaxTrackedDeviceCount);   
         }
-        
-        // deal with controllers being plugged in and out
-        // causing an invalid memory crash... skipping for now
-        /*boolean hasEvent = false;
-        while( JOpenVRLibrary.VR_IVRSystem_PollNextEvent(OpenVR.getVRSystemInstance(), tempEvent) != 0 ) {
-            // wait until the events are clear..
-            hasEvent = true;
-        }
-        if( hasEvent ) {
-            // an event probably changed controller state
-            VRInput._updateConnectedControllers();
-        }*/
-        //update controllers pose information
-        // TODO VRInput._updateControllerStates();
-        //handleInput();
-        // read pose data from native
-        for (int nDevice = 0; nDevice < JOpenVRLibrary.k_unMaxTrackedDeviceCount; ++nDevice ){
-            hmdTrackedDevicePoses[nDevice].readField("bPoseIsValid");
-            if( hmdTrackedDevicePoses[nDevice].bPoseIsValid != 0 ){
-                hmdTrackedDevicePoses[nDevice].readField("mDeviceToAbsoluteTracking");
-                poseMatrices[nDevice] = convertSteamVRMatrix3ToMatrix4f(hmdTrackedDevicePoses[nDevice].mDeviceToAbsoluteTracking);
+        nValidControllers = 0;
+        for (int nDevice = 0; nDevice < JOpenVRLibrary.k_unMaxTrackedDeviceCount; nDevice++ ){
+        	if (trackedDevicePose[nDevice].bPoseIsValid == 1) {
+        		MatrixUtils.copy(trackedDevicePose[nDevice].mDeviceToAbsoluteTracking, mat4DevicePose[nDevice]);
             }
+        	if(vrsystem.GetTrackedDeviceClass.apply(nDevice) == JOpenVRLibrary.ETrackedDeviceClass.ETrackedDeviceClass_TrackedDeviceClass_Controller){
+        		controllers[nDevice].setPose(trackedDevicePose[nDevice].bPoseIsValid == 1 ? mat4DevicePose[nDevice] : null);
+        		nValidControllers++;
+        	}
+        	else{
+        		controllers[nDevice].unValid();
+        	}
         }
+        handleInput();
         
-        if ( hmdTrackedDevicePoses[JOpenVRLibrary.k_unTrackedDeviceIndex_Hmd].bPoseIsValid != 0 ){
-            hmdPose = (Matrix4f) poseMatrices[JOpenVRLibrary.k_unTrackedDeviceIndex_Hmd].invert();
+        if ( trackedDevicePose[JOpenVRLibrary.k_unTrackedDeviceIndex_Hmd].bPoseIsValid == 1 ){
+            MatrixUtils.inverse((Matrix4f) mat4DevicePose[JOpenVRLibrary.k_unTrackedDeviceIndex_Hmd], hmdPose);
+            
             Matrix4f viewMatrix = new Matrix4f();
 			hmdPose.transpose(viewMatrix);
 			viewMatrix.invert();
+			
 			posX = viewMatrix.m03;
 			posY = viewMatrix.m13;
 			posZ = viewMatrix.m23;
@@ -407,6 +396,7 @@ public class VRUtils {
 			rightX = viewMatrix.m00;
 			rightY = viewMatrix.m10;
 			rightZ = viewMatrix.m20;
+			
         } else {
             hmdPose = new Matrix4f();
         }
@@ -443,7 +433,7 @@ public class VRUtils {
 		}
 	}
 	
-	static void sendFramesToCompositor() {
+	protected static void sendFramesToCompositor() {
 		if(vrCompositor.Submit == null)
 			return;
 		
@@ -460,7 +450,7 @@ public class VRUtils {
 		vrCompositor.PostPresentHandoff.apply();//require ?
 	}
 	
-	public static void sleepNanos(long nanoDuration) {
+	private static void sleepNanos(long nanoDuration) {
 		final long end = System.nanoTime() + nanoDuration; 
 		long timeLeft = nanoDuration; 
 		do {
@@ -475,12 +465,12 @@ public class VRUtils {
 		} while (timeLeft > 0);
 	}
 
-	public static boolean isCloseRequested() {//TODO quit system
-		return false;
+	protected static boolean isCloseRequested() {
+		return isCloseRequested;
 	}
 
 
-	public static void stop() {
+	protected static void stop() {
 		if (initialized){
 			JOpenVRLibrary.VR_ShutdownInternal();
 			initialized = false;
@@ -567,159 +557,158 @@ public class VRUtils {
 	public static Matrix4f getHmdPose(){
 		return hmdPose;
 	}
-	/*
-	static void handleInput() {
+	
+	
+	
+	
+	
+	
+	private static void handleInput() {
 
         // Process SteamVR events
         VREvent_t event = new VREvent_t();
         while (vrsystem.PollNextEvent.apply(event, event.size()) != 0) {
-
             processVREvent(event);
         }
-
+        
+        /*
         // Process SteamVR controller state
         for (int device = 0; device < JOpenVRLibrary.k_unMaxTrackedDeviceCount; device++) {
-        	/*
+
             VRControllerState_t state = new VRControllerState_t();
-            TrackedDevicePose_t pose = new TrackedDevicePose_t();
-            
-            if (vrsystem.GetControllerStateWithPose.apply(JOpenVRLibrary.ETrackingUniverseOrigin.ETrackingUniverseOrigin_TrackingUniverseStanding, device, state, pose) != 0) {
+
+            if (vrsystem.GetControllerState.apply(device, state, state.size()) != 0) {
 
                 //rbShowTrackedDevice[device] = state.ulButtonPressed == 0;
 
                 // let's test haptic impulse too..
                 if (state.ulButtonPressed != 0) {
                     // apparently only axis ID 0 works, maximum duration value is 3999
-                    vrsystem.TriggerHapticPulse.apply(device, 0, (short) 3999);
+                	vrsystem.TriggerHapticPulse.apply(device, 0, (short) 3999);
                 }
 
             }
-            * /
+        }
+        */
+    }
+
+    private static void processVREvent(VREvent_t event) {
+    	
+    	if(event.eventType >= 700 && event.eventType <= 704 && event.eventType != 701){
+    		System.out.println("[VRUtils] Close requested by SteamVR... (id: "+event.eventType+")");
+    		isCloseRequested = true;
+    	}
+    	
+    	if(event.trackedDeviceIndex > 0) controllers[event.trackedDeviceIndex].throwEvent(event.eventType);
+    	
+        switch (event.eventType) {
+            case JOpenVRLibrary.EVREventType.EVREventType_VREvent_TrackedDeviceActivated:
+                System.out.println("[VRUtils] Device %u attached. Setting up render model.\n" + event.trackedDeviceIndex);
+                break;
+
+            case JOpenVRLibrary.EVREventType.EVREventType_VREvent_TrackedDeviceDeactivated:
+                System.out.println("[VRUtils] Device %u detached.\n" + event.trackedDeviceIndex);
+                break;
+
+            case JOpenVRLibrary.EVREventType.EVREventType_VREvent_TrackedDeviceUpdated:
+                System.out.println("[VRUtils] Device %u updated.\n" + event.trackedDeviceIndex);
+                break;
         }
     }
-    
-	public static void processVREvent(VREvent_t event){
-		System.out.println("Event from device "+event.trackedDeviceIndex+": "+getEventString(event.eventType));
-		switch (event.eventType) {
-			case JOpenVRLibrary.EVREventType.EVREventType_VREvent_TrackedDeviceActivated:
-				System.out.printf("Device %d attached. Setting up render model.\n", event.trackedDeviceIndex);
-				break;
-			case JOpenVRLibrary.EVREventType.EVREventType_VREvent_TrackedDeviceDeactivated:
-				System.out.printf("Device %d detached.\n", event.trackedDeviceIndex);
-				break;
-			case JOpenVRLibrary.EVREventType.EVREventType_VREvent_TrackedDeviceUpdated:
-				System.out.printf("Device %d updated.\n", event.trackedDeviceIndex);
-				break;
-		}
-	}
-
-	private static String getEventString(int eventType) {
-		switch (eventType) {
-			case 0: return "EVREventType_VREvent_None";
-			case 100: return "EVREventType_VREvent_TrackedDeviceActivated";
-			case 101: return "EVREventType_VREvent_TrackedDeviceDeactivated";
-			case 102: return "EVREventType_VREvent_TrackedDeviceUpdated";
-			case 103: return "EVREventType_VREvent_TrackedDeviceUserInteractionStarted";
-			case 104: return "EVREventType_VREvent_TrackedDeviceUserInteractionEnded";
-			case 105: return "EVREventType_VREvent_IpdChanged";
-			case 106: return "EVREventType_VREvent_EnterStandbyMode";
-			case 107: return "EVREventType_VREvent_LeaveStandbyMode";
-			case 108: return "EVREventType_VREvent_TrackedDeviceRoleChanged";
-			case 109: return "EVREventType_VREvent_WatchdogWakeUpRequested";
-			case 200: return "EVREventType_VREvent_ButtonPress";
-			case 201: return "EVREventType_VREvent_ButtonUnpress";
-			case 202: return "EVREventType_VREvent_ButtonTouch";
-			case 203: return "EVREventType_VREvent_ButtonUntouch";
-			case 300: return "EVREventType_VREvent_MouseMove";
-			case 301: return "EVREventType_VREvent_MouseButtonDown";
-			case 302: return "EVREventType_VREvent_MouseButtonUp";
-			case 303: return "EVREventType_VREvent_FocusEnter";
-			case 304: return "EVREventType_VREvent_FocusLeave";
-			case 305: return "EVREventType_VREvent_Scroll";
-			case 306: return "EVREventType_VREvent_TouchPadMove";
-			case 307: return "EVREventType_VREvent_OverlayFocusChanged";
-			case 400: return "EVREventType_VREvent_InputFocusCaptured";
-			case 401: return "EVREventType_VREvent_InputFocusReleased";
-			case 402: return "EVREventType_VREvent_SceneFocusLost";
-			case 403: return "EVREventType_VREvent_SceneFocusGained";
-			case 404: return "EVREventType_VREvent_SceneApplicationChanged";
-			case 405: return "EVREventType_VREvent_SceneFocusChanged";
-			case 406: return "EVREventType_VREvent_InputFocusChanged";
-			case 407: return "EVREventType_VREvent_SceneApplicationSecondaryRenderingStarted";
-			case 410: return "EVREventType_VREvent_HideRenderModels";
-			case 411: return "EVREventType_VREvent_ShowRenderModels";
-			case 500: return "EVREventType_VREvent_OverlayShown";
-			case 501: return "EVREventType_VREvent_OverlayHidden";
-			case 502: return "EVREventType_VREvent_DashboardActivated";
-			case 503: return "EVREventType_VREvent_DashboardDeactivated";
-			case 504: return "EVREventType_VREvent_DashboardThumbSelected";
-			case 505: return "EVREventType_VREvent_DashboardRequested";
-			case 506: return "EVREventType_VREvent_ResetDashboard";
-			case 507: return "EVREventType_VREvent_RenderToast";
-			case 508: return "EVREventType_VREvent_ImageLoaded";
-			case 509: return "EVREventType_VREvent_ShowKeyboard";
-			case 510: return "EVREventType_VREvent_HideKeyboard";
-			case 511: return "EVREventType_VREvent_OverlayGamepadFocusGained";
-			case 512: return "EVREventType_VREvent_OverlayGamepadFocusLost";
-			case 513: return "EVREventType_VREvent_OverlaySharedTextureChanged";
-			case 514: return "EVREventType_VREvent_DashboardGuideButtonDown";
-			case 515: return "EVREventType_VREvent_DashboardGuideButtonUp";
-			case 516: return "EVREventType_VREvent_ScreenshotTriggered";
-			case 517: return "EVREventType_VREvent_ImageFailed";
-			case 520: return "EVREventType_VREvent_RequestScreenshot";
-			case 521: return "EVREventType_VREvent_ScreenshotTaken";
-			case 522: return "EVREventType_VREvent_ScreenshotFailed";
-			case 523: return "EVREventType_VREvent_SubmitScreenshotToDashboard";
-			case 524: return "EVREventType_VREvent_ScreenshotProgressToDashboard";
-			case 600: return "EVREventType_VREvent_Notification_Shown";
-			case 601: return "EVREventType_VREvent_Notification_Hidden";
-			case 602: return "EVREventType_VREvent_Notification_BeginInteraction";
-			case 603: return "EVREventType_VREvent_Notification_Destroyed";
-			case 700: return "EVREventType_VREvent_Quit";
-			case 701: return "EVREventType_VREvent_ProcessQuit";
-			case 702: return "EVREventType_VREvent_QuitAborted_UserPrompt";
-			case 703: return "EVREventType_VREvent_QuitAcknowledged";
-			case 704: return "EVREventType_VREvent_DriverRequestedQuit";
-			case 800: return "EVREventType_VREvent_ChaperoneDataHasChanged";
-			case 801: return "EVREventType_VREvent_ChaperoneUniverseHasChanged";
-			case 802: return "EVREventType_VREvent_ChaperoneTempDataHasChanged";
-			case 803: return "EVREventType_VREvent_ChaperoneSettingsHaveChanged";
-			case 804: return "EVREventType_VREvent_SeatedZeroPoseReset";
-			case 820: return "EVREventType_VREvent_AudioSettingsHaveChanged";
-			case 850: return "EVREventType_VREvent_BackgroundSettingHasChanged";
-			case 851: return "EVREventType_VREvent_CameraSettingsHaveChanged";
-			case 852: return "EVREventType_VREvent_ReprojectionSettingHasChanged";
-			case 853: return "EVREventType_VREvent_ModelSkinSettingsHaveChanged";
-			case 854: return "EVREventType_VREvent_EnvironmentSettingsHaveChanged";
-			case 900: return "EVREventType_VREvent_StatusUpdate";
-			case 1000: return "EVREventType_VREvent_MCImageUpdated";
-			case 1100: return "EVREventType_VREvent_FirmwareUpdateStarted";
-			case 1101: return "EVREventType_VREvent_FirmwareUpdateFinished";
-			case 1200: return "EVREventType_VREvent_KeyboardClosed";
-			case 1201: return "EVREventType_VREvent_KeyboardCharInput";
-			case 1202: return "EVREventType_VREvent_KeyboardDone";
-			case 1300: return "EVREventType_VREvent_ApplicationTransitionStarted";
-			case 1301: return "EVREventType_VREvent_ApplicationTransitionAborted";
-			case 1302: return "EVREventType_VREvent_ApplicationTransitionNewAppStarted";
-			case 1303: return "EVREventType_VREvent_ApplicationListUpdated";
-			case 1304: return "EVREventType_VREvent_ApplicationMimeTypeLoad";
-			case 1400: return "EVREventType_VREvent_Compositor_MirrorWindowShown";
-			case 1401: return "EVREventType_VREvent_Compositor_MirrorWindowHidden";
-			case 1410: return "EVREventType_VREvent_Compositor_ChaperoneBoundsShown";
-			case 1411: return "EVREventType_VREvent_Compositor_ChaperoneBoundsHidden";
-			case 1500: return "EVREventType_VREvent_TrackedCamera_StartVideoStream";
-			case 1501: return "EVREventType_VREvent_TrackedCamera_StopVideoStream";
-			case 1502: return "EVREventType_VREvent_TrackedCamera_PauseVideoStream";
-			case 1503: return "EVREventType_VREvent_TrackedCamera_ResumeVideoStream";
-			case 1600: return "EVREventType_VREvent_PerformanceTest_EnableCapture";
-			case 1601: return "EVREventType_VREvent_PerformanceTest_DisableCapture";
-			case 1602: return "EVREventType_VREvent_PerformanceTest_FidelityLevel";
-			case 10000: return "EVREventType_VREvent_VendorSpecific_Reserved_Start";
-			case 19999: return "EVREventType_VREvent_VendorSpecific_Reserved_End";
-			default: return "UNKNOWN_EVENT";
-		}
-		
-	}
-	*/
 	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+	public static Matrix4f[] getPoseMatrices() {
+		return mat4DevicePose;
+	}
+	
+	public static void renderControllers(){
+		//? ShaderManager.startControllerShader()
+		if(controllerModelid == 0)
+			try {
+				controllerModelid = OBJLoader.createTexturedDisplayList(OBJLoader.loadTexturedModel(new File(Infos.getInstallPath()+"/"+Infos.getVRFilesPath()+"/controller.obj")));
+			} catch (IOException e) {
+				System.err.println("[VRUtils] Unable to load controller model ! ("+e.getMessage()+")");
+				controllerModelid = GL11.glGenLists(1);
+				GL11.glNewList(controllerModelid, GL11.GL_COMPILE);
+				GL11.glBegin(GL11.GL_QUADS);
+				for(int i=0;i<CUBE_VERTICES.length;i+=5){
+					GL11.glTexCoord2f(CUBE_VERTICES[i+3], CUBE_VERTICES[i+4]);
+					GL11.glVertex3f(CUBE_VERTICES[i]*.01f, CUBE_VERTICES[i+1]*.01f, CUBE_VERTICES[i+2]*.01f);
+				}
+				GL11.glEnd();
+				GL11.glEndList();
+			}
+		ShaderManager.bindVRShaderColorTextureID(TextureManager.getTextureID(Infos.getVRFilesPath()+"/controller_texture.png"));
+		
+		for(int i=0;i<trackedDevicePose.length;i++){
+			if(trackedDevicePose[i].bPoseIsValid != 1) continue;
+			switch(vrsystem.GetTrackedDeviceClass.apply(i)){
+				case JOpenVRLibrary.ETrackedDeviceClass.ETrackedDeviceClass_TrackedDeviceClass_Controller:
+					ShaderManager.loadVRShaderTransformationMatrix(mat4DevicePose[i]);
+					GL11.glCallList(controllerModelid);
+					break;
+			}
+		}
+	}
+	
+	public static void renderBaseStations(){
+		//? ShaderManager.startControllerShader()
+		if(basestationModelid == 0)
+			try {
+				basestationModelid = OBJLoader.createTexturedDisplayList(OBJLoader.loadTexturedModel(new File(Infos.getInstallPath()+"/"+Infos.getVRFilesPath()+"/basestation.obj")));
+			} catch (IOException e) {
+				System.err.println("[VRUtils] Unable to load basestation model !");
+				e.printStackTrace();
+				basestationModelid = GL11.glGenLists(1);
+				GL11.glNewList(basestationModelid, GL11.GL_COMPILE);
+				GL11.glBegin(GL11.GL_QUADS);
+				for(int i=0;i<CUBE_VERTICES.length;i+=5){
+					GL11.glTexCoord2f(CUBE_VERTICES[i+3], CUBE_VERTICES[i+4]);
+					GL11.glVertex3f(CUBE_VERTICES[i]*.02f, CUBE_VERTICES[i+1]*.02f, CUBE_VERTICES[i+2]*.02f);
+				}
+				GL11.glEnd();
+				GL11.glEndList();
+			}
+		ShaderManager.bindVRShaderColorTextureID(TextureManager.getTextureID(Infos.getVRFilesPath()+"/basestation.tga"));
+		
+		for(int i=0;i<trackedDevicePose.length;i++){
+			if(trackedDevicePose[i].bPoseIsValid != 1) continue;
+			switch(vrsystem.GetTrackedDeviceClass.apply(i)){
+				case JOpenVRLibrary.ETrackedDeviceClass.ETrackedDeviceClass_TrackedDeviceClass_TrackingReference:
+					ShaderManager.loadVRShaderTransformationMatrix(mat4DevicePose[i]);
+					GL11.glCallList(basestationModelid);
+					break;
+			}
+		}
+	}
+    
+    
+    private static final float[] CUBE_VERTICES = new float[]{
+			 1,-1, 1, 1,0,  1, 1, 1, 1,1, -1, 1, 1, 0,1, -1,-1, 1, 0,0,
+			 1,-1,-1, 1,0,  1, 1,-1, 1,1,  1, 1, 1, 0,1,  1,-1, 1, 0,0,
+			-1,-1,-1, 1,0, -1, 1,-1, 1,1,  1, 1,-1, 0,1,  1,-1,-1, 0,0,
+			-1,-1, 1, 1,0, -1, 1, 1, 1,1, -1, 1,-1, 0,1, -1,-1,-1, 0,0,
+			 1, 1, 1, 1,0,  1, 1,-1, 1,1, -1, 1,-1, 0,1, -1, 1, 1, 0,0,
+			 1,-1, 1, 1,0, -1,-1, 1, 1,1, -1,-1,-1, 0,1,  1,-1,-1, 0,0
+	};
+	
+    public static void getValidControllers(){
+    	//int vc = 0;
+    	//for(VRController c:controllers) if(c.isValid()) vc++;
+    	VRController[] validControllers = new VRController[nValidControllers];
+    	int i=0;
+    	for(VRController c:controllers) if(c.isValid()){
+    		validControllers[i] = c;
+    		i++;
+    	}
+    }
 }

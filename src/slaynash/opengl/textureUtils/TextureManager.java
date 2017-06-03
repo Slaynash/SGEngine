@@ -17,12 +17,13 @@ public class TextureManager {
 	public static ArrayList<TextureDef> textureList = new ArrayList<TextureDef>();
 	private static int defaultTextureID = 0;
 	
+	@Deprecated
 	public static Texture getTexture(String texturePath){
 		
 		for(TextureDef tex:textureList) if(texturePath.equals(tex.path)) return tex.texture;
 		try {
-			System.out.println("Loading texture: "+texturePath);
-			Texture texture = TextureLoader.getTexture("PNG", new FileInputStream(new File(Infos.getInstallPath()+"/"+texturePath)));
+			System.out.println("[TextureManager] Loading texture: "+texturePath);
+			Texture texture = getSlickTexture(new File(Infos.getInstallPath()+"/"+texturePath));
 			textureList.add(new TextureDef(texture, texturePath));
 			return texture;
 		}
@@ -38,23 +39,22 @@ public class TextureManager {
 	public static TextureDef getTextureDef(String texturePath) {
 		for(TextureDef tex:textureList) if(texturePath.equals(tex.path)) return tex;
 		try {
-			System.out.println("Loading texture: "+texturePath);
-			TextureDef textureDef = new TextureDef(TextureLoader.getTexture("PNG", new FileInputStream(new File(Infos.getInstallPath()+"/"+texturePath))), texturePath);
+			System.out.println("[TextureManager] Loading texture: "+texturePath);
+			TextureDef textureDef = new TextureDef(getSlickTexture(new File(Infos.getInstallPath()+"/"+texturePath)), texturePath);
 			textureList.add(textureDef);
 			return textureDef;
 		}
-		catch (FileNotFoundException e) {
-			e.printStackTrace();
+		catch (Exception e) {
+			System.err.println("[TextureManager] Unable to load texture "+texturePath+" ("+e.getMessage()+")");
 			for(TextureDef tex:textureList) if(texturePath.equals("res/textures/default.png")) return tex;
 			try {
-				TextureDef textureDef = new TextureDef(TextureLoader.getTexture("PNG", new FileInputStream(new File(Infos.getInstallPath()+"/"+"res/textures/default.png"))), texturePath);
+				TextureDef textureDef = new TextureDef(getSlickTexture(new File(Infos.getInstallPath()+"/"+"res/textures/default.png")), texturePath);
 				textureList.add(textureDef);
 				return textureDef;
 			}
 			catch (FileNotFoundException e1) {e1.printStackTrace();}
 			catch (IOException e1) {e1.printStackTrace();}
 		}
-		catch (IOException e) {e.printStackTrace();}
 		return null;
 	}
 	
@@ -82,5 +82,10 @@ public class TextureManager {
 		
 		textureList.clear();
 		for(String path:names) getTextureDef(path);
+	}
+	
+	private static Texture getSlickTexture(File path) throws FileNotFoundException, IOException{
+		String[] fn = path.getName().split("\\.");
+		return TextureLoader.getTexture(fn[fn.length-1], new FileInputStream(path));
 	}
 }

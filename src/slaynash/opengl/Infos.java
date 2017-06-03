@@ -6,6 +6,7 @@ public class Infos {
 	private static String fontPath = "res/fonts";
 	private static String shaderPath = "res/shaders";
 	private static String shaderMode = "OK";
+	private static String vrFilesPath = "res/vr";
 
 	public static String getInstallPath() {
 		return installPath;
@@ -38,5 +39,13 @@ public class Infos {
 	public static void setShaderMode(String shaderMode) {
 		Infos.shaderMode = shaderMode;
 	}
-
+	
+	public static void setVRFilesPath(String path){
+		vrFilesPath = path;
+	}
+	
+	public static String getVRFilesPath(){
+		return vrFilesPath;
+	}
+	
 }
