@@ -13,7 +13,7 @@ public class Model3dWorld extends Entity{
 	public Model3dWorld(TriangleFace[] faces) {
 		super();
 		this.faces = faces;
-		setPosition(new Vector3f(2, 0, -10));
+		setPosition(new Vector3f(0, 0, 0));
 	}
 
 	@Override
