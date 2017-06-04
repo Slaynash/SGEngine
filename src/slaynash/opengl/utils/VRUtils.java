@@ -783,4 +783,8 @@ public class VRUtils {
     	}
     	return validControllers;
     }
+    
+    public static VRController[] getAllControllers(){
+    	return controllers;
+    }
 }
