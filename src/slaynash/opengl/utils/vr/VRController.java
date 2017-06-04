@@ -6,11 +6,15 @@ import slaynash.opengl.utils.MatrixUtils;
 
 public class VRController {
 	
-	private Matrix4f pose;
-	private boolean isValid;
+	private Matrix4f pose = new Matrix4f();
+	private boolean isValid = false;
 	int id = -1;
-	private boolean isPoseValid;
-	private VRControllerEventListener listener;
+	private boolean isPoseValid = false;
+	private VRControllerEventListener listener = null;
+	
+	public VRController(int id){
+		this.id = id;
+	}
 	
 	public void setPose(Matrix4f pose){
 		if(pose == null){

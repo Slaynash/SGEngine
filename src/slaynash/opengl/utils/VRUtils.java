@@ -251,7 +251,7 @@ public class VRUtils {
 			hmdDisplayFrequency = IntBuffer.allocate(1);
 			hmdDisplayFrequency.put( (int) JOpenVRLibrary.ETrackedDeviceProperty.ETrackedDeviceProperty_Prop_DisplayFrequency_Float);
 			for(int i=0;i<mat4DevicePose.length;i++) mat4DevicePose[i] = new Matrix4f();
-			for(int i=0;i<controllers.length;i++) controllers[i] = new VRController();
+			for(int i=0;i<controllers.length;i++) controllers[i] = new VRController(i);
 
 			timePerFrame = 1.0 / hmdDisplayFrequency.get(0);
 			

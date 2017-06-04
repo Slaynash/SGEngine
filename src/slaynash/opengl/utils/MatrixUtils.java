@@ -79,8 +79,8 @@ public class MatrixUtils {
 		dest.m23 = src.m23;
 		dest.m30 = src.m30;
 		dest.m31 = src.m31;
-		dest.m32 = src.m33;
-		dest.m33 = 1f;
+		dest.m32 = src.m32;
+		dest.m33 = src.m33;
 		return dest;
 	}
 
