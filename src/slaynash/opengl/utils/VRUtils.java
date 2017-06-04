@@ -601,7 +601,7 @@ public class VRUtils {
     		isCloseRequested = true;
     	}
     	
-    	if(event.trackedDeviceIndex > 0) controllers[event.trackedDeviceIndex].throwEvent(event.eventType);
+    	if(event.trackedDeviceIndex > 0) controllers[event.trackedDeviceIndex].throwEvent(event.trackedDeviceIndex, event.eventType, event.data);
     	
         switch (event.eventType) {
             case JOpenVRLibrary.EVREventType.EVREventType_VREvent_TrackedDeviceActivated:

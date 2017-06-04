@@ -2,13 +2,14 @@ package slaynash.opengl.utils.vr;
 
 import org.lwjgl.util.vector.Matrix4f;
 
+import jopenvr.VREvent_Data_t;
 import slaynash.opengl.utils.MatrixUtils;
 
 public class VRController {
 	
 	private Matrix4f pose = new Matrix4f();
 	private boolean isValid = false;
-	int id = -1;
+	private int id = -1;
 	private boolean isPoseValid = false;
 	private VRControllerEventListener listener = null;
 	
@@ -46,7 +47,11 @@ public class VRController {
 		this.listener = listener;
 	}
 	
-	public void throwEvent(int eventType){
-		if(listener != null) listener.onEvent(eventType);
+	public void throwEvent(int deviceIndex, int eventType, VREvent_Data_t data){
+		if(listener != null) listener.onEvent(deviceIndex, eventType, data);
+	}
+	
+	public int getId(){
+		return id;
 	}
 }
