@@ -16,7 +16,7 @@ public class WorldLoader {
 	public static String mv = "0.0";//mapversion
 	public static String mn = "null";//mapname
 	public static String mcn = "unknown";//mapcreator
-	public static String wspwn = "0 1 0";//worldspawn
+	public static String wspwn = "0 0 0";//worldspawn
 	
 	
 	private static List<Entity> entities = new ArrayList<Entity>();
@@ -289,5 +289,16 @@ public class WorldLoader {
 
 	public static List<PointLight> getLights() {
 		return lights;
+	}
+	
+	public static void reset(){
+		entities.clear();
+		lights.clear();
+		mv = "0.0";
+		mn = "null";
+		mcn = "unknown";
+		wspwn = "0 0 0";
+		error = false;
+		errorMessage = "";
 	}
 }

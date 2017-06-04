@@ -701,14 +701,13 @@ public class VRUtils {
 			 1,-1, 1, 1,0, -1,-1, 1, 1,1, -1,-1,-1, 0,1,  1,-1,-1, 0,0
 	};
 	
-    public static void getValidControllers(){
-    	//int vc = 0;
-    	//for(VRController c:controllers) if(c.isValid()) vc++;
+    public static VRController[] getValidControllers(){
     	VRController[] validControllers = new VRController[nValidControllers];
     	int i=0;
     	for(VRController c:controllers) if(c.isValid()){
     		validControllers[i] = c;
     		i++;
     	}
+    	return validControllers;
     }
 }
