@@ -18,6 +18,7 @@ public class VRController {
 			isValid = true;
 			return;
 		}
+		isPoseValid = true;
 		MatrixUtils.copy(pose, this.pose);
 	}
 	
