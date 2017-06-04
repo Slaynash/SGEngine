@@ -33,6 +33,10 @@ public class VRController {
 		return isPoseValid;
 	}
 	
+	public Matrix4f getPose(){
+		return pose;
+	}
+	
 	public void setVRControllerEventListener(VRControllerEventListener listener){
 		this.listener = listener;
 	}
