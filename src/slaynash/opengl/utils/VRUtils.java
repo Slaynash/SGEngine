@@ -3,9 +3,11 @@ package slaynash.opengl.utils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.concurrent.TimeUnit;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
@@ -686,6 +688,77 @@ public class VRUtils {
 				case JOpenVRLibrary.ETrackedDeviceClass.ETrackedDeviceClass_TrackedDeviceClass_TrackingReference:
 					ShaderManager.loadVRShaderTransformationMatrix(mat4DevicePose[i]);
 					GL11.glCallList(basestationModelid);
+					break;
+			}
+		}
+	}
+	
+	public static void renderControllers3D(){
+		//? ShaderManager.startControllerShader()
+		if(controllerModelid == 0)
+			try {
+				controllerModelid = OBJLoader.createTexturedDisplayList(OBJLoader.loadTexturedModel(new File(Infos.getInstallPath()+"/"+Infos.getVRFilesPath()+"/controller.obj")));
+			} catch (IOException e) {
+				System.err.println("[VRUtils] Unable to load controller model ! ("+e.getMessage()+")");
+				controllerModelid = GL11.glGenLists(1);
+				GL11.glNewList(controllerModelid, GL11.GL_COMPILE);
+				GL11.glBegin(GL11.GL_QUADS);
+				for(int i=0;i<CUBE_VERTICES.length;i+=5){
+					GL11.glTexCoord2f(CUBE_VERTICES[i+3], CUBE_VERTICES[i+4]);
+					GL11.glVertex3f(CUBE_VERTICES[i]*.01f, CUBE_VERTICES[i+1]*.01f, CUBE_VERTICES[i+2]*.01f);
+				}
+				GL11.glEnd();
+				GL11.glEndList();
+			}
+		ShaderManager.bind3DShaderColorTextureID(TextureManager.getTextureID(Infos.getVRFilesPath()+"/controller_texture.png"));
+		
+		for(int i=0;i<trackedDevicePose.length;i++){
+			if(trackedDevicePose[i].bPoseIsValid != 1) continue;
+			switch(vrsystem.GetTrackedDeviceClass.apply(i)){
+				case JOpenVRLibrary.ETrackedDeviceClass.ETrackedDeviceClass_TrackedDeviceClass_Controller:
+					GL11.glPushMatrix();
+						FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
+						mat4DevicePose[i].store(matrixBuffer);
+						matrixBuffer.flip();
+						GL11.glMultMatrix(matrixBuffer);
+						GL11.glCallList(controllerModelid);
+					GL11.glPopMatrix();
+					break;
+			}
+		}
+	}
+	
+	public static void renderBaseStations3D(){
+		//? ShaderManager.startControllerShader()
+		if(basestationModelid == 0)
+			try {
+				basestationModelid = OBJLoader.createTexturedDisplayList(OBJLoader.loadTexturedModel(new File(Infos.getInstallPath()+"/"+Infos.getVRFilesPath()+"/basestation.obj")));
+			} catch (IOException e) {
+				System.err.println("[VRUtils] Unable to load basestation model !");
+				e.printStackTrace();
+				basestationModelid = GL11.glGenLists(1);
+				GL11.glNewList(basestationModelid, GL11.GL_COMPILE);
+				GL11.glBegin(GL11.GL_QUADS);
+				for(int i=0;i<CUBE_VERTICES.length;i+=5){
+					GL11.glTexCoord2f(CUBE_VERTICES[i+3], CUBE_VERTICES[i+4]);
+					GL11.glVertex3f(CUBE_VERTICES[i]*.02f, CUBE_VERTICES[i+1]*.02f, CUBE_VERTICES[i+2]*.02f);
+				}
+				GL11.glEnd();
+				GL11.glEndList();
+			}
+		ShaderManager.bind3DShaderColorTextureID(TextureManager.getTextureID(Infos.getVRFilesPath()+"/basestation.tga"));
+		
+		for(int i=0;i<trackedDevicePose.length;i++){
+			if(trackedDevicePose[i].bPoseIsValid != 1) continue;
+			switch(vrsystem.GetTrackedDeviceClass.apply(i)){
+				case JOpenVRLibrary.ETrackedDeviceClass.ETrackedDeviceClass_TrackedDeviceClass_TrackingReference:
+					GL11.glPushMatrix();
+						FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
+						mat4DevicePose[i].store(matrixBuffer);
+						matrixBuffer.flip();
+						GL11.glMultMatrix(matrixBuffer);
+						GL11.glCallList(basestationModelid);
+					GL11.glPopMatrix();
 					break;
 			}
 		}
