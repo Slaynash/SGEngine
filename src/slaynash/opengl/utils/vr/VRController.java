@@ -17,9 +17,9 @@ public class VRController {
 	}
 	
 	public void setPose(Matrix4f pose){
+		isValid = true;
 		if(pose == null){
 			isPoseValid = false;
-			isValid = true;
 			return;
 		}
 		isPoseValid = true;
