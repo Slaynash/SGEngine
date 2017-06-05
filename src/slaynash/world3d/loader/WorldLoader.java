@@ -21,7 +21,7 @@ public class WorldLoader {
 	private static String worldName = "null";
 	private static String worldCreator = "unknown";
 	private static Vector3f worldSpawn = new Vector3f(0,0,0);
-	private static int scaleFactor = 1;
+	private static float scaleFactor = 1;
 	
 	
 	private static List<Entity> entities = new ArrayList<Entity>();
@@ -315,11 +315,11 @@ public class WorldLoader {
 	
 	
 	
-	public static int getScaleFactor() {
+	public static float getScaleFactor() {
 		return scaleFactor;
 	}
 
-	public static void setScaleFactor(int scaleFactor) {
+	public static void setScaleFactor(float scaleFactor) {
 		WorldLoader.scaleFactor = scaleFactor;
 	}
 
