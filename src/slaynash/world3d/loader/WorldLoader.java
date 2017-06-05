@@ -8,15 +8,20 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.lwjgl.util.vector.Vector3f;
+
 public class WorldLoader {
+
+	private static boolean clean = true;
 	
 	private static boolean error = false;
 	private static String errorMessage = "";
 	
-	public static String mv = "0.0";//mapversion
-	public static String mn = "null";//mapname
-	public static String mcn = "unknown";//mapcreator
-	public static String wspwn = "0 0 0";//worldspawn
+	private static String worldVersion = "0.0";
+	private static String worldName = "null";
+	private static String worldCreator = "unknown";
+	private static Vector3f worldSpawn = new Vector3f(0,0,0);
+	private static int scaleFactor = 1;
 	
 	
 	private static List<Entity> entities = new ArrayList<Entity>();
@@ -25,6 +30,8 @@ public class WorldLoader {
 	
 	
 	public static void loadMap(String mapPath){
+		if(!clean) reset();
+		clean = false;
 		System.out.println("[WorldLoader] Start loading 3d map \""+mapPath+"\"...");
 		File mapFile = new File(mapPath);
 		BufferedReader reader = null;
@@ -42,19 +49,19 @@ public class WorldLoader {
 			while(!found && (ln=reader.readLine()) != null) {
 				if(ln.split(" ", 2)[0].equals("MapVersion")){
 					System.out.println("[WorldLoader] Map version: "+ln.split(" ", 2)[1]);
-					mv = ln.split(" ", 2)[1];
+					worldVersion = ln.split(" ", 2)[1];
 					found = true;
 				}
 			}
-			if(mv.equals("0.0")){
+			if(worldVersion.equals("0.0")){
 				error = true; errorMessage = "Bad map file ! (version not found)"; reader.close(); return;
 			}
-			else if(mv.equals("1.3"))
+			else if(worldVersion.equals("1.3"))
 				readMap1_3(ln, command, args, reader);
-			else if(mv.equals("1.4"))
+			else if(worldVersion.equals("1.4"))
 				readMap1_4(ln, command, args, reader);
 			else{
-				error = true; errorMessage = "Version not readable. Version: "+mv; reader.close(); return;
+				error = true; errorMessage = "Version not readable. Version: "+worldVersion; reader.close(); return;
 			}
 			
 			
@@ -63,8 +70,8 @@ public class WorldLoader {
 		} catch (IOException e) {error = true; errorMessage = e.getMessage(); return;}
 		System.out.println("[WorldLoader] Load finished. map properties:");
 		System.out.println("[WorldLoader] ------------------------------");
-		System.out.println("[WorldLoader] Map \""+mn+"\" for loader v"+mv+", created by \""+mcn+"\".");
-		System.out.println("[WorldLoader] World spawn placed at "+wspwn.split(" ")[0]+" "+wspwn.split(" ")[1]+" "+wspwn.split(" ")[2]);
+		System.out.println("[WorldLoader] Map \""+worldName+"\" for loader v"+worldVersion+", created by \""+worldCreator+"\".");
+		System.out.println("[WorldLoader] World spawn placed at "+worldSpawn.x+" "+worldSpawn.y+" "+worldSpawn.z);
 		System.out.println("[WorldLoader] ------------------------------");
 	}
 	
@@ -76,9 +83,9 @@ public class WorldLoader {
 			if(command.equals("")) continue;
 			System.out.println("ln="+ln);
 			args = ln.split(" ", 2)[1];
-			if(command.equals("spawn")) wspwn = args;
-			else if(command.equals("name")) mn = args;
-			else if(command.equals("creator")) mcn = args;
+			if(command.equals("spawn")) worldSpawn.set(Float.parseFloat(args.split(" ")[0]), Float.parseFloat(args.split(" ")[1]), Float.parseFloat(args.split(" ")[2]));
+			else if(command.equals("name")) worldName = args;
+			else if(command.equals("creator")) worldCreator = args;
 			else if(command.equals("worldpart")){
 				//System.out.println("creating a world part...");
 				String[] ag = args.split(" ");
@@ -122,9 +129,9 @@ public class WorldLoader {
 					}
 					else if(command.equals("v")){//vertices*3 normals*3 uvs*2
 						//System.out.println("loading vertices at point nb "+vn);
-						 vs[vn*3+0] = Float.parseFloat(ag[1]);
-						 vs[vn*3+1] = Float.parseFloat(ag[2]);
-						 vs[vn*3+2] = Float.parseFloat(ag[3]);
+						 vs[vn*3+0] = Float.parseFloat(ag[1])*scaleFactor;
+						 vs[vn*3+1] = Float.parseFloat(ag[2])*scaleFactor;
+						 vs[vn*3+2] = Float.parseFloat(ag[3])*scaleFactor;
 						
 						vns[vn*3+0] = Float.parseFloat(ag[4]);
 						vns[vn*3+1] = Float.parseFloat(ag[5]);
@@ -158,7 +165,7 @@ public class WorldLoader {
 			else if(command.equals("pointlight")){
 				String[] ags = args.split(" ");
 				PointLight l = new PointLight(
-						Float.parseFloat(ags[0]), Float.parseFloat(ags[1]), Float.parseFloat(ags[2]),
+						Float.parseFloat(ags[0])*scaleFactor, Float.parseFloat(ags[1])*scaleFactor, Float.parseFloat(ags[2])*scaleFactor,
 						Float.parseFloat(ags[3]), Float.parseFloat(ags[4]), Float.parseFloat(ags[5]),
 						Float.parseFloat(ags[6]), Float.parseFloat(ags[7]), Float.parseFloat(ags[8])
 				);
@@ -176,9 +183,9 @@ public class WorldLoader {
 			if(command.equals("")) continue;
 			//System.out.println("ln="+ln);
 			args = ln.split(" ", 2)[1];
-			if(command.equals("spawn")) wspwn = args;
-			else if(command.equals("name")) mn = args;
-			else if(command.equals("creator")) mcn = args;
+			if(command.equals("spawn")) worldSpawn.set(Float.parseFloat(args.split(" ")[0]), Float.parseFloat(args.split(" ")[1]), Float.parseFloat(args.split(" ")[2]));
+			else if(command.equals("name")) worldName = args;
+			else if(command.equals("creator")) worldCreator = args;
 			if(command.equals("mapdisplacement")){
 				String[] t = args.split(" ", 3);
 				dx = Float.parseFloat(t[0]);
@@ -228,9 +235,9 @@ public class WorldLoader {
 					}
 					else if(command.equals("v")){//vertices*3 normals*3 uvs*2
 						//System.out.println("loading vertices at point nb "+vn);
-						 vs[vn*3+0] = Float.parseFloat(ag[1])+dx;
-						 vs[vn*3+1] = Float.parseFloat(ag[2])+dy;
-						 vs[vn*3+2] = Float.parseFloat(ag[3])+dz;
+						 vs[vn*3+0] = (Float.parseFloat(ag[1])+dx)*scaleFactor;
+						 vs[vn*3+1] = (Float.parseFloat(ag[2])+dy)*scaleFactor;
+						 vs[vn*3+2] = (Float.parseFloat(ag[3])+dz)*scaleFactor;
 						
 						vns[vn*3+0] = Float.parseFloat(ag[4]);
 						vns[vn*3+1] = Float.parseFloat(ag[5]);
@@ -264,7 +271,7 @@ public class WorldLoader {
 			else if(command.equals("pointlight")){
 				String[] ags = args.split(" ");
 				PointLight l = new PointLight(
-						Float.parseFloat(ags[0])+dx, Float.parseFloat(ags[1])+dy, Float.parseFloat(ags[2])+dz,
+						(Float.parseFloat(ags[0])+dx)*scaleFactor, (Float.parseFloat(ags[1])+dy)*scaleFactor, (Float.parseFloat(ags[2])+dz)*scaleFactor,
 						Float.parseFloat(ags[3]), Float.parseFloat(ags[4]), Float.parseFloat(ags[5]),
 						Float.parseFloat(ags[6]), Float.parseFloat(ags[7]), Float.parseFloat(ags[8])
 				);
@@ -294,11 +301,41 @@ public class WorldLoader {
 	public static void reset(){
 		entities.clear();
 		lights.clear();
-		mv = "0.0";
-		mn = "null";
-		mcn = "unknown";
-		wspwn = "0 0 0";
+		worldVersion = "0.0";
+		worldName = "null";
+		worldCreator = "unknown";
+		worldSpawn.x = 0;
+		worldSpawn.y = 0;
+		worldSpawn.z = 0;
 		error = false;
 		errorMessage = "";
+		scaleFactor = 1;
+		clean = true;
+	}
+	
+	
+	
+	public static int getScaleFactor() {
+		return scaleFactor;
+	}
+
+	public static void setScaleFactor(int scaleFactor) {
+		WorldLoader.scaleFactor = scaleFactor;
+	}
+
+	public static String getWorldVersion() {
+		return worldVersion;
+	}
+
+	public static String getWorldName() {
+		return worldName;
+	}
+
+	public static String getWorldCreator() {
+		return worldCreator;
+	}
+
+	public static Vector3f getWorldSpawn() {
+		return worldSpawn;
 	}
 }
