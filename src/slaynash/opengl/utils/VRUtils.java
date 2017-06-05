@@ -787,4 +787,26 @@ public class VRUtils {
     public static VRController[] getAllControllers(){
     	return controllers;
     }
+    
+
+	
+	public static VR_IVRSystem_FnTable getVRSystem(){
+		return vrsystem;
+	}
+
+	public static Matrix4f getLeftEyeProjectionMatrix() {
+		return leftEyeProjectionMatrix;
+	}
+
+	public static Matrix4f getRightEyeProjectionMatrix() {
+		return rightEyeProjectionMatrix;
+	}
+
+	public static Matrix4f getLeftEyePose() {
+		return leftEyePose;
+	}
+
+	public static Matrix4f getRightEyePose() {
+		return rightEyePose;
+	}
 }
