@@ -22,8 +22,10 @@ public class GUITextField extends GUIElement{
 	private static boolean numPressed = false;
 	private int maxChar = 0;
 	private String text = "";
+	private boolean centerText = false;
 	
 	private int backgroundID = 0;
+
 
 	public GUITextField(int x, int y, int width, String text, int maxChar, GUIElement parent, int location) {
 		super(x, y, width, 20, parent, false, location);
@@ -35,6 +37,22 @@ public class GUITextField extends GUIElement{
 	public GUITextField(int x, int y, int width, String text, GUIElement parent, int location) {
 		super(x, y, width, 20, parent, false, location);
 		setText(text);
+		
+		backgroundID = TextureManager.getTextureID("res/textures/gui/textfield.png");
+	}
+	
+	public GUITextField(int x, int y, int width, String text, boolean centerText, int maxChar, GUIElement parent, int location) {
+		super(x, y, width, 20, parent, centerText, location);
+		setText(text);
+		this.centerText = centerText;
+		this.maxChar = maxChar;
+		backgroundID = TextureManager.getTextureID("res/textures/gui/textfield.png");
+	}
+	
+	public GUITextField(int x, int y, int width, String text, boolean centerText, GUIElement parent, int location) {
+		super(x, y, width, 20, parent, centerText, location);
+		setText(text);
+		this.centerText = centerText;
 		
 		backgroundID = TextureManager.getTextureID("res/textures/gui/textfield.png");
 	}
@@ -65,10 +83,10 @@ public class GUITextField extends GUIElement{
 	private void setTextInternal(String text) {
 		if(text2d != null) text2d.release();
 		if(isFocused()){
-			this.text2d = new Text2d(text+"|", "tahoma", 300, new Vector2f(4, 2), width/2-2, false, this);
+			this.text2d = new Text2d(text+"|", "tahoma", 300, new Vector2f(4, 2), width/2-2, centerText, this);
 		}
 		else{
-			this.text2d = new Text2d(text, "tahoma", 300, new Vector2f(4, 2), width/2-2, false, this);
+			this.text2d = new Text2d(text, "tahoma", 300, new Vector2f(4, 2), width/2-2, centerText, this);
 		}
 	}
 	private void setText(String text) {
@@ -160,6 +178,10 @@ public class GUITextField extends GUIElement{
     public void destroy(){
     	super.destroy();
     	text2d.release();
+    }
+    
+    public String getText(){
+    	return text;
     }
     
 }
