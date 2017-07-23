@@ -10,6 +10,8 @@ import java.util.List;
 
 import org.lwjgl.util.vector.Vector3f;
 
+import slaynash.opengl.Configuration;
+
 public class WorldLoader {
 
 	private static boolean clean = true;
@@ -60,6 +62,8 @@ public class WorldLoader {
 				readMap1_3(ln, command, args, reader);
 			else if(worldVersion.equals("1.4"))
 				readMap1_4(ln, command, args, reader);
+			else if(worldVersion.equals("1.5"))
+				readMap1_5(ln, command, args, reader);
 			else{
 				error = true; errorMessage = "Version not readable. Version: "+worldVersion; reader.close(); return;
 			}
@@ -87,11 +91,9 @@ public class WorldLoader {
 			else if(command.equals("name")) worldName = args;
 			else if(command.equals("creator")) worldCreator = args;
 			else if(command.equals("worldpart")){
-				//System.out.println("creating a world part...");
 				String[] ag = args.split(" ");
 				TriangleFace[] faces = new TriangleFace[Integer.parseInt(ag[0])];
 				float[] vs = null;
-				float[] vns = null;
 				float[] uvs = null;
 				String texC = "";
 				String texN = "";
@@ -115,11 +117,10 @@ public class WorldLoader {
 					}
 					if(command.equals("face")){
 						vs = new float[Integer.parseInt(ag[1])*3];
-						vns = new float[Integer.parseInt(ag[1])*3];
 						uvs = new float[Integer.parseInt(ag[1])*2];
 					}
 					else if(command.equals("endface")){
-						faces[fn] = new TriangleFace(vs, vns, uvs, texC, texN, texS, sf);
+						faces[fn] = new TriangleFace(vs, uvs, texC, texN, texS, sf);
 						texC = "";
 						texN = "";
 						texS = "";
@@ -128,14 +129,9 @@ public class WorldLoader {
 						vn = 0;
 					}
 					else if(command.equals("v")){//vertices*3 normals*3 uvs*2
-						//System.out.println("loading vertices at point nb "+vn);
 						 vs[vn*3+0] = Float.parseFloat(ag[1])*scaleFactor;
 						 vs[vn*3+1] = Float.parseFloat(ag[2])*scaleFactor;
 						 vs[vn*3+2] = Float.parseFloat(ag[3])*scaleFactor;
-						
-						vns[vn*3+0] = Float.parseFloat(ag[4]);
-						vns[vn*3+1] = Float.parseFloat(ag[5]);
-						vns[vn*3+2] = Float.parseFloat(ag[6]);
 						
 						uvs[vn*2+0] = Float.parseFloat(ag[7]);
 						uvs[vn*2+1] = Float.parseFloat(ag[8]);
@@ -159,9 +155,7 @@ public class WorldLoader {
 					}
 				}
 			}
-			else if(command.equals("model3d")){
-				//Not implemented
-			}
+			else if(command.equals("model3d")){/*Not implemented*/}
 			else if(command.equals("pointlight")){
 				String[] ags = args.split(" ");
 				PointLight l = new PointLight(
@@ -172,6 +166,8 @@ public class WorldLoader {
 				lights.add(l);
 			}
 		}
+		//OLD: PlayerCharacter.instance.warp(worldSpawn);
+		Configuration.getPlayerCharacter().warp(worldSpawn);
 	}
 	
 	private static void readMap1_4(String ln, String command, String args, BufferedReader reader) throws IOException {
@@ -181,7 +177,6 @@ public class WorldLoader {
 			if(ln.startsWith("#")) continue;
 			command = ln.split(" ", 2)[0].toLowerCase();
 			if(command.equals("")) continue;
-			//System.out.println("ln="+ln);
 			args = ln.split(" ", 2)[1];
 			if(command.equals("spawn")) worldSpawn.set(Float.parseFloat(args.split(" ")[0]), Float.parseFloat(args.split(" ")[1]), Float.parseFloat(args.split(" ")[2]));
 			else if(command.equals("name")) worldName = args;
@@ -193,11 +188,9 @@ public class WorldLoader {
 				dz = Float.parseFloat(t[2]);
 			}
 			else if(command.equals("worldpart")){
-				//System.out.println("creating a world part...");
 				String[] ag = args.split(" ");
 				TriangleFace[] faces = new TriangleFace[Integer.parseInt(ag[0])];
 				float[] vs = null;
-				float[] vns = null;
 				float[] uvs = null;
 				String texC = "";
 				String texN = "";
@@ -216,16 +209,14 @@ public class WorldLoader {
 					if(command.equals("endworldpart")){
 						Model3dWorld m3dw = new Model3dWorld(faces);
 						entities.add(m3dw);
-						//System.out.println("m3dw created with "+faces.length+" faces !");
 						break;
 					}
 					if(command.equals("face")){
 						vs = new float[Integer.parseInt(ag[1])*3];
-						vns = new float[Integer.parseInt(ag[1])*3];
 						uvs = new float[Integer.parseInt(ag[1])*2];
 					}
 					else if(command.equals("endface")){
-						faces[fn] = new TriangleFace(vs, vns, uvs, texC, texN, texS, sf);
+						faces[fn] = new TriangleFace(vs, uvs, texC, texN, texS, sf);
 						texC = "";
 						texN = "";
 						texS = "";
@@ -234,17 +225,108 @@ public class WorldLoader {
 						vn = 0;
 					}
 					else if(command.equals("v")){//vertices*3 normals*3 uvs*2
-						//System.out.println("loading vertices at point nb "+vn);
 						 vs[vn*3+0] = (Float.parseFloat(ag[1])+dx)*scaleFactor;
 						 vs[vn*3+1] = (Float.parseFloat(ag[2])+dy)*scaleFactor;
 						 vs[vn*3+2] = (Float.parseFloat(ag[3])+dz)*scaleFactor;
 						
-						vns[vn*3+0] = Float.parseFloat(ag[4]);
-						vns[vn*3+1] = Float.parseFloat(ag[5]);
-						vns[vn*3+2] = Float.parseFloat(ag[6]);
-						
 						uvs[vn*2+0] = Float.parseFloat(ag[7]);
 						uvs[vn*2+1] = Float.parseFloat(ag[8]);
+						vn++;
+						
+					}
+					else if(command.equals("texc")){//color texture
+						texC = ln.split(" ", 2)[1];
+					}
+					else if(command.equals("texn")){//normal texture
+						texN = ln.split(" ", 2)[1];
+					}
+					else if(command.equals("texs")){//specular texture
+						texS = ln.split(" ", 2)[1];
+					}
+					else if(command.equals("sf")){//specular factor
+						sf = Float.parseFloat(ln.split(" ", 2)[1]);
+					}
+					else{
+						System.out.println("[WorldLoader] Unknown worldpart line: "+ln);
+					}
+				}
+			}
+			else if(command.equals("model3d")){/*Not implemented*/}
+			else if(command.equals("pointlight")){
+				String[] ags = args.split(" ");
+				PointLight l = new PointLight(
+						(Float.parseFloat(ags[0])+dx)*scaleFactor, (Float.parseFloat(ags[1])+dy)*scaleFactor, (Float.parseFloat(ags[2])+dz)*scaleFactor,
+						Float.parseFloat(ags[3]), Float.parseFloat(ags[4]), Float.parseFloat(ags[5]),
+						Float.parseFloat(ags[6]), Float.parseFloat(ags[7]), Float.parseFloat(ags[8])
+				);
+				lights.add(l);
+			}
+		}
+		Configuration.getPlayerCharacter().warp(worldSpawn);
+	}
+	
+	private static void readMap1_5(String ln, String command, String args, BufferedReader reader) throws IOException {
+		float dx=0, dy=0, dz=0;
+		while((ln=reader.readLine()) != null) {
+			ln = ln.trim();
+			if(ln.startsWith("#")) continue;
+			command = ln.split(" ", 2)[0].toLowerCase();
+			if(command.equals("")) continue;
+			//System.out.println("ln="+ln);
+			args = ln.split(" ", 2)[1];
+			if(command.equals("worldspawn")) worldSpawn.set(Float.parseFloat(args.split(" ")[0])*scaleFactor, Float.parseFloat(args.split(" ")[1])*scaleFactor, Float.parseFloat(args.split(" ")[2])*scaleFactor);
+			else if(command.equals("name")) worldName = args;
+			else if(command.equals("creator")) worldCreator = args;
+			if(command.equals("mapdisplacement")){
+				String[] t = args.split(" ", 3);
+				dx = Float.parseFloat(t[0]);
+				dy = Float.parseFloat(t[1]);
+				dz = Float.parseFloat(t[2]);
+			}
+			else if(command.equals("worldpart")){
+				String[] ag = args.split(" ");
+				TriangleFace[] faces = new TriangleFace[Integer.parseInt(ag[0])];
+				float[] vs = null;
+				float[] uvs = null;
+				String texC = "";
+				String texN = "";
+				String texS = "";
+				float sf = 0;
+				
+				int vn = 0;
+				
+				int fn = 0;
+				while((ln=reader.readLine()) != null){
+					ln = ln.trim();
+					if(ln.startsWith("#")) continue;
+					command = ln.split(" ", 2)[0].toLowerCase();
+					if(command.equals("")) continue;
+					ag = ln.split(" ");
+					if(command.equals("endworldpart")){
+						Model3dWorld m3dw = new Model3dWorld(faces);
+						entities.add(m3dw);
+						break;
+					}
+					if(command.equals("face")){
+						vs = new float[Integer.parseInt(ag[1])*3];
+						uvs = new float[Integer.parseInt(ag[1])*2];
+					}
+					else if(command.equals("endface")){
+						faces[fn] = new TriangleFace(vs, uvs, texC, texN, texS, sf);
+						texC = "";
+						texN = "";
+						texS = "";
+						sf = 0;
+						fn++;
+						vn = 0;
+					}
+					else if(command.equals("v")){//vertices*3 uvs*2
+						 vs[vn*3+0] = (Float.parseFloat(ag[1])+dx)*scaleFactor;
+						 vs[vn*3+1] = (Float.parseFloat(ag[2])+dy)*scaleFactor;
+						 vs[vn*3+2] = (Float.parseFloat(ag[3])+dz)*scaleFactor;
+						
+						uvs[vn*2+0] = Float.parseFloat(ag[4]);
+						uvs[vn*2+1] = Float.parseFloat(ag[5]);
 						vn++;
 						
 					}
@@ -270,14 +352,15 @@ public class WorldLoader {
 			}
 			else if(command.equals("pointlight")){
 				String[] ags = args.split(" ");
-				PointLight l = new PointLight(
-						(Float.parseFloat(ags[0])+dx)*scaleFactor, (Float.parseFloat(ags[1])+dy)*scaleFactor, (Float.parseFloat(ags[2])+dz)*scaleFactor,
-						Float.parseFloat(ags[3]), Float.parseFloat(ags[4]), Float.parseFloat(ags[5]),
-						Float.parseFloat(ags[6]), Float.parseFloat(ags[7]), Float.parseFloat(ags[8])
+				PointLight l = new PointLight(//TODO scaleFactor for attenuation
+						(Float.parseFloat(ags[4])+dx)*scaleFactor, (Float.parseFloat(ags[5])+dy)*scaleFactor, (Float.parseFloat(ags[6])+dz)*scaleFactor,
+						Float.parseFloat(ags[1]), Float.parseFloat(ags[2]), Float.parseFloat(ags[3]),
+						Float.parseFloat(ags[7]), Float.parseFloat(ags[8]), Float.parseFloat(ags[9])
 				);
 				lights.add(l);
 			}
 		}
+		Configuration.getPlayerCharacter().warp(worldSpawn);
 	}
 
 	public static String getError(){

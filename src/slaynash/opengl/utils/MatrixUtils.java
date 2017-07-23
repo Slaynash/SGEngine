@@ -1,9 +1,13 @@
 package slaynash.opengl.utils;
 
+import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Matrix4f;
+import org.lwjgl.util.vector.Vector2f;
+import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 
 import jopenvr.HmdMatrix34_t;
+import slaynash.opengl.Configuration;
 
 public class MatrixUtils {
 	
@@ -92,5 +96,70 @@ public class MatrixUtils {
 		dest.w = src.m03 * vec.x + src.m13 * vec.y + src.m23 * vec.z + src.m33 * vec.w;
 		return dest;
 	}
+	
+	
+	
+	public static Matrix4f createTransformationMatrix(Vector2f translation, Vector2f scale) {
+		Matrix4f matrix = new Matrix4f();
+		matrix.setIdentity();
+		Matrix4f.translate(translation, matrix, matrix);
+		Matrix4f.scale(new Vector3f(scale.x, scale.y, 1f), matrix, matrix);
+		return matrix;
+	}
+	
+	public static Matrix4f createTransformationMatrix(Vector3f translation, float rx, float ry, float rz, float scale) {
+		Matrix4f matrix = new Matrix4f();
+		matrix.setIdentity();
+		Matrix4f.translate(translation, matrix, matrix);
+		Matrix4f.rotate((float) Math.toRadians(rx), new Vector3f(1,0,0), matrix, matrix);
+		Matrix4f.rotate((float) Math.toRadians(ry), new Vector3f(0,1,0), matrix, matrix);
+		Matrix4f.rotate((float) Math.toRadians(rz), new Vector3f(0,0,1), matrix, matrix);
+		Matrix4f.scale(new Vector3f(scale,scale,scale), matrix, matrix);
+		return matrix;
+	}
+	
+	public static Matrix4f createCharacterViewMatrix() {
+		Matrix4f viewMatrix = new Matrix4f();
+		viewMatrix.setIdentity();
+		if(Configuration.getPlayerCharacter().isUsingPitchRoll()){
+			Matrix4f.rotate((float) -Configuration.getPlayerCharacter().getPitch(), new Vector3f(1, 0, 0), viewMatrix, viewMatrix);
+			Matrix4f.rotate((float) -Configuration.getPlayerCharacter().getYaw(), new Vector3f(0, 1, 0), viewMatrix, viewMatrix);
+			Vector3f cameraPos = Configuration.getPlayerCharacter().getViewPosition();
+			Vector3f negativeCameraPos = new Vector3f(-cameraPos.x,-cameraPos.y,-cameraPos.z);
+			Matrix4f.translate(negativeCameraPos, viewMatrix, viewMatrix);
+		}
+		else{
+			Matrix4f.transpose(Configuration.getPlayerCharacter().getViewMatrix(), viewMatrix);
+		}
+		return viewMatrix;
+	}
+	
+	public static Matrix4f createViewMatrix(Vector3f position, float pitch, float yaw) {
+		Matrix4f viewMatrix = new Matrix4f();
+		viewMatrix.setIdentity();
+		Matrix4f.rotate((float) Math.toRadians(pitch), new Vector3f(1, 0, 0), viewMatrix, viewMatrix);
+		Matrix4f.rotate((float) Math.toRadians(yaw), new Vector3f(0, 1, 0), viewMatrix, viewMatrix);
+		Vector3f cameraPos = position;
+		Vector3f negativeCameraPos = new Vector3f(-cameraPos.x,-cameraPos.y,-cameraPos.z);
+		Matrix4f.translate(negativeCameraPos, viewMatrix, viewMatrix);
+		return viewMatrix;
+	}
+	
+	public static Matrix4f createProjectionMatrix(float near, float far, float fov){
+    	Matrix4f projectionMatrix = new Matrix4f();
+		float aspectRatio = (float) Display.getWidth() / (float) Display.getHeight();
+		float y_scale = (float) ((1f / Math.tan(Math.toRadians(fov / 2f))));
+		float x_scale = y_scale / aspectRatio;
+		float frustum_length = far - near;
+
+		projectionMatrix.m00 = x_scale;
+		projectionMatrix.m11 = y_scale;
+		projectionMatrix.m22 = -((far + near) / frustum_length);
+		projectionMatrix.m23 = -1;
+		projectionMatrix.m32 = -((2 * near * far) / frustum_length);
+		projectionMatrix.m33 = 0;
+		
+		return projectionMatrix;
+    }
 	
 }

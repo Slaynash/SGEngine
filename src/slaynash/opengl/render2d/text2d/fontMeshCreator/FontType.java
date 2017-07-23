@@ -3,6 +3,7 @@ package slaynash.opengl.render2d.text2d.fontMeshCreator;
 import java.io.File;
 
 import slaynash.opengl.render2d.text2d.Text2d;
+import slaynash.opengl.textureUtils.TextureDef;
 
 /**
  * Represents a font. It holds the font's texture atlas as well as having the
@@ -13,7 +14,7 @@ import slaynash.opengl.render2d.text2d.Text2d;
  */
 public class FontType {
 
-	private int textureAtlas;
+	private TextureDef textureAtlas;
 	private TextMeshCreator loader;
 	private String fontPath;
 
@@ -27,7 +28,7 @@ public class FontType {
 	 *            - the font file containing information about each character in
 	 *            the texture atlas.
 	 */
-	public FontType(int textureAtlas, String fontPath) {
+	public FontType(TextureDef textureAtlas, String fontPath) {
 		this.textureAtlas = textureAtlas;
 		this.fontPath = fontPath;
 		this.loader = new TextMeshCreator(new File(fontPath));
@@ -36,7 +37,7 @@ public class FontType {
 	/**
 	 * @return The font texture atlas.
 	 */
-	public int getTextureAtlas() {
+	public TextureDef getTextureAtlas() {
 		return textureAtlas;
 	}
 

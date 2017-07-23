@@ -3,70 +3,35 @@ package slaynash.opengl.utils;
 import javax.swing.event.EventListenerList;
 
 import org.lwjgl.opengl.Display;
+import org.lwjgl.util.vector.Vector3f;
 
+import slaynash.audio.AudioManager;
+import slaynash.engine.SGELabelPage;
+import slaynash.inputs.KeyboardControlManager;
+import slaynash.opengl.Configuration;
 import slaynash.opengl.shaders.ShaderManager;
+import slaynash.opengl.textureUtils.TextureManager;
 import slaynash.opengl.utils.pageManagerEvent.PageManagerEvent;
 import slaynash.opengl.utils.pageManagerEvent.PageManagerListener;
+import slaynash.world3d.CollisionManager3d;
 
 public class PageManager {
 	
 	private final static EventListenerList listeners = new EventListenerList();
 	
-	private static GamePage currentPage;
-	private static Class<? extends GamePage> nextPage;
+	private static RenderablePage currentPage;
+	private static Class<? extends RenderablePage> nextPage;
 	private static boolean close = false;
 	private static boolean render = false;
 	private static Thread renderThread;
+	private static boolean firstRenderNotLabel = false;
 	
 	private static boolean initialized = false;
-	private static boolean vrMode = false;
 	
-	public static void init(final int x, final int y, final boolean fullscreen){
-		renderThread = new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-				
-				DisplayManager.createDisplay(x,y,fullscreen);
-				if(vrMode) if(!VRUtils.initVR()) vrMode = false;
-				UserInputUtil.initController();
-				while(true){
-					while(render){
-						if(Display.isCloseRequested() || (vrMode && VRUtils.isCloseRequested())){
-							render = false;
-							close = true;
-						}
-						currentPage.render();
-						if(vrMode){
-							VRUtils.updatePose();
-							currentPage.renderVR();
-						}
-						DisplayManager.updateDisplay(vrMode);
-						if(vrMode) VRUtils.sendFramesToCompositor();
-						if(nextPage != null) render = false;
-					}
-					
-					if(nextPage != null){
-						if(currentPage == null){
-							start();
-						}
-						else{
-							changePage();
-						}
-					}
-					else if(close){
-						stop();
-						UserInputUtil.exitControls();
-						if(vrMode) VRUtils.stop();
-						ShaderManager.cleanUp();
-						DisplayManager.closeDisplay();
-						throwExitedEvent();
-						break;
-					}
-					try { Thread.sleep(1); } catch (InterruptedException e) { e.printStackTrace(); }
-				}
-			}
-		});
+	public static void init(final int x, final int y, final boolean fullscreen, Class<? extends RenderablePage> nextPage){
+		if(Configuration.loadNatives()) LibraryLoader.loadLibraries();
+		PageManager.nextPage = nextPage;
+		createRenderThread(x,y,fullscreen);
 		renderThread.setName("Render_Thread");
 		
 		renderThread.start();
@@ -75,6 +40,96 @@ public class PageManager {
 		throwInitializedEvent();
 	}
 	
+	public static void init(Class<? extends RenderablePage> nextPage){
+		PageManager.nextPage = nextPage;
+		createRenderThread(1280,720,false);
+		renderThread.setName("Render_Thread");
+		
+		renderThread.start();
+		
+		initialized = true;
+		throwInitializedEvent();
+	}
+	
+	private static void createRenderThread(final int x, final int y, final boolean fullscreen) {
+		renderThread = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				
+				DisplayManager.createDisplay(x,y,fullscreen);
+				if(Configuration.isVR()) if(!VRUtils.initVR()) Configuration.enableVR(false);
+				TextureManager.init();
+				UserInputUtil.initController();
+				AudioManager.init();
+				SGELabelPage label = new SGELabelPage();
+				currentPage = label;
+				label.init();
+				label.start();
+				render = true;
+				System.out.println("[PageManager] Starting render");
+				while(true){
+					while(render){
+						if(Display.isCloseRequested() || (Configuration.isVR() && VRUtils.isCloseRequested())){
+							render = false;
+							close = true;
+						}
+						else{
+							UserInputUtil.update();
+							KeyboardControlManager.update();
+							if(currentPage != label && Configuration.isCollisionLoadedWith3dWorldLoad()) CollisionManager3d.update();
+							currentPage.render();
+							if(Configuration.isVR()){
+								VRUtils.updatePose();
+								currentPage.renderVR();
+								
+								Vector3f cpcPos = Configuration.getPlayerCharacter().getPosition();
+								Vector3f cpcDir = Configuration.getPlayerCharacter().getViewDirection();
+								Vector3f cpcUp = VRUtils.getUpVector();
+								AudioManager.update(cpcPos.x, cpcPos.y, cpcPos.z, cpcDir.x, cpcDir.y, cpcDir.z, cpcUp.x, cpcUp.y, cpcUp.z);
+							}
+							else{
+								Vector3f cpcPos = Configuration.getPlayerCharacter().getPosition();
+								Vector3f cpcDir = Configuration.getPlayerCharacter().getViewDirection();
+								AudioManager.update(cpcPos.x, cpcPos.y, cpcPos.z, cpcDir.x, cpcDir.y, cpcDir.z, 0, 1, 0);
+							}
+							DisplayManager.updateDisplay();
+							firstRenderNotLabel = false;
+							if(Configuration.isVR()) VRUtils.sendFramesToCompositor();
+							if(currentPage == label && label.isRenderingDone()){
+								System.out.println("[PageManager] Label rendering done");
+								render = false;
+								if(nextPage == null) close = true;
+								firstRenderNotLabel = true;
+							}
+						}
+					}
+					if(close){
+						stop();
+						UserInputUtil.exitControls();
+						if(Configuration.isVR()) VRUtils.stop();
+						ShaderManager.cleanUp();
+						VOLoader.cleanUp();
+						AudioManager.stop();
+						DisplayManager.closeDisplay();
+						throwExitedEvent();
+						break;
+					}
+					
+					else if(nextPage != null){
+						if(currentPage == null){
+							start();
+						}
+						else{
+							changePage();
+						}
+					}
+					try { Thread.sleep(1); } catch (InterruptedException e) { e.printStackTrace(); }
+				}
+			}
+		});
+	}
+
 	private static void start() {
 		try {
 			currentPage = nextPage.newInstance();
@@ -84,7 +139,9 @@ public class PageManager {
 		catch (IllegalAccessException e) {e.printStackTrace();}
 		render = true;
 		currentPage.init();
+		if(firstRenderNotLabel && Configuration.isCollisionLoadedWith3dWorldLoad()) CollisionManager3d.reload();
 		currentPage.start();
+		if(firstRenderNotLabel && Configuration.isCollisionLoadedWith3dWorldLoad()) CollisionManager3d.start();
 		throwPageStartedEvent();
 	}
 	
@@ -92,12 +149,12 @@ public class PageManager {
 	 * End current render loop, clear the current GamePage and start a new GamePage instance with his render
 	 * @param page is the GamePage to start
 	 */
-	public static void changePage(Class<? extends GamePage> page){
+	public static void changePage(Class<? extends RenderablePage> page){
 		nextPage = page;
 	}
 	
 	private static void changePage(){
-		System.out.println("Changing page from "+currentPage.getClass()+" to "+nextPage);
+		System.out.println("[PageManager] Changing page from "+currentPage.getClass()+" to "+nextPage);
 		stop();
 		start();
 		throwPageChangedEvent();
@@ -152,30 +209,15 @@ public class PageManager {
     	PageManagerEvent event = new PageManagerEvent(null);
     	for(PageManagerListener l:listeners.getListeners(PageManagerListener.class)) l.pageClosed(event);
     }
-    
-    
-    
-    
-    
-    
-    
-    // VR SYSTEM
-    
-    
-    
-    public static void enableVR(boolean enable){
-    	if(!initialized){
-    		vrMode = enable;
-    	}
-    	else System.out.println("Display manager already initialized ! Please enable or disable VR before !");
-    }
-    
-    public static boolean isVR(){
-    	return vrMode;
-    }
 
 	public static void setPageName(String title) {
 		Display.setTitle(title);
 	}
+
+	public static boolean isInitialized() {
+		return initialized;
+	}
+	
+	
 	
 }

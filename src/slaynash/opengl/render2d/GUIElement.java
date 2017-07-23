@@ -11,7 +11,7 @@ import slaynash.opengl.utils.UserInputUtil;
 public abstract class GUIElement {
 	protected int x;
 	protected int y;
-	protected int width,height;
+	private int width,height;
 	private boolean focus = false;
 	protected boolean mouseIn = false;
 	protected boolean mouseEntered = false;
@@ -139,7 +139,7 @@ public abstract class GUIElement {
 	}
 	
 	public Dimension getContainerPos(){
-		if(containerPadding == null) return new Dimension(0,0);
+		if(containerPadding == null) return new Dimension(x,y);
 		return new Dimension(x+containerPadding.width, y+containerPadding.height);
 	}
 	public Dimension getContainerSize(){
@@ -157,11 +157,6 @@ public abstract class GUIElement {
 			mouseExited = !b;
 			mouseIn = b;
 		}
-		//System.out.println(this+">"+mouseIn);
-		//System.out.println("b"+b);
-		//System.out.println("mouseIn"+mouseIn);
-		//System.out.println("mouseEntered"+mouseEntered);
-		//System.out.println("mouseExited"+mouseExited);
 	}
 
 	public boolean isMouseClickedIn() {
@@ -183,4 +178,24 @@ public abstract class GUIElement {
 	public int getLocation(){
 		return location;
 	}
+	
+	public int getWidth(){
+		return width;
+	}
+	
+	public int getHeight(){
+		return height;
+	}
+	
+	public void setWidth(int width){
+		this.width = width;
+		redraw();
+	}
+	
+	public void setHeight(int height){
+		this.height = height;
+		redraw();
+	}
+	
+	public void redraw(){}
 }

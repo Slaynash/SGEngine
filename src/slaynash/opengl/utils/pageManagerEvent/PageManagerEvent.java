@@ -1,16 +1,16 @@
 package slaynash.opengl.utils.pageManagerEvent;
 
-import slaynash.opengl.utils.GamePage;
+import slaynash.opengl.utils.RenderablePage;
 
 public class PageManagerEvent {
 	
-	private GamePage page;
+	private RenderablePage page;
 	
-	public PageManagerEvent(GamePage page) {
+	public PageManagerEvent(RenderablePage page) {
 		this.page = page;
 	}
 	
-	public GamePage getPage(){
+	public RenderablePage getPage(){
 		return page;
 	}
 

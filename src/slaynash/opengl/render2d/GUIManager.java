@@ -1,18 +1,5 @@
 package slaynash.opengl.render2d;
 
-import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
-import static org.lwjgl.opengl.GL11.GL_MODELVIEW;
-import static org.lwjgl.opengl.GL11.GL_PROJECTION;
-import static org.lwjgl.opengl.GL11.glClear;
-import static org.lwjgl.opengl.GL11.glDisable;
-import static org.lwjgl.opengl.GL11.glEnable;
-import static org.lwjgl.opengl.GL11.glLoadIdentity;
-import static org.lwjgl.opengl.GL11.glMatrixMode;
-import static org.lwjgl.opengl.GL11.glOrtho;
-import static org.lwjgl.opengl.GL11.glPopMatrix;
-import static org.lwjgl.opengl.GL11.glPushMatrix;
-
 import java.awt.Dimension;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -21,13 +8,14 @@ import java.util.List;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
-import org.newdawn.slick.opengl.Texture;
 
+import slaynash.engine.Renderable2dModel;
+import slaynash.opengl.Configuration;
 import slaynash.opengl.render2d.button.GUIButton;
 import slaynash.opengl.render2d.button.GUIButtonEvent;
 import slaynash.opengl.render2d.button.GUIButtonListener;
 import slaynash.opengl.render2d.comboBox.GUIComboBox;
-import slaynash.opengl.shaders.ShaderManager;
+import slaynash.opengl.textureUtils.TextureDef;
 import slaynash.opengl.textureUtils.TextureManager;
 import slaynash.opengl.utils.DisplayManager;
 import slaynash.opengl.utils.UserInputUtil;
@@ -56,13 +44,14 @@ public class GUIManager {
 	private static int menuTopLevel = 0;
 	private static int gameTopLevel = 0;
 	private static GUIElement focusedElement;
-	private static Texture background;
 	private static int drawMode;
 	protected static boolean isPopup;
 	protected static GUIPopup popup;
 	private static GUIElement elementUnderMouse;
 	private static boolean menuShown = true;
 	private static String popupCloseText;
+	private static boolean useBackground = false;
+	private static Renderable2dModel backgroundModel;
 	
 	public static void removeElement(GUIElement element){
 		if(element.hasChildrens()){
@@ -70,7 +59,6 @@ public class GUIManager {
 		}
 		if(element.getLocation() == ELEMENT_MENU) menuElementsToRemove.add(element);
 		if(element.getLocation() == ELEMENT_GAME) gameElementsToRemove.add(element);
-		//System.out.println("added "+element+" to remove list");
 	}
 	
 	public static void hideMenu(boolean hide){
@@ -81,14 +69,12 @@ public class GUIManager {
 		for(GUIElement e:menuElementsToRemove){
 			if(e != popup){
 				menuElements.remove(e);
-				//System.out.println(e+" removed !");
 			}
 		}
 		menuElementsToRemove.clear();
 		for(GUIElement e:gameElementsToRemove){
 			if(e != popup){
 				gameElements.remove(e);
-				//System.out.println(e+" removed !");
 			}
 		}
 		gameElementsToRemove.clear();
@@ -253,7 +239,7 @@ public class GUIManager {
 		if(canDrawBackground()) drawBackground();
 		Vector2f mousePos = UserInputUtil.getMousePos();
 		for(GUIElement element:gameElements) if(element.getClass() != GUIFrame.class && element.getClass() != GUIComboBox.class || (element.getClass() == GUIComboBox.class && !((GUIComboBox)element).isExpanded() && !isInElement(element, mousePos)) )element.render();
-		for(GUIElement element:gameElements) if(element.getClass() != GUIFrame.class && element.getClass() == GUIComboBox.class && (((GUIComboBox)element).isExpanded()|| isInElement(element, mousePos) )) element.render();
+		for(GUIElement element:gameElements) if(element.getClass() != GUIFrame.class && element.getClass() == GUIComboBox.class && (((GUIComboBox)element).isExpanded() || isInElement(element, mousePos) )) element.render();
 		
 		for(int i=0;i<=gameTopLevel;i++){
 			for(GUIElement element:gameElements){
@@ -305,94 +291,120 @@ public class GUIManager {
 	}
 
 	private static void drawBackground() {
-		float imageWidth = background.getImageWidth();
-		float imageHeight = background.getImageHeight();
-		
-		float aspectRatio = DisplayManager.getWidth()/((float)DisplayManager.getHeight());
-		float imgAspectRatio = imageWidth/imageHeight;
-		
-		float maxX = (imageWidth/(float)(background.getTextureWidth()));
-		float maxY = (imageHeight/(float)(background.getTextureHeight()));
-		float centerx = maxX*0.5f;
-		float centery = maxY*0.5f;
-		
-		ShaderManager.bind2DShaderTextureID(background.getTextureID());
-		
-		if(imgAspectRatio > aspectRatio){
-			float hs = (aspectRatio/imgAspectRatio)/2*maxX;
-			GL11.glBegin(GL11.GL_TRIANGLES);
-				GL11.glTexCoord2f(centerx-hs, 0);
-				GL11.glVertex2f  (0, 0);
-				
-				GL11.glTexCoord2f(centerx+hs, 0);
-				GL11.glVertex2f  (Display.getWidth(), 0);
-				
-				GL11.glTexCoord2f(centerx+hs, maxY);
-				GL11.glVertex2f  (Display.getWidth(), Display.getHeight());
-				
-	
-				GL11.glTexCoord2f(centerx+hs, maxY);
-				GL11.glVertex2f  (Display.getWidth(), Display.getHeight());
-				
-				GL11.glTexCoord2f(centerx-hs, maxY);
-				GL11.glVertex2f  (0, Display.getHeight());
-	
-				GL11.glTexCoord2f(centerx-hs, 0);
-				GL11.glVertex2f  (0, 0);
-				
-			GL11.glEnd();
-		}else{
-			float hs = (imgAspectRatio/aspectRatio)/2*maxY;
-			GL11.glBegin(GL11.GL_TRIANGLES);
-				GL11.glTexCoord2f(0, centery-hs);
-				GL11.glVertex2f  (0, 0);
-				
-				GL11.glTexCoord2f(maxX, centery-hs);
-				GL11.glVertex2f  (Display.getWidth(), 0);
-				
-				GL11.glTexCoord2f(maxX, centery+hs);
-				GL11.glVertex2f  (Display.getWidth(), Display.getHeight());
-				
-	
-				GL11.glTexCoord2f(maxX, centery+hs);
-				GL11.glVertex2f  (Display.getWidth(), Display.getHeight());
-				
-				GL11.glTexCoord2f(0, centery+hs);
-				GL11.glVertex2f  (0, Display.getHeight());
-	
-				GL11.glTexCoord2f(0, centery-hs);
-				GL11.glVertex2f  (0, 0);
-				
-			GL11.glEnd();
-		}
+		backgroundModel.render();
 	}
 
 	private static boolean canDrawBackground() {
-		if(background != null && drawMode == DRAWMODE_MENU) return true;
+		if(useBackground && drawMode == DRAWMODE_MENU) return true;
 		return false;
 	}
 	
 	public static void setBackground(String backgroundPath){
-		GUIManager.background = TextureManager.getTextureDef(backgroundPath).texture;
+		TextureDef background = TextureManager.getTextureDef(backgroundPath, TextureManager.COLOR);
+		
+		float[] vertices = new float[2*3*2];
+		float[] textCoords = new float[2*3*2];
+		
+		
+		float imageWidth = background.getTexture().getImageWidth();
+		float imageHeight = background.getTexture().getImageHeight();
+		
+		float aspectRatio = DisplayManager.getWidth()/((float)DisplayManager.getHeight());
+		float imgAspectRatio = imageWidth/imageHeight;
+		
+		float maxX = (imageWidth/(float)(background.getTexture().getTextureWidth()));
+		float maxY = (imageHeight/(float)(background.getTexture().getTextureHeight()));
+		float centerx = maxX*0.5f;
+		float centery = maxY*0.5f;
+		
+		if(imgAspectRatio > aspectRatio){
+			float hs = (aspectRatio/imgAspectRatio)/2*maxX;
+			textCoords[0] = centerx-hs;
+			textCoords[1] = 0;
+			vertices[0] = 0;
+			vertices[1] = 0;
+				
+			textCoords[2] = centerx+hs;
+			textCoords[3] = 0;
+			vertices[2] = Display.getWidth();
+			vertices[3] = 0;
+			
+			textCoords[4] = centerx+hs;
+			textCoords[5] = maxY;
+			vertices[4] = Display.getWidth();
+			vertices[5] = Display.getHeight();
+			
+			textCoords[6] = centerx+hs;
+			textCoords[7] = maxY;
+			vertices[6] = Display.getWidth();
+			vertices[7] = Display.getHeight();
+			
+			textCoords[8] = centerx-hs;
+			textCoords[9] = maxY;
+			vertices[8] = 0;
+			vertices[9] = Display.getHeight();
+			
+			textCoords[10] = centerx-hs;
+			textCoords[11] = 0;
+			vertices[10] = 0;
+			vertices[11] = 0;
+		}else{
+			float hs = (imgAspectRatio/aspectRatio)/2*maxY;
+			
+			textCoords[0] = 0;
+			textCoords[1] = centery-hs;
+			vertices[0] = 0;
+			vertices[1] = 0;
+				
+			textCoords[2] = maxX;
+			textCoords[3] = centery-hs;
+			vertices[2] = Display.getWidth();
+			vertices[3] = 0;
+			
+			textCoords[4] = maxX;
+			textCoords[5] = centery+hs;
+			vertices[4] = Display.getWidth();
+			vertices[5] = Display.getHeight();
+			
+			textCoords[6] = maxX;
+			textCoords[7] = centery+hs;
+			vertices[6] = Display.getWidth();
+			vertices[7] = Display.getHeight();
+			
+			textCoords[8] = 0;
+			textCoords[9] = centery+hs;
+			vertices[8] = 0;
+			vertices[9] = Display.getHeight();
+			
+			textCoords[10] = 0;
+			textCoords[11] = centery-hs;
+			vertices[10] = 0;
+			vertices[11] = 0;
+		}
+		
+		backgroundModel = new Renderable2dModel(vertices, textCoords, background);
+		useBackground = true;
 	}
 	
 	public static void removeBackground(){
-		GUIManager.background = null;
+		useBackground = false;
 	}
 
 	private static void prepare() {
 		if(drawMode == DRAWMODE_GAME){
-			glDisable(GL_DEPTH_TEST);
-			glClear(GL_DEPTH_BUFFER_BIT);
-			
+			GL11.glDisable(GL11.GL_DEPTH_TEST);
+			GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
+			/* Useless, it's using a projectionless shader
 			glMatrixMode(GL_PROJECTION);
 			glPushMatrix();
 			glLoadIdentity();
 			glOrtho(0, DisplayManager.getWidth(), DisplayManager.getHeight(), 0, -1, 1);
-			
 			glMatrixMode(GL_MODELVIEW);
-			glPushMatrix();
-			glLoadIdentity();
+			*/
+			if(Configuration.getRenderMethod() == Configuration.RENDER_FREE){
+				GL11.glPushMatrix();
+				GL11.glLoadIdentity();
+			}
 		}
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -400,11 +412,15 @@ public class GUIManager {
 	}
 	private static void restore(){
 		if(drawMode == DRAWMODE_GAME){
+			/* Useless, it's using a projectionless shader
 			glMatrixMode(GL_PROJECTION);
 			glPopMatrix();
 			glMatrixMode(GL_MODELVIEW);
-			glPopMatrix();
-			glEnable(GL_DEPTH_TEST);
+			*/
+			if(Configuration.getRenderMethod() == Configuration.RENDER_FREE){
+				GL11.glPopMatrix();
+				GL11.glEnable(GL11.GL_DEPTH_TEST);
+			}
 		}
 		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
@@ -434,7 +450,6 @@ public class GUIManager {
 					if(element.getClass() == GUIFrame.class){
 						if(((GUIFrame)element).getLevel() == i){
 							((GUIFrame)element).reduceLevel(1);
-							//System.out.println(((GUIFrame)element)+" deranked to level "+((GUIFrame)element).getLevel());
 						}
 					}
 				}
@@ -447,14 +462,12 @@ public class GUIManager {
 					if(element.getClass() == GUIFrame.class){
 						if(((GUIFrame)element).getLevel() == i){
 							((GUIFrame)element).reduceLevel(1);
-							//System.out.println(((GUIFrame)element)+" deranked to level "+((GUIFrame)element).getLevel());
 						}
 					}
 				}
 			}
 			frame.setLevel(gameTopLevel);
 		}
-		//System.out.println(frame+" is now on the top ! ("+frame.getLevel()+")");
 	}
 	
 	private static boolean isInElement(GUIElement element, Vector2f pos) {
@@ -473,9 +486,8 @@ public class GUIManager {
 			    Method getText = c.getDeclaredMethod("getText", argTypes);
 			    popupCloseText = (String)getText.invoke(null, (Object)new String("POPUP_BUTTON_CLOSE"));
 			} catch (Exception e) {
-				System.out.println("[GUIManager.class/INFO] Class slaynash.text.utils.Localization, popup closebutton text is now \""+popupCloseText+"\".");
 				popupCloseText = "Close";
-				e.printStackTrace();
+				System.out.println("[GUIManager] Class slaynash.text.utils.Localization not found, popup closebutton text is now \""+popupCloseText+"\".");
 			}
 		}
 		popup = new GUIPopup(400, 150, text, text, popupType);

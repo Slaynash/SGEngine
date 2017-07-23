@@ -1,19 +1,86 @@
 package slaynash.world3d.loader;
 
-import org.lwjgl.opengl.GL11;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
+import slaynash.engine.Renderable3dModel;
+import slaynash.opengl.Configuration;
 import slaynash.opengl.shaders.ShaderManager;
+import slaynash.opengl.utils.ShapeHelper;
+import slaynash.world3d.CollisionManager3d;
 
 public class Model3dWorld extends Entity{
 	
 	private TriangleFace[] faces;
+	
+	private Renderable3dModel[] models;
 
 	public Model3dWorld(TriangleFace[] faces) {
 		super();
 		this.faces = faces;
 		setPosition(new Vector3f(0, 0, 0));
+		
+		Map<Integer, List<TriangleFace>> faceGroups = new HashMap<Integer, List<TriangleFace>>();
+		
+		for(TriangleFace face:faces){
+			int texture = face.getTextureNormal().getTextureID();
+			List<TriangleFace> batch = faceGroups.get(texture);
+			if(batch != null){
+				batch.add(face);
+			}
+			else{
+				List<TriangleFace> newBatch = new ArrayList<TriangleFace>();
+				newBatch.add(face);
+				faceGroups.put(texture, newBatch);
+			}
+		}
+		
+		models = new Renderable3dModel[faceGroups.size()];
+		
+		int i=0;
+		for(List<TriangleFace> tf:faceGroups.values()){
+			float[] vertices = new float[tf.size()*3*3];
+			float[] texCoords = new float[tf.size()*2*3];
+			float[] normals = new float[tf.size()*3*3];
+			for(int j=0;j<tf.size();j++){
+				TriangleFace f = tf.get(j);
+				vertices[j*3*3+0] = f.getVertices()[0];
+				vertices[j*3*3+1] = f.getVertices()[1];
+				vertices[j*3*3+2] = f.getVertices()[2];
+				vertices[j*3*3+3] = f.getVertices()[3];
+				vertices[j*3*3+4] = f.getVertices()[4];
+				vertices[j*3*3+5] = f.getVertices()[5];
+				vertices[j*3*3+6] = f.getVertices()[6];
+				vertices[j*3*3+7] = f.getVertices()[7];
+				vertices[j*3*3+8] = f.getVertices()[8];
+				
+				normals[j*3*3+0] = f.getNormals()[0];
+				normals[j*3*3+1] = f.getNormals()[1];
+				normals[j*3*3+2] = f.getNormals()[2];
+				normals[j*3*3+3] = f.getNormals()[3];
+				normals[j*3*3+4] = f.getNormals()[4];
+				normals[j*3*3+5] = f.getNormals()[5];
+				normals[j*3*3+6] = f.getNormals()[6];
+				normals[j*3*3+7] = f.getNormals()[7];
+				normals[j*3*3+8] = f.getNormals()[8];
+				
+				texCoords[j*2*3+0] = f.getUVs()[0];
+				texCoords[j*2*3+1] = f.getUVs()[1];
+				texCoords[j*2*3+2] = f.getUVs()[2];
+				texCoords[j*2*3+3] = f.getUVs()[3];
+				texCoords[j*2*3+4] = f.getUVs()[4];
+				texCoords[j*2*3+5] = f.getUVs()[5];
+			}
+			models[i] = new Renderable3dModel(vertices, texCoords, ShapeHelper.calculateNormals(vertices), ShapeHelper.calculateTangents(vertices, texCoords), tf.get(0).getTextureColor(), tf.get(0).getTextureNormal(), tf.get(0).getTextureSpecular());
+			i++;
+		}
+		
+		if(Configuration.isCollisionLoadedWith3dWorldLoad()) CollisionManager3d.addModel3dWorld(this);
 	}
 
 	@Override
@@ -23,111 +90,23 @@ public class Model3dWorld extends Entity{
 
 	@Override
 	public void render() {
-		GL11.glTranslatef(getPosition().x, getPosition().y, getPosition().z);
-		GL11.glRotatef(getAngle().x, 1, 0, 0);
-		GL11.glRotatef(getAngle().y, 0, 1, 0);
-		GL11.glRotatef(getAngle().z, 0, 0, 1);
-		//System.out.println("rendering "+faces.length+" faces");
-		for(TriangleFace f:faces){
-			float[] vs = f.getVertices();
-			float[] vns = f.getNormals();
-			float[] uvs = f.getUVs();
-			if(f.getTextureColorID() != 0)
-				ShaderManager.bind3DShaderColorTextureID(f.getTextureColorID());
-			else
-				ShaderManager.bind3DShaderDefaultColorTexture();
-			
-			if(f.getTextureNormalID() != 0)
-				ShaderManager.bind3DShaderNormalTextureID(f.getTextureNormalID());
-			else
-				ShaderManager.bind3DShaderDefaultNormalTexture();
-			
-			if(f.getTextureSpecularID() != 0)
-				ShaderManager.bind3DShaderSpecularTextureID(f.getTextureSpecularID());
-			else
-				ShaderManager.bind3DShaderDefaultSpecularTexture();
-			
-			ShaderManager.bind3DSpecularFactor(f.getSpecularFactor());
-			//System.out.println("rendering face "+(i++));
-			GL11.glBegin(GL11.GL_TRIANGLES);
-			
-			GL11.glTexCoord2f(uvs[0], uvs[1]);
-			GL11.glNormal3f(vns[0], vns[1], vns[2]);
-			GL11.glVertex3f(vs[0], vs[1], vs[2]);
-
-			GL11.glTexCoord2f(uvs[2], uvs[3]);
-			GL11.glNormal3f(vns[3], vns[4], vns[5]);
-			GL11.glVertex3f(vs[3], vs[4], vs[5]);
-			
-			GL11.glTexCoord2f(uvs[4], uvs[5]);
-			GL11.glNormal3f(vns[6], vns[7], vns[8]);
-			GL11.glVertex3f(vs[6], vs[7], vs[8]);
-			
-			GL11.glEnd();
-		}
-		GL11.glRotatef(-getAngle().x, 1, 0, 0);
-		GL11.glRotatef(-getAngle().y, 0, 1, 0);
-		GL11.glRotatef(-getAngle().z, 0, 0, 1);
-		GL11.glTranslatef(-getPosition().x, -getPosition().y, -getPosition().z);
+		
+		ShaderManager.shader3d_loadTransformationMatrix(
+				createTransformationMatrix(getPosition(), getAngle().x, getAngle().y, getAngle().z, 1f)
+		);
+		
+		for(Renderable3dModel model:models) model.render();
 	}
 	
 
 
 	@Override
 	public void renderVR() {
-		/*
-		GL11.glTranslatef(getPosition().x, getPosition().y, getPosition().z);
-		GL11.glRotatef(getAngle().x, 1, 0, 0);
-		GL11.glRotatef(getAngle().y, 0, 1, 0);
-		GL11.glRotatef(getAngle().z, 0, 0, 1);
-		*/
-		ShaderManager.loadVRShaderTransformationMatrix(
-				createTransformationMatrix(getPosition(), 0, 0, 0, 1f)
+		ShaderManager.shaderVR_loadTransformationMatrix(
+				createTransformationMatrix(getPosition(), getAngle().x, getAngle().y, getAngle().z, 1f)
 		);
-		//System.out.println("rendering "+faces.length+" faces");
-		for(TriangleFace f:faces){
-			float[] vs = f.getVertices();
-			float[] vns = f.getNormals();
-			float[] uvs = f.getUVs();
-			if(f.getTextureColorID() != 0)
-				ShaderManager.bindVRShaderColorTextureID(f.getTextureColorID());
-			else
-				ShaderManager.bindVRShaderDefaultColorTexture();
-			
-			if(f.getTextureNormalID() != 0)
-				ShaderManager.bindVRShaderNormalTextureID(f.getTextureNormalID());
-			else
-				ShaderManager.bindVRShaderDefaultNormalTexture();
-			
-			if(f.getTextureSpecularID() != 0)
-				ShaderManager.bindVRShaderSpecularTextureID(f.getTextureSpecularID());
-			else
-				ShaderManager.bindVRShaderDefaultSpecularTexture();
-			
-			ShaderManager.bindVRSpecularFactor(f.getSpecularFactor());
-			//System.out.println("rendering face "+(i++));
-			GL11.glBegin(GL11.GL_TRIANGLES);
-			
-			GL11.glTexCoord2f(uvs[0], uvs[1]);
-			GL11.glNormal3f(vns[0], vns[1], vns[2]);
-			GL11.glVertex3f(vs[0], vs[1], vs[2]);
-
-			GL11.glTexCoord2f(uvs[2], uvs[3]);
-			GL11.glNormal3f(vns[3], vns[4], vns[5]);
-			GL11.glVertex3f(vs[3], vs[4], vs[5]);
-			
-			GL11.glTexCoord2f(uvs[4], uvs[5]);
-			GL11.glNormal3f(vns[6], vns[7], vns[8]);
-			GL11.glVertex3f(vs[6], vs[7], vs[8]);
-			
-			GL11.glEnd();
-		}
-		/*
-		GL11.glRotatef(-getAngle().x, 1, 0, 0);
-		GL11.glRotatef(-getAngle().y, 0, 1, 0);
-		GL11.glRotatef(-getAngle().z, 0, 0, 1);
-		GL11.glTranslatef(-getPosition().x, -getPosition().y, -getPosition().z);
-		*/
+		
+		for(Renderable3dModel model:models) model.render();
 	}
 
 	public TriangleFace[] getFaces() {

@@ -2,15 +2,19 @@ package slaynash.opengl.utils;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.Sys;
+import org.lwjgl.opengl.ContextAttribs;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.PixelFormat;
 
+import slaynash.opengl.Configuration;
 import slaynash.opengl.render2d.text2d.Text2d;
 
 public class DisplayManager {
+	
+	public static int SAMPLES = 8;
 	
 	private static int w;
 	private static int h;
@@ -32,9 +36,17 @@ public class DisplayManager {
 	}
 	
 	public static void createDisplay(int x, int y, boolean fullscreen){
+		if(Display.isCreated()){
+			System.err.println("Unable to create display: display already created");
+			return;
+		}
 		resize(x,y,fullscreen);
 		
 		lastFrameTime = getCurrentTime();
+	}
+
+	public static void createDisplay() {
+		createDisplay(1280, 720, false);
 	}
 	
 	public static void resize(int x, int y, boolean fullscreen){
@@ -48,7 +60,15 @@ public class DisplayManager {
 				try {
 					Display.setDisplayMode(dm);
 					Display.setFullscreen(fullscreen);
-					if(!Display.isCreated()) Display.create(pf);
+					if(!Display.isCreated()){
+						if(Configuration.getRenderMethod() == Configuration.RENDER_MODERN){
+							ContextAttribs attribs = new ContextAttribs(3,3)
+									.withForwardCompatible(true)
+									.withProfileCore(true);
+							Display.create(pf.withSamples(SAMPLES).withDepthBits(24), attribs);
+							GL11.glEnable(GL13.GL_MULTISAMPLE);
+						}else Display.create(pf);
+					}
 					w = Display.getWidth();
 					h = Display.getHeight();
 					fps = dm.getFrequency();
@@ -61,7 +81,15 @@ public class DisplayManager {
 		try {
 			displayMode = new DisplayMode(x, y);
 			Display.setDisplayMode(displayMode);
-			if(!Display.isCreated())Display.create(pf);
+			if(!Display.isCreated()){
+				if(Configuration.getRenderMethod() == Configuration.RENDER_MODERN){
+					ContextAttribs attribs = new ContextAttribs(3,3)
+							.withForwardCompatible(true)
+							.withProfileCore(true);
+					Display.create(pf.withSamples(SAMPLES).withDepthBits(24), attribs);
+					GL11.glEnable(GL13.GL_MULTISAMPLE);
+				}else Display.create(pf);
+			}
 		} catch (LWJGLException e) {e.printStackTrace();}
 		
 		w = Display.getWidth();
@@ -69,16 +97,16 @@ public class DisplayManager {
 		fps = displayMode.getFrequency();
 		bps = displayMode.getBitsPerPixel();
 		GL11.glViewport(0, 0, w, h);
-		if(PageManager.isVR()) GL11.glEnable( GL13.GL_MULTISAMPLE );
+		if(Configuration.isVR()) GL11.glEnable( GL13.GL_MULTISAMPLE );
 		PageManager.resize();
 		
 		
 	}
 	
-	public static void updateDisplay(boolean isVr){
+	public static void updateDisplay(){
 		//System.out.println(UserInputUtil.getMousePos().toString());
 		Display.update();
-		if(!isVr) Display.sync(fps);
+		if(!Configuration.isVR()) Display.sync(fps);
 		long currentFrameTime = getCurrentTime();
 		delta = (currentFrameTime - lastFrameTime)/1000f;
 		deltaMS = (currentFrameTime - lastFrameTime);
@@ -127,5 +155,9 @@ public class DisplayManager {
 			PageManager.resize();
 			Text2d.reload();
 		}
+	}
+
+	public static int getSamples() {
+		return SAMPLES;
 	}
 }

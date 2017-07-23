@@ -1,8 +1,12 @@
 package slaynash.opengl.render2d;
 
-import org.lwjgl.opengl.GL11;
+import java.awt.Dimension;
 
+import org.lwjgl.util.vector.Vector2f;
+
+import slaynash.engine.Renderable2dModel;
 import slaynash.opengl.shaders.ShaderManager;
+import slaynash.opengl.textureUtils.TextureDef;
 import slaynash.opengl.textureUtils.TextureManager;
 
 public class GUIMiniPopup extends GUIElement {
@@ -11,29 +15,43 @@ public class GUIMiniPopup extends GUIElement {
 	public static final float STAY_DURATION = 3;
 	public static final float HIDE_DURATION = 0.5f;
 	public static final int HEIGHT = 150;
-	private int textureID;
+	private TextureDef texture;
 	private float startTime;
+	private Renderable2dModel model;
+	
+	private static float[] uvs = new float[]{0,0,1,0,1,1,1,1,0,1,0,0};
 
 	public GUIMiniPopup() {
 		super(0, 0, 350, HEIGHT, null, true, GUIManager.ELEMENT_POPUP_UP);
-		textureID = TextureManager.getTextureID("res/textures/menu/miniPopup.png");
+		texture = TextureManager.getTextureDef("res/textures/menu/miniPopup.png", TextureManager.COLOR);
 		startTime = System.nanoTime()/1E9f;
+		
+		float[] vertices = new float[12];
+		vertices[0] = 0;
+		vertices[1] = 0;
+		vertices[2] = getWidth();
+		vertices[3] = 0;
+		vertices[4] = getWidth();
+		vertices[5] = getHeight();
+
+		vertices[6] = getWidth();
+		vertices[7] = getHeight();
+		vertices[8] = 0;
+		vertices[9] = getHeight();
+		vertices[10] = 0;
+		vertices[11] = 0;
+		
+		model = new Renderable2dModel(vertices, uvs, texture);
+		
 	}
 
 	@Override
 	public void render() {
-		//System.out.println("rendering popup at "+getTopLeft().toString());
-		ShaderManager.bind2DShaderTextureID(textureID);
-		GL11.glBegin(GL11.GL_QUADS);
-			GL11.glTexCoord2f(0      , 0);
-			GL11.glVertex2f  (getTopLeft().x, getTopLeft().y);
-			GL11.glTexCoord2f(1      , 0);
-			GL11.glVertex2f  (getBottomRight().x, getTopLeft().y);
-			GL11.glTexCoord2f(1      , 1);
-			GL11.glVertex2f  (getBottomRight().x, getBottomRight().y);
-			GL11.glTexCoord2f(0      , 1);
-			GL11.glVertex2f  (getTopLeft().x, getBottomRight().y);
-		GL11.glEnd();
+		
+		ShaderManager.shaderGUI_loadTranslation(getTopLeft());
+		
+		model.render();
+		ShaderManager.shaderGUI_loadTranslation(new Vector2f());
 		
 		for(GUIElement child:getChildrens()) child.render();
 	}
@@ -41,6 +59,11 @@ public class GUIMiniPopup extends GUIElement {
 	public void setPosition(int x, int y) {
 		this.x = x;
 		this.y = y;
+	}
+	
+	@Override
+	public Dimension getContainerPos(){
+		return new Dimension(x, y);
 	}
 
 	public float getLifeTime() {

@@ -3,10 +3,10 @@ package slaynash.opengl.render2d.text2d;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
+import slaynash.engine.Renderable2dModel;
 import slaynash.opengl.render2d.GUIElement;
 import slaynash.opengl.render2d.text2d.fontMeshCreator.FontType;
 import slaynash.opengl.render2d.text2d.fontMeshCreator.TextMeshData;
@@ -35,6 +35,8 @@ public class Text2d {
 	
 	private FontType fontType;
 	
+	private Renderable2dModel textModel;
+	
 	public Text2d(String text, String fontLocation, float fontSize, Vector2f position, float maxLineLength, boolean centered, GUIElement parent){
 		fontType = FontManager.createFont(fontLocation);
 		
@@ -50,28 +52,34 @@ public class Text2d {
 		TextMeshData data = fontType.loadText(this);
 		vertices = data.getVertexPositions();
 		uvs = data.getTextureCoords();
+		textModel = new Renderable2dModel(vertices, uvs, font.getTextureAtlas());
+		
 		text2ds.add(this);
 	}
 	
 	
 	public void render(){
-		ShaderManager.setTextMode();
+		ShaderManager.shaderGUI_setTextMode();
 		FontManager.bind2DShaderAtlas(font);
-		ShaderManager.load2dColor(getColour());
+		ShaderManager.shaderGUI_loadColor(getColour());
 		float px = position.x;
 		float py = position.y;
 		if(parent != null){
 			px += parent.getTopLeft().x;
 			py += parent.getTopLeft().y;
 		}
+		ShaderManager.shaderGUI_loadTranslation(new Vector2f(px, -DisplayManager.getHeight()+py));
+		/*
 		GL11.glBegin(GL11.GL_TRIANGLES);
 		for(int i=0;i<vertices.length;i+=2){
 			GL11.glTexCoord2f(uvs[i], uvs[i+1]);
 			GL11.glVertex2f(vertices[i]+px, vertices[i+1]-(DisplayManager.getHeight()-py));
 		}
 		GL11.glEnd();
-		
-		ShaderManager.exitTextMode();
+		*/
+		textModel.render();
+		ShaderManager.shaderGUI_loadTranslation(new Vector2f());
+		ShaderManager.shaderGUI_exitTextMode();
 	}
 	
 	
@@ -216,6 +224,7 @@ public class Text2d {
 			TextMeshData data = t.fontType.loadText(t);
 			t.vertices = data.getVertexPositions();
 			t.uvs = data.getTextureCoords();
+			t.textModel = new Renderable2dModel(t.vertices, t.uvs, t.font.getTextureAtlas());
 		}
 	}
 	

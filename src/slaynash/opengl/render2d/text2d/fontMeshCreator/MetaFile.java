@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import slaynash.opengl.Infos;
+import slaynash.opengl.Configuration;
 
 /**
  * Provides functionality for getting the values from a font file.
@@ -137,7 +137,7 @@ public class MetaFile {
 	 */
 	private void openFile(File file) {
 		try {
-			reader = new BufferedReader(new FileReader(Infos.getInstallPath()+"/"+file));
+			reader = new BufferedReader(new FileReader(Configuration.getAbsoluteInstallPath()+"/"+file));
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.err.println("Couldn't read font meta file!");

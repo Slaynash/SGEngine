@@ -1,8 +1,11 @@
 OpenGLUtils Library, by Slaynash.
+This project is also called "Slaynash Game Engine" or "SGE"
 
 Contains:
- - GUI interface (Ingame: for inventory/..., Outgame: for menus/...)
- - 3D basic display system (Shader-free)
- - VR basic display system (Shader version 120, editable but matrix value required)
- - Rendering instances (for going threw menus/game instance)
- - Basic world loader (using OpenGL 1 (GL11) rendering - no VAO/VBO)
+- GUI rendering (Ingame: for inventory,... and Outgame: for menus,...)
+- 3D rendering
+- VR rendering
+- A Rendering instances manager (for going threw menus/game instances)
+- A basic world loader
+- An audio loader (.wav only)
+- A physic engine (using JBullet)

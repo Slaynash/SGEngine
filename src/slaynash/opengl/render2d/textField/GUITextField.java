@@ -3,12 +3,13 @@ package slaynash.opengl.render2d.textField;
 import javax.swing.event.EventListenerList;
 
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
+import slaynash.engine.Renderable2dModel;
 import slaynash.opengl.render2d.GUIElement;
 import slaynash.opengl.render2d.text2d.Text2d;
 import slaynash.opengl.shaders.ShaderManager;
+import slaynash.opengl.textureUtils.TextureDef;
 import slaynash.opengl.textureUtils.TextureManager;
 
 public class GUITextField extends GUIElement{
@@ -24,21 +25,18 @@ public class GUITextField extends GUIElement{
 	private String text = "";
 	private boolean centerText = false;
 	
-	private int backgroundID = 0;
+	private TextureDef background;
+	private Renderable2dModel model;
+	
+	private static float[] uvs = new float[]{0,0,1,0,1,1,1,1,0,1,0,0};
 
 
 	public GUITextField(int x, int y, int width, String text, int maxChar, GUIElement parent, int location) {
-		super(x, y, width, 20, parent, false, location);
-		setText(text);
-		this.maxChar = maxChar;
-		backgroundID = TextureManager.getTextureID("res/textures/gui/textfield.png");
+		this(x, y, width,text,false, maxChar, parent, location);
 	}
 	
 	public GUITextField(int x, int y, int width, String text, GUIElement parent, int location) {
-		super(x, y, width, 20, parent, false, location);
-		setText(text);
-		
-		backgroundID = TextureManager.getTextureID("res/textures/gui/textfield.png");
+		this(x,y,width,text,0,parent,location);
 	}
 	
 	public GUITextField(int x, int y, int width, String text, boolean centerText, int maxChar, GUIElement parent, int location) {
@@ -46,15 +44,28 @@ public class GUITextField extends GUIElement{
 		setText(text);
 		this.centerText = centerText;
 		this.maxChar = maxChar;
-		backgroundID = TextureManager.getTextureID("res/textures/gui/textfield.png");
+		background = TextureManager.getTextureDef("res/textures/gui/textfield.png", TextureManager.COLOR);
+		
+		float[] vertices = new float[12];
+		vertices[0] = 0;
+		vertices[1] = 0;
+		vertices[2] = getWidth();
+		vertices[3] = 0;
+		vertices[4] = getWidth();
+		vertices[5] = getHeight();
+
+		vertices[6] = getWidth();
+		vertices[7] = getHeight();
+		vertices[8] = 0;
+		vertices[9] = getHeight();
+		vertices[10] = 0;
+		vertices[11] = 0;
+		
+		model = new Renderable2dModel(vertices, uvs, background);
 	}
 	
 	public GUITextField(int x, int y, int width, String text, boolean centerText, GUIElement parent, int location) {
-		super(x, y, width, 20, parent, centerText, location);
-		setText(text);
-		this.centerText = centerText;
-		
-		backgroundID = TextureManager.getTextureID("res/textures/gui/textfield.png");
+		this(x, y, width, text, false, 0, parent, location);
 	}
 
 	@Override
@@ -62,17 +73,10 @@ public class GUITextField extends GUIElement{
 		if(isFocused()){
 			updateText();
 		}
-		ShaderManager.bind2DShaderTextureID(backgroundID);
-		GL11.glBegin(GL11.GL_QUADS);
-			GL11.glTexCoord2f(0      , 0);
-			GL11.glVertex2f  (getTopLeft().x, getTopLeft().y);
-			GL11.glTexCoord2f(1      , 0);
-			GL11.glVertex2f  (getBottomRight().x, getTopLeft().y);
-			GL11.glTexCoord2f(1      , 1);
-			GL11.glVertex2f  (getBottomRight().x, getBottomRight().y);
-			GL11.glTexCoord2f(0      , 1);
-			GL11.glVertex2f  (getTopLeft().x, getBottomRight().y);
-		GL11.glEnd();
+
+		ShaderManager.shaderGUI_loadTranslation(getTopLeft());
+		model.render();
+		ShaderManager.shaderGUI_loadTranslation(new Vector2f());
 		
 		if((!isFocused() && !text.equals(text2d.getTextString())) || (isFocused() && !text2d.getTextString().equals(text+"|"))){
 			setTextInternal(text);
@@ -83,10 +87,10 @@ public class GUITextField extends GUIElement{
 	private void setTextInternal(String text) {
 		if(text2d != null) text2d.release();
 		if(isFocused()){
-			this.text2d = new Text2d(text+"|", "tahoma", 300, new Vector2f(4, 2), width/2-2, centerText, this);
+			this.text2d = new Text2d(text+"|", "tahoma", 300, new Vector2f(4, 2), getWidth()/2-2, centerText, this);
 		}
 		else{
-			this.text2d = new Text2d(text, "tahoma", 300, new Vector2f(4, 2), width/2-2, centerText, this);
+			this.text2d = new Text2d(text, "tahoma", 300, new Vector2f(4, 2), getWidth()/2-2, centerText, this);
 		}
 	}
 	private void setText(String text) {
@@ -106,7 +110,6 @@ public class GUITextField extends GUIElement{
 		else shift = false;
 		
 		while (Keyboard.next()) {
-			//System.out.println(Keyboard.getEventKey());
             if (Keyboard.isKeyDown(Keyboard.KEY_RETURN)) {
                 return;
             } else if (Keyboard.isKeyDown(Keyboard.KEY_NUMLOCK)) {
@@ -135,7 +138,6 @@ public class GUITextField extends GUIElement{
 		                	text += Character.toUpperCase(Keyboard.getEventCharacter());
 		                } else {
 		                	text += String.valueOf(Keyboard.getEventCharacter());
-		                    //jtLetter = true;
 		                }
 	            	}
 	            }

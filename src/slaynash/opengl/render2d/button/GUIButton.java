@@ -4,25 +4,31 @@ import java.awt.Dimension;
 
 import javax.swing.event.EventListenerList;
 
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 import org.newdawn.slick.Color;
 
+import slaynash.engine.Renderable2dModel;
 import slaynash.opengl.render2d.GUIElement;
 import slaynash.opengl.render2d.text2d.Text2d;
 import slaynash.opengl.shaders.ShaderManager;
+import slaynash.opengl.textureUtils.TextureDef;
+import slaynash.opengl.textureUtils.TextureManager;
 import slaynash.opengl.utils.UserInputUtil;
 
 public class GUIButton extends GUIElement{
 	
 	private final EventListenerList listeners = new EventListenerList();
 	
-	
 	protected boolean backgroundEnabled = true;
 	protected boolean textEnable = false;
 	protected Text2d text;
 	protected Color textColor;
 	protected Color textColorHover;
+
+	private TextureDef texBack;
+	private Renderable2dModel model;
+	
+	private static float[] uvs = new float[]{0,0,1,0,1,1,1,1,0,1,0,0};
 	
 	
 
@@ -30,41 +36,43 @@ public class GUIButton extends GUIElement{
 		super(pos.width, pos.height, size.width, size.height, parent, false, location);
 		textColor = new Color(255, 255, 255);
 		textColorHover = new Color(140, 140, 140);
+		
+		texBack = TextureManager.getTextureDef("res/textures/gui/backDef.png", TextureManager.COLOR);
+		
+		float[] vertices = new float[12];
+		vertices[0] = 0;
+		vertices[1] = 0;
+		vertices[2] = getWidth();
+		vertices[3] = 0;
+		vertices[4] = getWidth();
+		vertices[5] = getHeight();
+
+		vertices[6] = getWidth();
+		vertices[7] = getHeight();
+		vertices[8] = 0;
+		vertices[9] = getHeight();
+		vertices[10] = 0;
+		vertices[11] = 0;
+		
+		model = new Renderable2dModel(vertices, uvs, texBack);
+		
 	}
 	
 	public void render(){
 		// DRAW PART
 		if(backgroundEnabled){
-
-			//GL11.glDisable(GL11.GL_TEXTURE_2D);
-			ShaderManager.bind2DShaderTexture("res/textures/gui/backDef.png");
-			//new Color(40, 40, 40, 170).bind();
-			float t = getTopLeft().y;
-			float l = getTopLeft().x;
-			float b = getBottomRight().y;
-			float r = getBottomRight().x;
-			GL11.glBegin(GL11.GL_QUADS);
-				GL11.glTexCoord2f(0, 0);
-				GL11.glVertex2f(l, t);
-				GL11.glTexCoord2f(1, 0);
-				GL11.glVertex2f(r, t);
-				GL11.glTexCoord2f(1, 1);
-				GL11.glVertex2f(r, b);
-				GL11.glTexCoord2f(0, 1);
-				GL11.glVertex2f(l, b);
-			GL11.glEnd();
-			//GL11.glEnable(GL11.GL_TEXTURE_2D);
+			
+			ShaderManager.shaderGUI_loadTranslation(getTopLeft());
+			model.render();
+			ShaderManager.shaderGUI_loadTranslation(new Vector2f());
+			
 		}
 		if(textEnable){
 			text.render();
 		}
 		
-
-		//System.out.println(this+">"+UserInputUtil.mouseLeftClicked()+", "+mouseIn);
-		
 		
 		// LOGIC PART
-		//System.out.println(mouseEntered);
 		GUIButtonEvent event = null;
 		if(mouseEntered){
 			for(GUIButtonListener listener : getGUIButtonListener()){
@@ -112,9 +120,9 @@ public class GUIButton extends GUIElement{
 	public void setText(String string, boolean centered) {
 		if(text != null) text.release();
 		if(centered)
-			text = new Text2d(string, "tahoma", 400, new Vector2f(2,3), width/2, centered, this);
+			text = new Text2d(string, "tahoma", 400, new Vector2f(2,3), getWidth()/2, centered, this);
 		else
-			text = new Text2d(string, "tahoma", 400, new Vector2f(5,3), width-3, centered, this);
+			text = new Text2d(string, "tahoma", 400, new Vector2f(5,3), getWidth()-3, centered, this);
 		textEnable = true;
 	}
 	
