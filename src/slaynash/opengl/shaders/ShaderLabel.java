@@ -12,6 +12,7 @@ public class ShaderLabel extends FreeShader {
 		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "freeLabel.vs", "freeLabel.fs", ShaderProgram.SHADER_LABEL_FREE);
 	}
 	
+	@Override
 	protected void getAllUniformLocations() {
 		super.getUniformLocation("visibility");
 		texture_location = super.getUniformLocation("textureDiffuse");

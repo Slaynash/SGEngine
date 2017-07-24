@@ -19,7 +19,7 @@ public class Configuration {
 	private static String shaderPath = "res/shaders";
 	private static String shaderMode = "OK";
 	private static String vrFilesPath = "res/vr";
-	private static int renderMethod = 0;
+	private static int renderMethod = RENDER_MODERN;
 	private static float mouseSensibility = 1;
 	private static float fov = 80;
 	private static float znear = 0.1f, zfar = 1000f;
@@ -27,6 +27,11 @@ public class Configuration {
 	private static boolean worldColl3d = false;
 	private static PlayerCharacter playerCharacter;
 	private static boolean loadNatives = true;
+	private static int numberOfControllers = 4;
+	private static boolean enableControllers = false;
+	private static int ssaaSamples = 4;
+	private static int vrssaaSamples = 4;
+	private static boolean vsync = true;
 
 	public static String getAbsoluteInstallPath() {
 		if(installPath.equals("")){
@@ -150,7 +155,45 @@ public class Configuration {
 	public static void setLoadNatives(boolean loadNatives) {
 		Configuration.loadNatives = loadNatives;
 	}
+
+	public static int getNumberOfControllers() {
+		return numberOfControllers;
+	}
+
+	public static void setNumberOfControllers(int numbersOfControllers) {
+		Configuration.numberOfControllers = numbersOfControllers;
+	}
+
+	public static boolean isControllersEnabled() {
+		return enableControllers;
+	}
+
+	public static void enableControllers(boolean enableControllers) {
+		Configuration.enableControllers = enableControllers;
+	}
+
+	public static void setSSAASamples(int samples) {
+		Configuration.ssaaSamples = samples;
+	}
 	
-	
+	public static int getSSAASamples() {
+		return Configuration.ssaaSamples;
+	}
+
+	public static int getVRSSAASamples() {
+		return vrssaaSamples;
+	}
+
+	public static void setVRSSAASamples(int vrssaaSamples) {
+		Configuration.vrssaaSamples = vrssaaSamples;
+	}
+
+	public static boolean isVSyncEnabled() {
+		return vsync;
+	}
+
+	public static void enableVSync(boolean vsync) {
+		Configuration.vsync = vsync;
+	}
 	
 }

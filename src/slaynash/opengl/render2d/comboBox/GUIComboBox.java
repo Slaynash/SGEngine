@@ -60,11 +60,9 @@ public class GUIComboBox extends GUIElement{ //TODO create events for comboBox
 	@Override
 	public void render() {
 		if(isFocused()){
-			System.out.println("[GUICombobox] FOCUSED");
 			if(mouseIn && UserInputUtil.mouseLeftClicked()){
 				if(getHeight() == 20){
 					open();
-					System.out.println("[GUICombobox] "+getTopLeft().y);
 				}
 				else{
 					Vector2f mousePos = UserInputUtil.getMousePos();

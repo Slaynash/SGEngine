@@ -312,8 +312,8 @@ public class GUIManager {
 		float aspectRatio = DisplayManager.getWidth()/((float)DisplayManager.getHeight());
 		float imgAspectRatio = imageWidth/imageHeight;
 		
-		float maxX = (imageWidth/(float)(background.getTexture().getTextureWidth()));
-		float maxY = (imageHeight/(float)(background.getTexture().getTextureHeight()));
+		float maxX = (imageWidth/(background.getTexture().getTextureWidth()));
+		float maxY = (imageHeight/(background.getTexture().getTextureHeight()));
 		float centerx = maxX*0.5f;
 		float centery = maxY*0.5f;
 		

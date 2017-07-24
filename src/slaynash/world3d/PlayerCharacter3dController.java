@@ -2,25 +2,21 @@ package slaynash.world3d;
 
 import javax.vecmath.Vector3f;
 
-import org.lwjgl.input.Mouse;
-
 import com.bulletphysics.collision.dispatch.CollisionFlags;
 import com.bulletphysics.collision.dispatch.PairCachingGhostObject;
 import com.bulletphysics.collision.shapes.BoxShape;
 import com.bulletphysics.dynamics.ActionInterface;
 import com.bulletphysics.linearmath.Transform;
 
-import slaynash.inputs.KeyboardControlManager;
-import slaynash.opengl.Configuration;
+import slaynash.inputs.ControllersControlManager;
 import slaynash.world3d.loader.WorldLoader;
 
-public class PlayerCharacter3d extends PlayerCharacter {
+public class PlayerCharacter3dController extends PlayerCharacter {
 	
 	private static final float DEGREE_TO_RADIANS = (float) (Math.PI/180f);
 	private static final float PI = 3.14159f;
 	
 	private static final float WALK_SPEED = 0.02f;
-	private static final float RUN_SPEED = 0.10f;
 	
 	private static final float PLAYER_WIDTH = 0.40f;
 	private static final float PLAYER_HEIGHT = 1.50f;
@@ -32,7 +28,7 @@ public class PlayerCharacter3d extends PlayerCharacter {
 	public static CharacterController controller;
 	private static PairCachingGhostObject entity;
 	
-	public PlayerCharacter3d(){
+	public PlayerCharacter3dController(){
 		super();
 		BoxShape playerShape = new BoxShape(new Vector3f(PLAYER_WIDTH, PLAYER_HEIGHT*.5f, PLAYER_STEP_HEIGHT));
 		Transform t = new Transform(); t.setIdentity();
@@ -73,8 +69,8 @@ public class PlayerCharacter3d extends PlayerCharacter {
 	}
 	
 	private void updateAimDir() {
-		yaw -= (Mouse.getDX())*0.01f*Configuration.getMouseSensibility();
-		pitch += (Mouse.getDY())*0.01f*Configuration.getMouseSensibility();
+		yaw -= ControllersControlManager.getValue(0, "cameraX")*.05f;
+		pitch += ControllersControlManager.getValue(0, "cameraY")*.05f;
 		
 		if (yaw >= PI*2f){
 			yaw -= PI*2f;
@@ -94,41 +90,13 @@ public class PlayerCharacter3d extends PlayerCharacter {
 		
 	}
 	
-	private void checkInputs(){
-		if(KeyboardControlManager.isPressed("run")){
-			if(KeyboardControlManager.isPressed("forward"))
-				forward = -RUN_SPEED;
-			else if(KeyboardControlManager.isPressed("backward"))
-				forward = RUN_SPEED;
-			else forward = 0;
-			
-			if(KeyboardControlManager.isPressed("right"))
-				left = RUN_SPEED;
-			else if(KeyboardControlManager.isPressed("left"))
-				left = -RUN_SPEED;
-			else left = 0;
-		}
-		else{
-			if(KeyboardControlManager.isPressed("forward"))
-				forward = -WALK_SPEED;
-			else if(KeyboardControlManager.isPressed("backward"))
-				forward = WALK_SPEED;
-			else forward = 0;
-			
-			if(KeyboardControlManager.isPressed("right"))
-				left = WALK_SPEED;
-			else if(KeyboardControlManager.isPressed("left"))
-				left = -WALK_SPEED;
-			else left = 0;
-		}
-		
-		if(KeyboardControlManager.isPressed("jump"))
+	private void checkInputs() {
+		forward = -ControllersControlManager.getValue(0, "forward")*WALK_SPEED;
+		left = ControllersControlManager.getValue(0, "right")*WALK_SPEED;
+		if(ControllersControlManager.isPressed(0, "jump"))
 			controller.jump();
 	}
 	
-
-
-
 	public ActionInterface getController() {
 		return controller;
 	}
@@ -149,4 +117,5 @@ public class PlayerCharacter3d extends PlayerCharacter {
 		
 		controller.warp(new Vector3f(warp.x, warp.y, warp.z));
 	}
+	
 }

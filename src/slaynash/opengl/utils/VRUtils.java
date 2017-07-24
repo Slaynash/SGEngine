@@ -8,38 +8,31 @@ import java.util.concurrent.TimeUnit;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
+import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
-import com.sun.jna.Memory;
-import com.sun.jna.Pointer;
 import com.sun.jna.ptr.FloatByReference;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.LongByReference;
-import com.sun.jna.ptr.PointerByReference;
 
 import de.fruitfly.ovr.structs.Vector2i;
 import jopenvr.HmdMatrix34_t;
 import jopenvr.HmdMatrix44_t;
 import jopenvr.JOpenVRLibrary;
 import jopenvr.JOpenVRLibrary.ETextureType;
-import jopenvr.RenderModel_TextureMap_t;
-import jopenvr.RenderModel_Vertex_t;
-import jopenvr.RenderModel_t;
 import jopenvr.Texture_t;
 import jopenvr.TrackedDevicePose_t;
 import jopenvr.VREvent_t;
 import jopenvr.VRTextureBounds_t;
 import jopenvr.VR_IVRCompositor_FnTable;
-import jopenvr.VR_IVRRenderModels_FnTable;
 import jopenvr.VR_IVRSystem_FnTable;
 import slaynash.engine.Renderable3dModel;
 import slaynash.engine.objloader.ObjLoader;
 import slaynash.opengl.Configuration;
 import slaynash.opengl.shaders.ShaderManager;
-import slaynash.opengl.textureUtils.TextureDef;
 import slaynash.opengl.utils.vr.VRController;
 
 public class VRUtils {
@@ -109,6 +102,9 @@ public class VRUtils {
 	private static VRController[] controllers = new VRController[JOpenVRLibrary.k_unMaxTrackedDeviceCount];
 	private static int nValidControllers;
 	
+	private static Vector3f envPosition = new Vector3f(0,0,0);
+	private static Matrix4f envMatrix = Matrix4f.translate(new Vector3f(envPosition.x, envPosition.y, envPosition.z), new Matrix4f(), new Matrix4f());
+	
 	public static void setViewDistance(float znear, float zfar){
 		if(VRUtils.znear == znear && VRUtils.zfar == zfar) return;
 		VRUtils.znear = znear;
@@ -118,15 +114,19 @@ public class VRUtils {
 	
 	protected static boolean initVR() {
 		System.out.println("[VRUtils] initializing OpenVR...");
+		if(JOpenVRLibrary.VR_IsRuntimeInstalled() == 0){
+			initStatus = "SteamVR not detected on this platform.";
+			return false;
+		}
 		if(JOpenVRLibrary.VR_IsHmdPresent() == 0){
 			initStatus =  "VR Headset not detected.";
 			return false;
 		}
-
 		try {
 			initializeJOpenVR();
 			initOpenVRCompositor(true);
 		} catch (Exception e) {
+			System.out.println("[VRUtils] Unable to initialize JOpenVR");
 			e.printStackTrace();
 			initSuccess = false;
 			initStatus = e.getLocalizedMessage();
@@ -192,13 +192,13 @@ public class VRUtils {
 		
 		int colourBufferLeft = GL30.glGenRenderbuffers();
 		GL30.glBindRenderbuffer(GL30.GL_RENDERBUFFER, colourBufferLeft);
-		GL30.glRenderbufferStorageMultisample(GL30.GL_RENDERBUFFER, 4, GL11.GL_RGBA8, xl, yl);
+		GL30.glRenderbufferStorageMultisample(GL30.GL_RENDERBUFFER, Configuration.getVRSSAASamples(), GL11.GL_RGBA8, xl, yl);
 		GL30.glFramebufferRenderbuffer(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, GL30.GL_RENDERBUFFER,
 				colourBufferLeft);
 		
 		int depthBufferLeft = GL30.glGenRenderbuffers();
 		GL30.glBindRenderbuffer(GL30.GL_RENDERBUFFER, depthBufferLeft);
-		GL30.glRenderbufferStorageMultisample(GL30.GL_RENDERBUFFER, 4, GL14.GL_DEPTH_COMPONENT24, xl, yl);
+		GL30.glRenderbufferStorageMultisample(GL30.GL_RENDERBUFFER, Configuration.getVRSSAASamples(), GL14.GL_DEPTH_COMPONENT24, xl, yl);
 		GL30.glFramebufferRenderbuffer(GL30.GL_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT, GL30.GL_RENDERBUFFER,
 				depthBufferLeft);
 		
@@ -216,13 +216,13 @@ public class VRUtils {
 		
 		int colourBufferRight = GL30.glGenRenderbuffers();
 		GL30.glBindRenderbuffer(GL30.GL_RENDERBUFFER, colourBufferRight);
-		GL30.glRenderbufferStorageMultisample(GL30.GL_RENDERBUFFER, 4, GL11.GL_RGBA8, xr, yr);
+		GL30.glRenderbufferStorageMultisample(GL30.GL_RENDERBUFFER, Configuration.getVRSSAASamples(), GL11.GL_RGBA8, xr, yr);
 		GL30.glFramebufferRenderbuffer(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, GL30.GL_RENDERBUFFER,
 				colourBufferRight);
 		
 		int depthBufferRight = GL30.glGenRenderbuffers();
 		GL30.glBindRenderbuffer(GL30.GL_RENDERBUFFER, depthBufferRight);
-		GL30.glRenderbufferStorageMultisample(GL30.GL_RENDERBUFFER, 4, GL14.GL_DEPTH_COMPONENT24, xr, yr);
+		GL30.glRenderbufferStorageMultisample(GL30.GL_RENDERBUFFER, Configuration.getVRSSAASamples(), GL14.GL_DEPTH_COMPONENT24, xr, yr);
 		GL30.glFramebufferRenderbuffer(GL30.GL_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT, GL30.GL_RENDERBUFFER,
 				depthBufferRight);
 		
@@ -308,7 +308,7 @@ public class VRUtils {
 			System.out.println("[VRUtils] OpenVR initialized & VR connected.");
 
 			hmdDisplayFrequency = IntBuffer.allocate(1);
-			hmdDisplayFrequency.put( (int) JOpenVRLibrary.ETrackedDeviceProperty.ETrackedDeviceProperty_Prop_DisplayFrequency_Float);
+			hmdDisplayFrequency.put( JOpenVRLibrary.ETrackedDeviceProperty.ETrackedDeviceProperty_Prop_DisplayFrequency_Float);
 			for(int i=0;i<mat4DevicePose.length;i++) mat4DevicePose[i] = new Matrix4f();
 			for(int i=0;i<controllers.length;i++) controllers[i] = new VRController(i);
 
@@ -437,7 +437,7 @@ public class VRUtils {
         handleInput();
         
         if ( trackedDevicePose[JOpenVRLibrary.k_unTrackedDeviceIndex_Hmd].bPoseIsValid == 1 ){
-            MatrixUtils.inverse((Matrix4f) mat4DevicePose[JOpenVRLibrary.k_unTrackedDeviceIndex_Hmd], hmdPose);
+            MatrixUtils.inverse(mat4DevicePose[JOpenVRLibrary.k_unTrackedDeviceIndex_Hmd], hmdPose);
             
             Matrix4f viewMatrix = new Matrix4f();
 			hmdPose.transpose(viewMatrix);
@@ -495,21 +495,26 @@ public class VRUtils {
 	protected static void sendFramesToCompositor() {
 		if(vrCompositor.Submit == null)
 			return;
-		
+
+		long pinnedTime = System.nanoTime();
+		GL11.glDisable(GL13.GL_MULTISAMPLE);
 		GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, rbos[EYE_LEFT]);
 		GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, fbos[EYE_LEFT]);
-		GL30.glBlitFramebuffer(0, 0, rendersize.x, rendersize.y, 0, 0, rendersize.x, rendersize.y, GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT, GL11.GL_NEAREST);
+		GL30.glBlitFramebuffer(0, 0, rendersize.x, rendersize.y, 0, 0, rendersize.x, rendersize.y, GL11.GL_COLOR_BUFFER_BIT, GL11.GL_NEAREST);
 		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
+		
+		GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, rbos[EYE_RIGHT]);
+		GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, fbos[EYE_RIGHT]);
+		GL30.glBlitFramebuffer(0, 0, rendersize.x, rendersize.y, 0, 0, rendersize.x, rendersize.y, GL11.GL_COLOR_BUFFER_BIT, GL11.GL_NEAREST);
+		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
+
+		System.out.println("fill rbos: "+(System.nanoTime()-pinnedTime)+"ns");
+		pinnedTime = System.nanoTime();
 		
 		vrCompositor.Submit.apply(
 				JOpenVRLibrary.EVREye.EVREye_Eye_Left,
 				texType0, texBoundsLeft,
 				JOpenVRLibrary.EVRSubmitFlags.EVRSubmitFlags_Submit_Default);
-		
-		GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, rbos[EYE_RIGHT]);
-		GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, fbos[EYE_RIGHT]);
-		GL30.glBlitFramebuffer(0, 0, rendersize.x, rendersize.y, 0, 0, rendersize.x, rendersize.y, GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT, GL11.GL_NEAREST);
-		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
 		
 		vrCompositor.Submit.apply(
 				JOpenVRLibrary.EVREye.EVREye_Eye_Right,
@@ -517,6 +522,9 @@ public class VRUtils {
 				JOpenVRLibrary.EVRSubmitFlags.EVRSubmitFlags_Submit_Default);
 
 		vrCompositor.PostPresentHandoff.apply();//require ?
+		GL11.glEnable(GL13.GL_MULTISAMPLE);
+		
+		System.out.println("send frames: "+(System.nanoTime()-pinnedTime)+"ns");
 	}
 	
 	private static void sleepNanos(long nanoDuration) {
@@ -600,6 +608,14 @@ public class VRUtils {
 	
 	public static Matrix4f getViewMatrix(int eye){
 		if(eye == EYE_LEFT)
+			return Matrix4f.mul(leftEyePose, Matrix4f.mul(hmdPose, Matrix4f.invert(envMatrix, new Matrix4f()), new Matrix4f()), new Matrix4f());
+		else if(eye == EYE_RIGHT)
+			return Matrix4f.mul(rightEyePose, Matrix4f.mul(hmdPose, Matrix4f.invert(envMatrix, new Matrix4f()), new Matrix4f()), new Matrix4f());
+		else return Matrix4f.mul(hmdPose, Matrix4f.invert(envMatrix, new Matrix4f()), new Matrix4f());
+	}
+	
+	public static Matrix4f getRawViewMatrix(int eye){
+		if(eye == EYE_LEFT)
 			return Matrix4f.mul(leftEyePose, hmdPose, new Matrix4f());
 		else if(eye == EYE_RIGHT)
 			return Matrix4f.mul(rightEyePose, hmdPose, new Matrix4f());
@@ -620,7 +636,7 @@ public class VRUtils {
     }
     */
 	
-	public static Vector3f getPosition(){
+	public static Vector3f getRawPosition(){
 		return new Vector3f(posX, posY, posZ);
 	}
 	
@@ -636,8 +652,12 @@ public class VRUtils {
 		return new Vector3f(rightX, rightY, rightZ);
 	}
 	
-	public static Matrix4f getHmdPose(){
+	public static Matrix4f getRawHmdPose(){
 		return hmdPose;
+	}
+	
+	public static Matrix4f getHmdPose(){
+		return Matrix4f.mul(hmdPose, Matrix4f.invert(envMatrix, new Matrix4f()), new Matrix4f());
 	}
 	
 	
@@ -708,7 +728,7 @@ public class VRUtils {
 	
 	
 
-	public static Matrix4f[] getPoseMatrices() {
+	public static Matrix4f[] getRawPoseMatrices() {
 		return mat4DevicePose;
 	}
 	
@@ -718,7 +738,7 @@ public class VRUtils {
 			if(trackedDevicePose[i].bPoseIsValid != 1) continue;
 			switch(vrsystem.GetTrackedDeviceClass.apply(i)){
 				case JOpenVRLibrary.ETrackedDeviceClass.ETrackedDeviceClass_TrackedDeviceClass_Controller:
-					ShaderManager.shaderVR_loadTransformationMatrix(mat4DevicePose[i]);
+					ShaderManager.shaderVR_loadTransformationMatrix(Matrix4f.mul(envMatrix, mat4DevicePose[i], new Matrix4f()));
 					controllerModel.renderVR();
 					break;
 			}
@@ -731,12 +751,13 @@ public class VRUtils {
 			if(trackedDevicePose[i].bPoseIsValid != 1) continue;
 			switch(vrsystem.GetTrackedDeviceClass.apply(i)){
 				case JOpenVRLibrary.ETrackedDeviceClass.ETrackedDeviceClass_TrackedDeviceClass_TrackingReference:
-					ShaderManager.shaderVR_loadTransformationMatrix(mat4DevicePose[i]);
+					ShaderManager.shaderVR_loadTransformationMatrix(Matrix4f.mul(envMatrix, mat4DevicePose[i], new Matrix4f()));
 					basestationModel.renderVR();
 					break;
 			}
 		}
 	}
+	
 	
 	public static void renderControllers3D(){
 		if(controllerModel == null) controllerModel = ObjLoader.loadRenderable3dModel(new File(Configuration.getAbsoluteInstallPath()+"/res/vr/controller.obj"), "res/vr/controller_texture.png", null, "res/vr/controller_spec.png");
@@ -744,7 +765,7 @@ public class VRUtils {
 			if(trackedDevicePose[i].bPoseIsValid != 1) continue;
 			switch(vrsystem.GetTrackedDeviceClass.apply(i)){
 				case JOpenVRLibrary.ETrackedDeviceClass.ETrackedDeviceClass_TrackedDeviceClass_Controller:
-					ShaderManager.shader3d_loadTransformationMatrix(mat4DevicePose[i]);
+					ShaderManager.shader3d_loadTransformationMatrix(Matrix4f.mul(envMatrix, mat4DevicePose[i], new Matrix4f()));
 					controllerModel.render();
 					break;
 			}
@@ -757,7 +778,7 @@ public class VRUtils {
 			if(trackedDevicePose[i].bPoseIsValid != 1) continue;
 			switch(vrsystem.GetTrackedDeviceClass.apply(i)){
 				case JOpenVRLibrary.ETrackedDeviceClass.ETrackedDeviceClass_TrackedDeviceClass_TrackingReference:
-					ShaderManager.shader3d_loadTransformationMatrix(mat4DevicePose[i]);
+					ShaderManager.shader3d_loadTransformationMatrix(Matrix4f.mul(envMatrix, mat4DevicePose[i], new Matrix4f()));
 					basestationModel.render();
 					break;
 			}
@@ -767,7 +788,7 @@ public class VRUtils {
     public static VRController[] getValidControllers(){
     	VRController[] validControllers = new VRController[nValidControllers];
     	int i=0;
-    	for(VRController c:controllers) if(c.isValid()){
+    	for(VRController c:controllers) if(c != null && c.isValid()){
     		validControllers[i] = c;
     		i++;
     	}
@@ -783,123 +804,21 @@ public class VRUtils {
 	public static VR_IVRSystem_FnTable getVRSystem(){
 		return vrsystem;
 	}
-	
-	public static Renderable3dModel loadDeviceModel(int trackedDeviceIndex){
-		
-		if (vrsystem == null) {
-            return null;
-        }
-		
-		 String modelName = getTrackedDeviceString(trackedDeviceIndex, JOpenVRLibrary.ETrackedDeviceProperty.ETrackedDeviceProperty_Prop_RenderModelName_String);
-		 
-		 IntBuffer errorBuffer = IntBuffer.allocate(1);
-         VR_IVRRenderModels_FnTable renderModels = new VR_IVRRenderModels_FnTable(
-                 JOpenVRLibrary.VR_GetGenericInterface(JOpenVRLibrary.IVRRenderModels_Version, errorBuffer));
-         
-         if (errorBuffer.get(0) != JOpenVRLibrary.EVRRenderModelError.EVRRenderModelError_VRRenderModelError_None) {
-             return null;
-         }
 
-         int error;
-         PointerByReference modelPtr = new PointerByReference();
-         while (true) {
-        	 System.out.println("Pass");
-             Pointer stringPointer = new Memory(modelName.length() + 1);
-             stringPointer.setString(0, modelName);
-             
-             System.out.println("renderModels: "+renderModels);
-             System.out.println("LoadRenderModel_Async: "+renderModels.LoadRenderModel_Async);
-
-             error = renderModels.LoadRenderModel_Async.apply(stringPointer, modelPtr);
-
-             if (error != JOpenVRLibrary.EVRRenderModelError.EVRRenderModelError_VRRenderModelError_Loading) {
-                 break;
-             }
-
-             try {
-                 Thread.sleep(1);
-             } catch (InterruptedException ex) {
-                 System.err.println("[VRUtils] [loadControllerModel]"+ex);
-             }
-         }
-         
-         RenderModel_t renderModel = new RenderModel_t(modelPtr.getValue());
-
-         if (error != JOpenVRLibrary.EVRRenderModelError.EVRRenderModelError_VRRenderModelError_None) {
-             System.err.println("Unable to load render model " + modelName + " - "
-                     + renderModels.GetRenderModelErrorNameFromEnum.apply(error));
-             return null; // move on to the next tracked device
-         }
-         
-         PointerByReference texturePtr = new PointerByReference();
-
-         while (true) {
-
-             error = renderModels.LoadTexture_Async.apply(renderModel.diffuseTextureId, texturePtr);
-
-             if (error != JOpenVRLibrary.EVRRenderModelError.EVRRenderModelError_VRRenderModelError_Loading) {
-                 break;
-             }
-
-             try {
-                 Thread.sleep(1);
-             } catch (InterruptedException ex) {
-            	 System.err.println("[VRUtils] [loadControllerModel]"+ex);
-             }
-         }
-         RenderModel_TextureMap_t renderModelTexture = new RenderModel_TextureMap_t(texturePtr.getValue());
-
-         if (error != JOpenVRLibrary.EVRRenderModelError.EVRRenderModelError_VRRenderModelError_None) {
-             System.err.println("Unable to load render texture id " + renderModel.diffuseTextureId
-                     + " for render model " + modelName);
-             return null; // move on to the next tracked device
-         }
-         
-         RenderModel_Vertex_t[] vertexList = (RenderModel_Vertex_t[]) renderModel.rVertexData.toArray(renderModel.unVertexCount);
-         short[] elements = renderModel.rIndexData.getPointer().getShortArray(0, renderModel.unTriangleCount * 3);
-         
-         float[] vertices = new float[renderModel.unVertexCount*3];
-         float[] normals = new float[renderModel.unVertexCount*3];
-         float[] uvs = new float[renderModel.unVertexCount*2];
-         int[] indices = new int[renderModel.unTriangleCount*3];
-         
-         for(int i=0;i<renderModel.unVertexCount;i++){
-        	 vertices[i*3+0] = vertexList[i].vPosition.v[0];
-        	 vertices[i*3+1] = vertexList[i].vPosition.v[1];
-        	 vertices[i*3+2] = vertexList[i].vPosition.v[2];
-
-        	 normals[i*3+0] = vertexList[i].vNormal.v[0];
-        	 normals[i*3+1] = vertexList[i].vNormal.v[1];
-        	 normals[i*3+2] = vertexList[i].vNormal.v[2];
-        	 
-        	 uvs[i*2+0] = vertexList[i].rfTextureCoord[0];
-        	 uvs[i*2+1] = vertexList[i].rfTextureCoord[1];
-         }
-         
-         for(int i=0;i<renderModel.unTriangleCount*3;i++){
-        	 indices[i] = elements[i];
-         }
-         
-         TextureDef texture = TextureDef.createTextureFromData(renderModelTexture.rubTextureMapData.getByteArray(0, renderModelTexture.unWidth * renderModelTexture.unHeight * 4 * Byte.BYTES), modelName, renderModelTexture.unWidth, renderModelTexture.unHeight);
-         
-         renderModels.FreeRenderModel.apply(renderModel);
-         renderModels.FreeTexture.apply(renderModelTexture);
-         
-         return new Renderable3dModel(vertices, uvs, normals, ShapeHelper.calculateTangents(vertices, uvs), indices, texture, null, null);
-		
+	public static Vector3f getEnvPosition() {
+		return envPosition;
 	}
-	
-	private static String getTrackedDeviceString(int device, int prop) {
-		hmdErrorStore.put(0, 0);
-		int requiredBufferLen = vrsystem.GetStringTrackedDeviceProperty.apply(device, prop, Pointer.NULL, 0, hmdErrorStore);
-		
-		if (requiredBufferLen == 0) {
-			return "";
-		}
-		
-		Pointer stringPointer = new Memory(requiredBufferLen);
-		vrsystem.GetStringTrackedDeviceProperty.apply(device, prop, stringPointer, requiredBufferLen, hmdErrorStore);
-		
-		return stringPointer.getString(0);
+
+	public static Matrix4f getEnvMatrix() {
+		return envMatrix;
+	}
+
+	public static void setEnvPosition(Vector3f envPosition) {
+		VRUtils.envPosition = envPosition;
+		VRUtils.envMatrix = Matrix4f.translate(envPosition, new Matrix4f(), new Matrix4f());
+	}
+
+	public static Vector3f getPosition() {
+		return Vector3f.add(getRawPosition(), getEnvPosition(), new Vector3f());
 	}
 }

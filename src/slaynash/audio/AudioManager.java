@@ -88,5 +88,9 @@ public class AudioManager {
 	public static void playSoundQuickOnCamera(String filename, float x, float y, float z){
 		soundSystem.quickPlay(false, filename, false, x, y, z, SoundSystemConfig.ATTENUATION_NONE, SoundSystemConfig.getDefaultRolloff());
 	}
+
+	public static boolean isInitialized() {
+		return init;
+	}
 	
 }

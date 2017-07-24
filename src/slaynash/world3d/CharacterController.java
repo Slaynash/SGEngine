@@ -118,12 +118,14 @@ public class CharacterController extends ActionInterface {
 		}
 
 		// ActionInterface interface
+		@Override
 		public void updateAction(CollisionWorld collisionWorld, float deltaTime) {
 			preStep(collisionWorld);
 			playerStep(collisionWorld, deltaTime);
 		}
 
 		// ActionInterface interface
+		@Override
 		public void debugDraw(IDebugDraw debugDrawer) {
 		}
 
@@ -292,7 +294,7 @@ public class CharacterController extends ActionInterface {
 		
 		public void setMaxSlope(float slopeRadians) {
 			maxSlopeRadians = slopeRadians;
-			maxSlopeCosine = (float)Math.cos((float)slopeRadians);
+			maxSlopeCosine = (float)Math.cos(slopeRadians);
 		}
 		
 		public float getMaxSlope() {

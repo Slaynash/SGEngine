@@ -17,11 +17,11 @@ public class AudioSource {
 		this.path = audioPath;
 		this.sourcename = new File(audioPath).getName()+"_"+AudioManager.random.nextInt(10000);
 		try {
-			System.out.println("[AudioSource] file:\\"+new File(Configuration.getAbsoluteInstallPath()+"/"+audioPath).getAbsolutePath());
+			System.out.println("[AudioSource] file:///"+new File(Configuration.getAbsoluteInstallPath()+"/"+audioPath).getAbsolutePath());
 			AudioManager.getSoundSystem().newSource(
 					false,
 					sourcename,
-					new URL("file:\\"+new File(Configuration.getAbsoluteInstallPath()+"/"+audioPath).getAbsolutePath()),
+					new URL("file:///"+new File(Configuration.getAbsoluteInstallPath()+"/"+audioPath).getAbsolutePath()),
 					Configuration.getAbsoluteInstallPath()+"/"+audioPath,
 					loop,
 					x, y, z,
@@ -37,11 +37,11 @@ public class AudioSource {
 		this.path = audioPath;
 		this.sourcename = new File(audioPath).getName()+"_"+AudioManager.random.nextInt(10000);
 		try {
-			System.out.println("[AudioSource] file:\\"+new File(Configuration.getAbsoluteInstallPath()+"/"+audioPath).getAbsolutePath());
+			System.out.println("[AudioSource] file:///"+new File(Configuration.getAbsoluteInstallPath()+"/"+audioPath).getAbsolutePath());
 			AudioManager.getSoundSystem().newSource(
 					false,
 					sourcename,
-					new URL("file:\\"+new File(Configuration.getAbsoluteInstallPath()+"/"+audioPath).getAbsolutePath()),
+					new URL("file:///"+new File(Configuration.getAbsoluteInstallPath()+"/"+audioPath).getAbsolutePath()),
 					Configuration.getAbsoluteInstallPath()+"/"+audioPath,
 					loop,
 					0, 0, 0,

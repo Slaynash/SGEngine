@@ -6,8 +6,6 @@ import slaynash.opengl.utils.VRUtils;
 
 public class PlayerCharacterVR extends PlayerCharacter {
 	
-	Vector3f envPos = new Vector3f(0,0,0);
-	
 	public PlayerCharacterVR() {
 		super();
 		this.isUsingPitchRoll = false;
@@ -16,12 +14,12 @@ public class PlayerCharacterVR extends PlayerCharacter {
 	@Override
 	public void update() {
 		Vector3f p = VRUtils.getPosition();
-		position.x = envPos.x+p.x;
-		position.y = envPos.y;
-		position.z = envPos.z+p.z;
-		viewPosition.x = envPos.x+p.x;
-		viewPosition.y = envPos.y+p.y;
-		viewPosition.z = envPos.z+p.z;
+		position.x = p.x;
+		position.y = VRUtils.getRawPosition().y;
+		position.z = p.z;
+		viewPosition.x = p.x;
+		viewPosition.y = p.y;
+		viewPosition.z = p.z;
 		
 		Vector3f vd = VRUtils.getForward();
 		
@@ -30,14 +28,24 @@ public class PlayerCharacterVR extends PlayerCharacter {
 		viewDirection.z = vd.z;
 		
 		viewMatrix = VRUtils.getViewMatrix(VRUtils.EYE_CENTER);
+		
+		//Matrix4f tm = Matrix4f.translate(envPos, new Matrix4f(), new Matrix4f());
+		//System.out.println("ENVPOS: "+tm);
+		
+		//viewMatrix = Matrix4f.mul(tm, VRUtils.getViewMatrix(VRUtils.EYE_CENTER), new Matrix4f());
 	}
 	
 	@Override
 	public void warp(Vector3f warp) {
-		Vector3f p = VRUtils.getPosition();
+		Vector3f envPos = new Vector3f();
+		Vector3f p = VRUtils.getRawPosition();
 		envPos.x = warp.x-p.x;
 		envPos.y = warp.y;
 		envPos.z = warp.z-p.z;
+		
+		VRUtils.setEnvPosition(envPos);
+		
+		update();
 	}
 	
 }

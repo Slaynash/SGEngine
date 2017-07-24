@@ -14,8 +14,6 @@ import slaynash.opengl.render2d.text2d.Text2d;
 
 public class DisplayManager {
 	
-	public static int SAMPLES = 8;
-	
 	private static int w;
 	private static int h;
 	private static int fps;
@@ -25,7 +23,6 @@ public class DisplayManager {
 	private static long deltaMS;
 	private static boolean multisample = true;
 	private static int bps;
-	private static PixelFormat pf = new PixelFormat().withSamples(4);
 	
 	public static DisplayMode[] getAvailableResolutions(){//return an array of x*5
 		try {
@@ -65,9 +62,9 @@ public class DisplayManager {
 							ContextAttribs attribs = new ContextAttribs(3,3)
 									.withForwardCompatible(true)
 									.withProfileCore(true);
-							Display.create(pf.withSamples(SAMPLES).withDepthBits(24), attribs);
+							Display.create(new PixelFormat().withSamples(Configuration.getSSAASamples()).withDepthBits(24), attribs);
 							GL11.glEnable(GL13.GL_MULTISAMPLE);
-						}else Display.create(pf);
+						}else Display.create(new PixelFormat());
 					}
 					w = Display.getWidth();
 					h = Display.getHeight();
@@ -86,9 +83,9 @@ public class DisplayManager {
 					ContextAttribs attribs = new ContextAttribs(3,3)
 							.withForwardCompatible(true)
 							.withProfileCore(true);
-					Display.create(pf.withSamples(SAMPLES).withDepthBits(24), attribs);
+					Display.create(new PixelFormat().withSamples(Configuration.getSSAASamples()).withDepthBits(24), attribs);
 					GL11.glEnable(GL13.GL_MULTISAMPLE);
-				}else Display.create(pf);
+				}else Display.create(new PixelFormat());
 			}
 		} catch (LWJGLException e) {e.printStackTrace();}
 		
@@ -106,7 +103,7 @@ public class DisplayManager {
 	public static void updateDisplay(){
 		//System.out.println(UserInputUtil.getMousePos().toString());
 		Display.update();
-		if(!Configuration.isVR()) Display.sync(fps);
+		if(!Configuration.isVR() && Configuration.isVSyncEnabled()) Display.sync(fps);
 		long currentFrameTime = getCurrentTime();
 		delta = (currentFrameTime - lastFrameTime)/1000f;
 		deltaMS = (currentFrameTime - lastFrameTime);
@@ -155,9 +152,5 @@ public class DisplayManager {
 			PageManager.resize();
 			Text2d.reload();
 		}
-	}
-
-	public static int getSamples() {
-		return SAMPLES;
 	}
 }

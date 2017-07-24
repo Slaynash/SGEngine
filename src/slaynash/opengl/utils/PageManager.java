@@ -7,6 +7,7 @@ import org.lwjgl.util.vector.Vector3f;
 
 import slaynash.audio.AudioManager;
 import slaynash.engine.SGELabelPage;
+import slaynash.inputs.ControllersControlManager;
 import slaynash.inputs.KeyboardControlManager;
 import slaynash.opengl.Configuration;
 import slaynash.opengl.shaders.ShaderManager;
@@ -35,20 +36,18 @@ public class PageManager {
 		renderThread.setName("Render_Thread");
 		
 		renderThread.start();
-		
-		initialized = true;
+		while(!initialized) {
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 		throwInitializedEvent();
 	}
 	
 	public static void init(Class<? extends RenderablePage> nextPage){
-		PageManager.nextPage = nextPage;
-		createRenderThread(1280,720,false);
-		renderThread.setName("Render_Thread");
-		
-		renderThread.start();
-		
-		initialized = true;
-		throwInitializedEvent();
+		init(1280, 720, false, nextPage);
 	}
 	
 	private static void createRenderThread(final int x, final int y, final boolean fullscreen) {
@@ -58,15 +57,20 @@ public class PageManager {
 			public void run() {
 				
 				DisplayManager.createDisplay(x,y,fullscreen);
-				if(Configuration.isVR()) if(!VRUtils.initVR()) Configuration.enableVR(false);
+				if(Configuration.isVR()) if(!VRUtils.initVR()) {
+					Configuration.enableVR(false);
+					System.err.println("[PageManager] Unable to start VR: "+VRUtils.initStatus);
+				}
 				TextureManager.init();
 				UserInputUtil.initController();
+				if(Configuration.isControllersEnabled()) ControllersControlManager.init();
 				AudioManager.init();
 				SGELabelPage label = new SGELabelPage();
 				currentPage = label;
 				label.init();
 				label.start();
 				render = true;
+				initialized = true;
 				System.out.println("[PageManager] Starting render");
 				while(true){
 					while(render){
@@ -77,6 +81,7 @@ public class PageManager {
 						else{
 							UserInputUtil.update();
 							KeyboardControlManager.update();
+							if(Configuration.isControllersEnabled()) ControllersControlManager.update();
 							if(currentPage != label && Configuration.isCollisionLoadedWith3dWorldLoad()) CollisionManager3d.update();
 							currentPage.render();
 							if(Configuration.isVR()){
@@ -95,7 +100,9 @@ public class PageManager {
 							}
 							DisplayManager.updateDisplay();
 							firstRenderNotLabel = false;
-							if(Configuration.isVR()) VRUtils.sendFramesToCompositor();
+							if(Configuration.isVR()) {
+								VRUtils.sendFramesToCompositor();
+							}
 							if(currentPage == label && label.isRenderingDone()){
 								System.out.println("[PageManager] Label rendering done");
 								render = false;

@@ -122,14 +122,14 @@ public class MatrixUtils {
 		Matrix4f viewMatrix = new Matrix4f();
 		viewMatrix.setIdentity();
 		if(Configuration.getPlayerCharacter().isUsingPitchRoll()){
-			Matrix4f.rotate((float) -Configuration.getPlayerCharacter().getPitch(), new Vector3f(1, 0, 0), viewMatrix, viewMatrix);
-			Matrix4f.rotate((float) -Configuration.getPlayerCharacter().getYaw(), new Vector3f(0, 1, 0), viewMatrix, viewMatrix);
+			Matrix4f.rotate(-Configuration.getPlayerCharacter().getPitch(), new Vector3f(1, 0, 0), viewMatrix, viewMatrix);
+			Matrix4f.rotate(-Configuration.getPlayerCharacter().getYaw(), new Vector3f(0, 1, 0), viewMatrix, viewMatrix);
 			Vector3f cameraPos = Configuration.getPlayerCharacter().getViewPosition();
 			Vector3f negativeCameraPos = new Vector3f(-cameraPos.x,-cameraPos.y,-cameraPos.z);
 			Matrix4f.translate(negativeCameraPos, viewMatrix, viewMatrix);
 		}
 		else{
-			Matrix4f.transpose(Configuration.getPlayerCharacter().getViewMatrix(), viewMatrix);
+			Matrix4f.load(Configuration.getPlayerCharacter().getViewMatrix(), viewMatrix);
 		}
 		return viewMatrix;
 	}

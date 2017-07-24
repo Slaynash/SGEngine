@@ -15,6 +15,7 @@ public class TextureManagerLogSystem implements LogSystem {
 	 * @param message The message describing the error
 	 * @param e The exception causing the error
 	 */
+	@Override
 	public void error(String message, Throwable e) {
 		error(message);
 		error(e);
@@ -25,6 +26,7 @@ public class TextureManagerLogSystem implements LogSystem {
 	 * 
 	 * @param e The exception causing the error
 	 */
+	@Override
 	public void error(Throwable e) {
 		out.println("[TextureManagerLogSystem] ERROR: " +e.getMessage());
 		e.printStackTrace(out);
@@ -35,6 +37,7 @@ public class TextureManagerLogSystem implements LogSystem {
 	 * 
 	 * @param message The message describing the error
 	 */
+	@Override
 	public void error(String message) {
 		out.println("[TextureManagerLogSystem] ERROR: " +message);
 	}
@@ -44,6 +47,7 @@ public class TextureManagerLogSystem implements LogSystem {
 	 * 
 	 * @param message The message describing the warning
 	 */
+	@Override
 	public void warn(String message) {
 		out.println("[TextureManagerLogSystem] WARN: " +message);
 	}
@@ -53,6 +57,7 @@ public class TextureManagerLogSystem implements LogSystem {
 	 * 
 	 * @param message The message describing the infomation
 	 */
+	@Override
 	public  void info(String message) {
 		out.println("[TextureManagerLogSystem] INFO: " +message);
 	}
@@ -62,6 +67,7 @@ public class TextureManagerLogSystem implements LogSystem {
 	 * 
 	 * @param message The message describing the debug
 	 */
+	@Override
 	public void debug(String message) {
 		out.println("[TextureManagerLogSystem] DEBUG: " +message);
 	}

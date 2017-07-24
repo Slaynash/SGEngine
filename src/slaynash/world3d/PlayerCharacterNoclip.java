@@ -27,9 +27,9 @@ public class PlayerCharacterNoclip extends PlayerCharacter{
 		float dx = (float) (forward * Math.sin(yaw) + left * Math.cos(yaw));
 		float dz = (float) (forward * Math.cos(yaw) - left * Math.sin(yaw));
 		
-		viewDirection.x = (float) (Math.sin(yaw) * Math.cos(pitch));
-		viewDirection.z = (float) (Math.cos(yaw) * Math.cos(pitch));
-		viewDirection.y = (float) -Math.sin(pitch);
+		viewDirection.x = (float) -(Math.sin(yaw) * Math.cos(pitch));
+		viewDirection.z = (float) -(Math.cos(yaw) * Math.cos(pitch));
+		viewDirection.y = (float) Math.sin(pitch);
 		
 		position.x += dx*DisplayManager.getFrameTime();
 		position.z += dz*DisplayManager.getFrameTime();
@@ -40,8 +40,8 @@ public class PlayerCharacterNoclip extends PlayerCharacter{
 	}
 	
 	private void updateAimDir() {
-		yaw -= (float)(Mouse.getDX())*0.01f*Configuration.getMouseSensibility();
-		pitch += (float)(Mouse.getDY())*0.01f*Configuration.getMouseSensibility();
+		yaw -= (Mouse.getDX())*0.01f*Configuration.getMouseSensibility();
+		pitch += (Mouse.getDY())*0.01f*Configuration.getMouseSensibility();
 		
 		if (yaw >= PI*2f){
 			yaw -= PI*2f;
@@ -51,9 +51,9 @@ public class PlayerCharacterNoclip extends PlayerCharacter{
 		}
 		
 		if (pitch > PI*0.5f-0.0001f)
-			pitch = (float) (PI/2-0.0001f);
+			pitch = PI/2-0.0001f;
 		else if (pitch < -PI*0.5f+0.0001f)
-			pitch = (float) (-PI/2+0.0001f);
+			pitch = -PI/2+0.0001f;
 		
 		rotation.x = pitch/DEGREE_TO_RADIANS;
 		rotation.y = yaw/DEGREE_TO_RADIANS;

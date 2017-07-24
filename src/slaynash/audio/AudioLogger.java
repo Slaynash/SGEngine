@@ -3,6 +3,7 @@ package slaynash.audio;
 import paulscode.sound.SoundSystemLogger;
 
 public class AudioLogger extends SoundSystemLogger {
+	@Override
 	public void message( String message, int indent )
     {
         String messageText;
@@ -19,6 +20,7 @@ public class AudioLogger extends SoundSystemLogger {
         System.out.println("[SoundSystemLogger] "+ messageText );
     }
 	
+	@Override
 	public void importantMessage( String message, int indent )
     {
         String messageText;
@@ -35,6 +37,7 @@ public class AudioLogger extends SoundSystemLogger {
         System.out.println("[SoundSystemLogger] "+ messageText );
     }
 	
+	@Override
 	public void errorMessage( String classname, String message, int indent )
     {
         String headerLine, messageText;

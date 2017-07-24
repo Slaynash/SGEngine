@@ -42,19 +42,19 @@ public class ShaderManager {
 	private static FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
 	
 	public static void initGUIShader() {
-		if(shaderGUI == null) shaderGUI = (ShaderProgram) (Configuration.getRenderMethod() == Configuration.RENDER_FREE ? new ShaderGUI() : new ModernShaderGUI());
+		if(shaderGUI == null) shaderGUI = Configuration.getRenderMethod() == Configuration.RENDER_FREE ? new ShaderGUI() : new ModernShaderGUI();
 	}
 	
 	public static void initLabelShader() {
-		if(shaderLabel == null) shaderLabel = (ShaderProgram) (Configuration.getRenderMethod() == Configuration.RENDER_FREE ? new ShaderLabel() : new ModernShaderLabel());
+		if(shaderLabel == null) shaderLabel = Configuration.getRenderMethod() == Configuration.RENDER_FREE ? new ShaderLabel() : new ModernShaderLabel();
 	}
 	
 	public static void init3DShader() {
-		if(shader3d == null) shader3d = (ShaderProgram) (Configuration.getRenderMethod() == Configuration.RENDER_FREE ? new Shader3D() : new ModernShader3D());
+		if(shader3d == null) shader3d = Configuration.getRenderMethod() == Configuration.RENDER_FREE ? new Shader3D() : new ModernShader3D();
 	}
 	
 	public static void initVRShader() {
-		if(shaderVR == null) shaderVR = (ShaderProgram) (Configuration.getRenderMethod() == Configuration.RENDER_FREE ? new ShaderVR() : new ModernShaderVR());
+		if(shaderVR == null) shaderVR = Configuration.getRenderMethod() == Configuration.RENDER_FREE ? new ShaderVR() : new ModernShaderVR();
 	}
 	
 	

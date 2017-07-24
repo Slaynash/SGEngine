@@ -78,8 +78,8 @@ public class SGELabelPage extends RenderablePage {
 		float aspectRatio = DisplayManager.getWidth()/((float)DisplayManager.getHeight());
 		float imgAspectRatio = imageWidth/imageHeight;
 		
-		float maxX = (imageWidth/(float)(background.getTexture().getTextureWidth()));
-		float maxY = (imageHeight/(float)(background.getTexture().getTextureHeight()));
+		float maxX = (imageWidth/(background.getTexture().getTextureWidth()));
+		float maxY = (imageHeight/(background.getTexture().getTextureHeight()));
 		float centerx = maxX*0.5f;
 		float centery = maxY*0.5f;
 		
@@ -188,13 +188,13 @@ public class SGELabelPage extends RenderablePage {
 		ShaderManager.startLabelShader();
 		
 		elapsedTime = (System.nanoTime()/1E9f)-startTime;
-		if(Configuration.isVR()){
+		if(Configuration.isVR()){//Default: 15s
 			if(elapsedTime < 1)
 				ShaderManager.shaderLabel_setVisibility(elapsedTime/1f);
-			else if (elapsedTime < 14)
+			else if (elapsedTime < 2)
 				ShaderManager.shaderLabel_setVisibility(1);
-			else if (elapsedTime < 15){
-				ShaderManager.shaderLabel_setVisibility((-elapsedTime+15)/1f);
+			else if (elapsedTime < 3){
+				ShaderManager.shaderLabel_setVisibility((-elapsedTime+3)/1f);
 			}
 			else doneRendering = true;
 		}
