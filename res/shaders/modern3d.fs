@@ -27,7 +27,7 @@ void main(void){
 	vec3 totalSpecular = vec3(0.0);
 	
 	for(int i=0;i<8;i++){
-		float distance = length(toLightVector[i]);
+		float distance = length(toLightVector[i])*10;
 		float attFactor = attenuation[i].x + (attenuation[i].y * distance) + (attenuation[i].z * distance * distance);
 		vec3 unitLightVector = normalize(toLightVector[i]);	
 		float nDotl = dot(unitNormal,unitLightVector);

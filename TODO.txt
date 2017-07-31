@@ -1,7 +1,10 @@
-Plannded to do:
+Planned to do:
 
 
 TODO: Add LeapMotion support
+TODO: Add G15 Support
+
+TODO: load entities and models from files
 
 
 TODO: Add a key filter to GUITextField and add mid-text edit capabilities
@@ -27,3 +30,7 @@ TODO: Fint a way to avoid the 8 lights limit
 TODO: Update 2d interface design/textures
 TODO: Add shadows
 TODO: Render optimisations
+TODO: Add Skybox
+
+
+TODO: Android compatibility

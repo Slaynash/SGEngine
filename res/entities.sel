@@ -1,0 +1,16 @@
+player_start
+{
+	type: "logic"
+	model: none
+	editormodel: "playerspawn"
+	supertype: none
+}
+
+pointlight
+{
+	type: "logic"
+	model: none
+	editormodel: "pointlight"
+	script: none
+	supertype: light
+}
