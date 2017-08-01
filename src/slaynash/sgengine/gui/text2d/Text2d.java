@@ -60,7 +60,6 @@ public class Text2d {
 	
 	public void render(){
 		ShaderManager.shaderGUI_setTextMode();
-		FontManager.bind2DShaderAtlas(font);
 		ShaderManager.shaderGUI_loadColor(getColour());
 		float px = position.x;
 		float py = position.y;
@@ -82,7 +81,9 @@ public class Text2d {
 		ShaderManager.shaderGUI_exitTextMode();
 	}
 	
-	
+	public Renderable2dModel getModel() {
+		return textModel;
+	}
 	
 	
 	
