@@ -78,6 +78,10 @@ public class PageManager {
 							render = false;
 							close = true;
 						}
+						else if(nextPage != null) {
+							render = false;
+							break;
+						}
 						else{
 							UserInputUtil.update();
 							KeyboardControlManager.update();
