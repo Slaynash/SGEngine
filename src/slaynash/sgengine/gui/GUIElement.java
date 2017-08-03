@@ -187,6 +187,11 @@ public abstract class GUIElement {
 		return height;
 	}
 	
+	public void setPosition(Dimension position) {
+		this.x = position.width;
+		this.y = position.height;
+	}
+	
 	public void setWidth(int width){
 		this.width = width;
 		redraw();
