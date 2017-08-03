@@ -38,7 +38,10 @@ public class CollisionManager3d {
 	
 	public static void reload(){
 		
-		//if(dynamicsWorld != null) dynamicsWorld.destroy();
+		if(dynamicsWorld != null) {
+			dynamicsWorld.destroy();
+			dynamicsWorld = null;
+		}
 		
 		broadphase = new DbvtBroadphase();
 		collisionConfiguration = new DefaultCollisionConfiguration();
@@ -166,5 +169,10 @@ public class CollisionManager3d {
 	
 	public static DiscreteDynamicsWorld getDynamicWorld(){
 		return dynamicsWorld;
+	}
+	
+	public static void destroyDynamicWorld() {
+		dynamicsWorld.destroy();
+		dynamicsWorld = null;
 	}
 }
