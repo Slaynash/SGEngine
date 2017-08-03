@@ -78,7 +78,7 @@ public class PageManager {
 							render = false;
 							close = true;
 						}
-						else if(nextPage != null) {
+						else if(currentPage != label && nextPage != null) {
 							render = false;
 							break;
 						}
