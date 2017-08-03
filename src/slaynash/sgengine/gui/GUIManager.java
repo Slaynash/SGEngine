@@ -295,11 +295,15 @@ public class GUIManager {
 	}
 
 	private static boolean canDrawBackground() {
-		if(useBackground && drawMode == DRAWMODE_MENU) return true;
+		if((useBackground && drawMode == DRAWMODE_MENU) || (useBackground && drawMode == DRAWMODE_GAME && menuShown)) return true;
 		return false;
 	}
 	
 	public static void setBackground(String backgroundPath){
+		if(backgroundPath == null) {
+			useBackground = false;
+			return;
+		}
 		TextureDef background = TextureManager.getTextureDef(backgroundPath, TextureManager.COLOR);
 		
 		float[] vertices = new float[2*3*2];
