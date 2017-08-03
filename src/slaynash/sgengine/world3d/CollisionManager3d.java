@@ -132,7 +132,7 @@ public class CollisionManager3d {
 	public static void update() {
 		long ct = DisplayManager.getCurrentTime();
 		float delta = ct-lastCall;
-		if(delta < 0.016f) return;
+		if(delta < 16f) return;
 		lastCall = ct;
 		dynamicsWorld.stepSimulation(delta, 5);
 	}
