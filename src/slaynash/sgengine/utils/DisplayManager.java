@@ -50,34 +50,30 @@ public class DisplayManager {
 		w = x;
 		h = y;
 		DisplayMode[] ds = getAvailableResolutions();
+		
 		DisplayMode displayMode = null;
+		boolean found = false;
 		
 		for(DisplayMode dm:ds){
 			if(dm.getWidth() == x && dm.getHeight() == y && (!fullscreen || dm.isFullscreenCapable() == fullscreen) && Display.getDesktopDisplayMode().getFrequency() == dm.getFrequency() && dm.getBitsPerPixel() == Display.getDesktopDisplayMode().getBitsPerPixel()){
-				try {
-					Display.setDisplayMode(dm);
-					Display.setFullscreen(fullscreen);
-					if(!Display.isCreated()){
-						if(Configuration.getRenderMethod() == Configuration.RENDER_MODERN){
-							ContextAttribs attribs = new ContextAttribs(3,3)
-									.withForwardCompatible(true)
-									.withProfileCore(true);
-							Display.create(new PixelFormat().withSamples(Configuration.getSSAASamples()).withDepthBits(24), attribs);
-							GL11.glEnable(GL13.GL_MULTISAMPLE);
-						}else Display.create(new PixelFormat());
-					}
-					w = Display.getWidth();
-					h = Display.getHeight();
-					fps = dm.getFrequency();
-					bps = dm.getBitsPerPixel();
-					GL11.glViewport(0, 0, w, h);
-				} catch (LWJGLException e) {e.printStackTrace();}
-				return;
+				displayMode = dm;
+				found = true;
+				break;
 			}
 		}
-		try {
+		if(!found) {
 			displayMode = new DisplayMode(x, y);
-			Display.setDisplayMode(displayMode);
+		}
+		
+		try {
+			if(Display.isCreated() && !Display.isFullscreen()) {
+				Display.setDisplayMode(displayMode);
+				Display.setFullscreen(fullscreen);
+			}else {
+				Display.setFullscreen(fullscreen);
+				Display.setDisplayMode(displayMode);
+				
+			}
 			if(!Display.isCreated()){
 				if(Configuration.getRenderMethod() == Configuration.RENDER_MODERN){
 					ContextAttribs attribs = new ContextAttribs(3,3)

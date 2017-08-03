@@ -487,7 +487,7 @@ public class GUIManager {
 			try {
 				Class<?> c = Class.forName("slaynash.text.utils.Localization");
 			    Class<?>[] argTypes = new Class[] { String.class };
-			    Method getText = c.getDeclaredMethod("getText", argTypes);
+			    Method getText = c.getDeclaredMethod("getTranslation", argTypes);
 			    popupCloseText = (String)getText.invoke(null, (Object)new String("POPUP_BUTTON_CLOSE"));
 			} catch (Exception e) {
 				popupCloseText = "Close";
