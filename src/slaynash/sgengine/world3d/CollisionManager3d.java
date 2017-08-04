@@ -22,7 +22,6 @@ import com.bulletphysics.linearmath.IDebugDraw;
 import com.bulletphysics.util.ObjectArrayList;
 
 import slaynash.sgengine.Configuration;
-import slaynash.sgengine.utils.DisplayManager;
 import slaynash.sgengine.world3d.loader.Model3dWorld;
 import slaynash.sgengine.world3d.loader.TriangleFace;
 
@@ -129,11 +128,11 @@ public class CollisionManager3d {
 	}
 	
 	public static void start(){
-		lastCall = DisplayManager.getCurrentTime();
+		lastCall = System.nanoTime()/1000000;
 	}
 	
 	public static void update() {
-		long ct = DisplayManager.getCurrentTime();
+		long ct = System.nanoTime()/1000000;
 		float delta = ct-lastCall;
 		if(delta < 16f) return;
 		lastCall = ct;
