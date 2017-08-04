@@ -43,7 +43,6 @@ public class PageManager {
 				e.printStackTrace();
 			}
 		}
-		throwInitializedEvent();
 	}
 	
 	public static void init(Class<? extends RenderablePage> nextPage){
@@ -71,6 +70,7 @@ public class PageManager {
 				label.start();
 				render = true;
 				initialized = true;
+				throwInitializedEvent();
 				System.out.println("[PageManager] Starting render");
 				while(true){
 					while(render){
