@@ -1,6 +1,8 @@
 package slaynash.sgengine.audio;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -81,12 +83,20 @@ public class AudioManager {
 		return soundSystem;
 	}
 	
-	public static void playSoundQuick(String filename, float x, float y, float z){
-		soundSystem.quickPlay(false, filename, false, x, y, z, SoundSystemConfig.getDefaultAttenuation(), SoundSystemConfig.getDefaultRolloff());
+	public static void playSoundQuick(String audioPath, float x, float y, float z){
+		try {
+			soundSystem.quickPlay(false, new URL("file:///"+new File(Configuration.getAbsoluteInstallPath()+"/"+audioPath).getAbsolutePath()), Configuration.getAbsoluteInstallPath()+"/"+audioPath, false, x, y, z, SoundSystemConfig.getDefaultAttenuation(), SoundSystemConfig.getDefaultRolloff());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 	}
 	
-	public static void playSoundQuickOnCamera(String filename, float x, float y, float z){
-		soundSystem.quickPlay(false, filename, false, x, y, z, SoundSystemConfig.ATTENUATION_NONE, SoundSystemConfig.getDefaultRolloff());
+	public static void playSoundQuickOnCamera(String audioPath){
+		try {
+			soundSystem.quickPlay(false, new URL("file:///"+new File(Configuration.getAbsoluteInstallPath()+"/"+audioPath).getAbsolutePath()), Configuration.getAbsoluteInstallPath()+"/"+audioPath, false, 0, 0, 0, SoundSystemConfig.ATTENUATION_NONE, SoundSystemConfig.getDefaultRolloff());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static boolean isInitialized() {
