@@ -38,8 +38,8 @@ public class Shader2D extends FreeShader{
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glDisable(GL11.GL_CULL_FACE);
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
-		
-		GL20.glUniform1f(getLocation("displayRatio"), Display.getWidth()/Display.getHeight());
+
+		GL20.glUniform1f(getLocation("displayRatio"), (float)Display.getWidth()/(float)Display.getHeight());
 	}
 
 	@Override

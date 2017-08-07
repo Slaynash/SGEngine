@@ -24,7 +24,9 @@ public class ModernShader2D extends ModernShader {
 	@Override
 	protected void getAllUniformLocations() {
 		texture_location = super.getUniformLocation("textureDiffuse");
-		super.getUniformLocation("translation");
+		super.getUniformLocation("mMatrix");
+		super.getUniformLocation("vMatrix");
+		super.getUniformLocation("pMatrix");
 		super.getUniformLocation("zoom");
 		super.getUniformLocation("displayRatio");
 	}
@@ -41,13 +43,15 @@ public class ModernShader2D extends ModernShader {
 		GL11.glDisable(GL11.GL_CULL_FACE);
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
 		
-		GL20.glUniform1f(getLocation("displayRatio"), Display.getWidth()/Display.getHeight());
+		GL20.glUniform1f(getLocation("displayRatio"), (float)Display.getWidth()/(float)Display.getHeight());
 	}
 
 	@Override
 	protected void stop() {
+		/*
 		GL20.glDisableVertexAttribArray(0);
 		GL20.glDisableVertexAttribArray(1);
+		*/
 		GL30.glBindVertexArray(0);
 		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);

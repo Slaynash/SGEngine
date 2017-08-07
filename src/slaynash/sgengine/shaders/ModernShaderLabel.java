@@ -60,8 +60,10 @@ public class ModernShaderLabel extends ModernShader{
 
 	@Override
 	protected void stop() {
+		/*
 		GL20.glDisableVertexAttribArray(0);
 		GL20.glDisableVertexAttribArray(1);
+		*/
 		GL30.glBindVertexArray(0);
 		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);

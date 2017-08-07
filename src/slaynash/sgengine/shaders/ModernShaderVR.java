@@ -57,10 +57,12 @@ public class ModernShaderVR extends ModernShader {
 
 	@Override
 	protected void stop() {
+		/*
 		GL20.glDisableVertexAttribArray(0);
 		GL20.glDisableVertexAttribArray(1);
 		GL20.glDisableVertexAttribArray(2);
 		GL20.glDisableVertexAttribArray(3);
+		*/
 		GL30.glBindVertexArray(0);
 	}
 }
