@@ -6,9 +6,9 @@ import slaynash.sgengine.Configuration;
 
 public class ShaderVR extends FreeShader{
 	
-	private static int colorTexture_location;
-	private static int normalTexture_location;
-	private static int specularTexture_location;
+	private int colorTexture_location;
+	private int normalTexture_location;
+	private int specularTexture_location;
 	
 	public ShaderVR() {
 		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "freeVR.vs", "freeVR.fs", ShaderProgram.SHADER_VR_FREE);

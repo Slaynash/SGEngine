@@ -161,5 +161,18 @@ public class MatrixUtils {
 		
 		return projectionMatrix;
     }
+
+	public static Matrix4f create2dProjectionMatrix() {
+		return new Matrix4f();
+	}
+
+	public static Matrix4f createCharacterViewMatrix2d() {
+		Matrix4f viewMatrix = new Matrix4f();
+		viewMatrix.setIdentity();
+		Vector3f cameraPos = Configuration.getPlayerCharacter().getViewPosition();
+		Vector3f negativeCameraPos = new Vector3f(-cameraPos.x,-cameraPos.y, 0);
+		Matrix4f.translate(negativeCameraPos, viewMatrix, viewMatrix);
+		return viewMatrix;
+	}
 	
 }

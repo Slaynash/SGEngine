@@ -33,6 +33,7 @@ public class ShaderManager {
 	private static ShaderProgram shaderLabel;
 	private static ShaderProgram shaderGUI;
 	private static ShaderProgram shader3d;
+	private static ShaderProgram shader2d;
 	private static ShaderProgram shaderVR;
 	
 	private static ShaderProgram currentShader;
@@ -53,8 +54,28 @@ public class ShaderManager {
 		if(shader3d == null) shader3d = Configuration.getRenderMethod() == Configuration.RENDER_FREE ? new Shader3D() : new ModernShader3D();
 	}
 	
+	public static void init2DShader() {
+		if(shader2d == null) shader2d = Configuration.getRenderMethod() == Configuration.RENDER_FREE ? new Shader2D() : new ModernShader2D();
+	}
+	
 	public static void initVRShader() {
 		if(shaderVR == null) shaderVR = Configuration.getRenderMethod() == Configuration.RENDER_FREE ? new ShaderVR() : new ModernShaderVR();
+	}
+	
+	public static void set3dShader(ShaderProgram shader){
+		shader3d = shader;
+	}
+	
+	public static void set2dShader(ShaderProgram shader){
+		shader2d = shader;
+	}
+	
+	public static void setVRShader(ShaderProgram shader){
+		shaderVR = shader;
+	}
+	
+	public static void setGUIShader(ShaderProgram shader){
+		shaderGUI = shader;
 	}
 	
 	
@@ -97,7 +118,7 @@ public class ShaderManager {
 		shaderLabel.use();
 	}
 
-	public static void start2DShader() {
+	public static void startGUIShader() {
 		if(shaderGUI == null) initGUIShader();
 		shaderGUI.use();
 	}
@@ -105,6 +126,11 @@ public class ShaderManager {
 	public static void start3DShader() {
 		if(shader3d == null) init3DShader();
 		shader3d.use();
+	}
+	
+	public static void start2DShader() {
+		if(shader2d == null) init2DShader();
+		shader2d.use();
 	}
 	
 	public static void startVRShader() {
@@ -197,6 +223,41 @@ public class ShaderManager {
 	}
 	
 	
+	
+	public static void shader2d_loadTransformationMatrix(Matrix4f matrix){
+		matrix.store(matrixBuffer);
+		matrixBuffer.flip();
+		GL20.glUniformMatrix4(shader2d.getLocation("mMatrix"), false, matrixBuffer);
+	}
+	
+	public static void shader2d_loadViewMatrix(Matrix4f viewMatrix){
+		viewMatrix.store(matrixBuffer);
+		matrixBuffer.flip();
+		GL20.glUniformMatrix4(shader2d.getLocation("vMatrix"), false, matrixBuffer);
+	}
+	 
+	public static void shader2d_loadProjectionMatrix(Matrix4f projectionMatrix){
+		projectionMatrix.store(matrixBuffer);
+		matrixBuffer.flip();
+		GL20.glUniformMatrix4(shader2d.getLocation("pMatrix"), false, matrixBuffer);
+	}
+	
+	public static void shader2d_bindTextureID(int textureID, int textureType) {
+		GL13.glActiveTexture(GL13.GL_TEXTURE0+textureType);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
+	}
+
+	public static void shader2d_bindDefaultColorTexture() {
+		shader2d_bindTextureID(TextureManager.getDefaultTextureID(), TEXTURE_COLOR);
+	}
+	
+	public static void shader2d_loadZoom(float zoom){
+		GL20.glUniform1f(shader2d.getLocation("zoom"), zoom);
+	}
+	
+	public static void shader2d_loadDisplayRatio(float displayRatio){
+		GL20.glUniform1f(shader2d.getLocation("displayRatio"), displayRatio);
+	}
 	
 	
 	
@@ -403,6 +464,10 @@ public class ShaderManager {
 
 	public static ShaderProgram getGUIShaderProgram() {
 		return shaderGUI;
+	}
+	
+	public static ShaderProgram get2DShaderProgram() {
+		return shader2d;
 	}
 
 	public static ShaderProgram getVRShaderProgram() {

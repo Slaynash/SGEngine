@@ -8,7 +8,7 @@ import slaynash.sgengine.Configuration;
 
 public class ShaderGUI extends FreeShader {
 
-	private static int texture_location;
+	private int texture_location;
 	
 	public ShaderGUI() {
 		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "freeGUI.vs", "freeGUI.fs", ShaderProgram.SHADER_GUI_FREE);

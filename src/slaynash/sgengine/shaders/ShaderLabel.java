@@ -6,7 +6,7 @@ import slaynash.sgengine.Configuration;
 
 public class ShaderLabel extends FreeShader {
 	
-	private static int texture_location;
+	private int texture_location;
 	
 	public ShaderLabel() {
 		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "freeLabel.vs", "freeLabel.fs", ShaderProgram.SHADER_LABEL_FREE);

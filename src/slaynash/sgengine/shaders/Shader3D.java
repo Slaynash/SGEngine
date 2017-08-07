@@ -6,9 +6,9 @@ import slaynash.sgengine.Configuration;
 
 public class Shader3D extends FreeShader{
 	
-	private static int colorTexture_location;
-	private static int normalTexture_location;
-	private static int specularTexture_location;
+	private int colorTexture_location;
+	private int normalTexture_location;
+	private int specularTexture_location;
 	
 	public Shader3D() {
 		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "free3d.vs", "free3d.fs", ShaderProgram.SHADER_3D_FREE);
