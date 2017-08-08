@@ -1,4 +1,4 @@
-package slaynash.sgengine.world3d.loader;
+package slaynash.sgengine.world3d;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +12,8 @@ import slaynash.sgengine.Configuration;
 import slaynash.sgengine.models.Renderable3dModel;
 import slaynash.sgengine.shaders.ShaderManager;
 import slaynash.sgengine.utils.ShapeHelper;
-import slaynash.sgengine.world3d.CollisionManager3d;
+import slaynash.sgengine.world3d.loader.Entity;
+import slaynash.sgengine.world3d.loader.TriangleFace;
 
 public class Model3dWorld extends Entity{
 	
@@ -80,7 +81,7 @@ public class Model3dWorld extends Entity{
 			i++;
 		}
 		
-		if(Configuration.isCollisionLoadedWith3dWorldLoad()) CollisionManager3d.addModel3dWorld(this);
+		if(Configuration.isCollisionsLoadedWith3dWorldLoad()) CollisionManager3d.addModel3dWorld(this);
 	}
 
 	@Override

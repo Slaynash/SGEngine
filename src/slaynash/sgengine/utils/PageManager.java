@@ -14,6 +14,7 @@ import slaynash.sgengine.shaders.ShaderManager;
 import slaynash.sgengine.textureUtils.TextureManager;
 import slaynash.sgengine.utils.pageManagerEvent.PageManagerEvent;
 import slaynash.sgengine.utils.pageManagerEvent.PageManagerListener;
+import slaynash.sgengine.world2d.CollisionManager2d;
 import slaynash.sgengine.world3d.CollisionManager3d;
 
 public class PageManager {
@@ -86,7 +87,8 @@ public class PageManager {
 							UserInputUtil.update();
 							KeyboardControlManager.update();
 							if(Configuration.isControllersEnabled()) ControllersControlManager.update();
-							if(currentPage != label && Configuration.isCollisionLoadedWith3dWorldLoad()) CollisionManager3d.update();
+							if(currentPage != label && Configuration.isCollisionManager3dEnabled()) CollisionManager3d.update();
+							if(currentPage != label && Configuration.isCollisionManager2dEnabled()) CollisionManager2d.update();
 							currentPage.render();
 							if(Configuration.isVR()){
 								VRUtils.updatePose();
@@ -151,9 +153,11 @@ public class PageManager {
 		catch (IllegalAccessException e) {e.printStackTrace();}
 		render = true;
 		currentPage.init();
-		if(firstRenderNotLabel && Configuration.isCollisionLoadedWith3dWorldLoad()) CollisionManager3d.reload();
+		if(firstRenderNotLabel && Configuration.isCollisionManager3dEnabled()) CollisionManager3d.reload();
+		if(firstRenderNotLabel && Configuration.isCollisionManager3dEnabled()) CollisionManager2d.reload();
 		currentPage.start();
-		if(firstRenderNotLabel && Configuration.isCollisionLoadedWith3dWorldLoad()) CollisionManager3d.start();
+		if(firstRenderNotLabel && Configuration.isCollisionManager3dEnabled()) CollisionManager3d.start();
+		if(firstRenderNotLabel && Configuration.isCollisionManager3dEnabled()) CollisionManager2d.start();
 		throwPageStartedEvent();
 	}
 	

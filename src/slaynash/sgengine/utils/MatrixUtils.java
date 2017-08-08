@@ -1,5 +1,6 @@
 package slaynash.sgengine.utils;
 
+import org.jbox2d.common.Vec2;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
@@ -104,6 +105,14 @@ public class MatrixUtils {
 		matrix.setIdentity();
 		Matrix4f.translate(translation, matrix, matrix);
 		Matrix4f.scale(new Vector3f(scale.x, scale.y, 1f), matrix, matrix);
+		return matrix;
+	}
+
+	public static Matrix4f createTransformationMatrix(Vec2 position, int scale) {
+		Matrix4f matrix = new Matrix4f();
+		matrix.setIdentity();
+		Matrix4f.translate(new Vector2f(position.x, position.y), matrix, matrix);
+		Matrix4f.scale(new Vector3f(scale, scale, 1f), matrix, matrix);
 		return matrix;
 	}
 	

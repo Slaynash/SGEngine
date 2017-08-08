@@ -1,11 +1,9 @@
-package slaynash.sgengine.world3d;
+package slaynash.sgengine.playercharacters;
 
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
 public abstract class PlayerCharacter {
-	
-	public static PlayerCharacter instance;
 	
 	protected Vector3f position = new Vector3f();
 	protected Vector3f viewPosition = new Vector3f();
@@ -43,10 +41,6 @@ public abstract class PlayerCharacter {
 		viewPosition.x = warp.x;
 		viewPosition.y = warp.y;
 		viewPosition.z = warp.z;
-	}
-	
-	public PlayerCharacter(){
-		instance = this;
 	}
 	
 	public void start(){}

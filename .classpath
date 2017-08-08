@@ -13,6 +13,7 @@
 	<classpathentry kind="lib" path="libs/vr/jopenvr-1.0.7_2.jar"/>
 	<classpathentry kind="lib" path="libs/vr/JRift-1.3.0.0.1.jar"/>
 	<classpathentry kind="lib" path="libs/audio/CodecWav.jar"/>
-	<classpathentry kind="lib" path="libs/jamepad_sge_edition_2407170358.jar"/>
+	<classpathentry kind="lib" path="libs/physics/jbox2d_sge_edition_0808171240.jar"/>
+	<classpathentry kind="lib" path="libs/jamepad_sge_edition_2607171819.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

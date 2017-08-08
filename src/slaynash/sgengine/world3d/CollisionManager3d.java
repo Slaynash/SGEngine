@@ -22,7 +22,6 @@ import com.bulletphysics.linearmath.IDebugDraw;
 import com.bulletphysics.util.ObjectArrayList;
 
 import slaynash.sgengine.Configuration;
-import slaynash.sgengine.world3d.loader.Model3dWorld;
 import slaynash.sgengine.world3d.loader.TriangleFace;
 
 public class CollisionManager3d {

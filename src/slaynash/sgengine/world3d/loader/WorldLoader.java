@@ -11,6 +11,7 @@ import java.util.List;
 import org.lwjgl.util.vector.Vector3f;
 
 import slaynash.sgengine.Configuration;
+import slaynash.sgengine.world3d.Model3dWorld;
 
 public class WorldLoader {
 

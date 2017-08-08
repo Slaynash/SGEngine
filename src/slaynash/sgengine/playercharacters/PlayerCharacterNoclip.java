@@ -1,4 +1,4 @@
-package slaynash.sgengine.world3d;
+package slaynash.sgengine.playercharacters;
 
 import org.lwjgl.input.Mouse;
 
@@ -17,7 +17,7 @@ public class PlayerCharacterNoclip extends PlayerCharacter{
 	private static float forward, left, up;
 	
 	public PlayerCharacterNoclip() {
-		super();
+		
 	}
 	
 	@Override

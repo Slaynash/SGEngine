@@ -12,7 +12,7 @@ public class RaycastUtil {
 	private static final float EPSILON = 0.000001f;
 	
 	public static Vector3f intersect3dLoadedWorld(Vector3f start, Vector3f dir, float range){
-		if(Configuration.isCollisionLoadedWith3dWorldLoad()){
+		if(Configuration.isCollisionManager3dEnabled()){
 			
 			javax.vecmath.Vector3f end = new javax.vecmath.Vector3f(start.x+dir.x*range, start.y+dir.y*range, start.z+dir.z*range);
 			ClosestRayResultCallback resultCallback = new ClosestRayResultCallback(new javax.vecmath.Vector3f(start.x, start.y, start.z), end);
@@ -25,7 +25,7 @@ public class RaycastUtil {
 		return null;
 	}
 	
-	public static Vector3f intersect(Vector3f start, Vector3f dir, float range, Vector3f p0, Vector3f p1, Vector3f p2) {
+	public static Vector3f intersect3d(Vector3f start, Vector3f dir, float range, Vector3f p0, Vector3f p1, Vector3f p2) {
 		Vector3f e1 = new Vector3f(), e2 = new Vector3f();
 		Vector3f P = new Vector3f(), Q = new Vector3f(), T = new Vector3f();
 		float det, inv_det, u, v;

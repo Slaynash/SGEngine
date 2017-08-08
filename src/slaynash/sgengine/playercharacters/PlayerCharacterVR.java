@@ -1,4 +1,4 @@
-package slaynash.sgengine.world3d;
+package slaynash.sgengine.playercharacters;
 
 import org.lwjgl.util.vector.Vector3f;
 
@@ -7,7 +7,6 @@ import slaynash.sgengine.utils.VRUtils;
 public class PlayerCharacterVR extends PlayerCharacter {
 	
 	public PlayerCharacterVR() {
-		super();
 		this.isUsingPitchRoll = false;
 	}
 	

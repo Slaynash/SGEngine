@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
+import slaynash.sgengine.playercharacters.PlayerCharacter;
 import slaynash.sgengine.utils.PageManager;
-import slaynash.sgengine.world3d.PlayerCharacter;
 
 public class Configuration {
 
@@ -24,7 +24,8 @@ public class Configuration {
 	private static float fov = 80;
 	private static float znear = 0.1f, zfar = 1000f;
 	private static boolean vr = false;
-	private static boolean worldColl3d = false;
+	private static boolean collisionsLoadedWith3dWorldLoad = false;
+	private static boolean collisionsLoadedWith2dWorldLoad = false;
 	private static PlayerCharacter playerCharacter;
 	private static boolean loadNatives = true;
 	private static int numberOfControllers = 4;
@@ -32,6 +33,8 @@ public class Configuration {
 	private static int ssaaSamples = 4;
 	private static int vrssaaSamples = 4;
 	private static boolean vsync = true;
+	private static boolean collisionManager3dEnabled = false;
+	private static boolean collisionManager2dEnabled = false;
 
 	public static String getAbsoluteInstallPath() {
 		if(installPath.equals("")){
@@ -131,12 +134,36 @@ public class Configuration {
     	return vr;
     }
 
-	public static void setCollisionLoadedWith3dWorldLoad(boolean loadCollisionsWith3dWorldLoad) {
-		worldColl3d = loadCollisionsWith3dWorldLoad;
+	public static void setCollisionLoadedWith3dWorldLoad(boolean collisionsLoadedWith3dWorldLoad) {
+		Configuration.collisionsLoadedWith3dWorldLoad = collisionsLoadedWith3dWorldLoad;
 	}
 	
-	public static boolean isCollisionLoadedWith3dWorldLoad() {
-		return worldColl3d;
+	public static boolean isCollisionsLoadedWith3dWorldLoad() {
+		return collisionsLoadedWith3dWorldLoad;
+	}
+
+	public static void setCollisionLoadedWith2dWorldLoad(boolean collisionsLoadedWith2dWorldLoad) {
+		Configuration.collisionsLoadedWith2dWorldLoad = collisionsLoadedWith2dWorldLoad;
+	}
+	
+	public static boolean isCollisionsLoadedWith2dWorldLoad() {
+		return collisionsLoadedWith2dWorldLoad;
+	}
+	
+	public static void setCollisionManager3dEnabled(boolean collisionManager3dEnabled){
+		Configuration.collisionManager3dEnabled = collisionManager3dEnabled;
+	}
+	
+	public static boolean isCollisionManager3dEnabled(){
+		return collisionManager3dEnabled;
+	}
+	
+	public static void setCollisionManager2dEnabled(boolean collisionManager2dEnabled){
+		Configuration.collisionManager2dEnabled = collisionManager2dEnabled;
+	}
+	
+	public static boolean isCollisionManager2dEnabled(){
+		return collisionManager2dEnabled;
 	}
 
 	public static PlayerCharacter getPlayerCharacter() {
