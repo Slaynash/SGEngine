@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GL32;
 
 public abstract class ShaderProgram {
 
@@ -21,8 +22,10 @@ public abstract class ShaderProgram {
 	public static final int SHADER_LABEL_MODERN = 8;
 	
 	private String vertexShaderPath;
+	private String geometryShaderPath;
 	private String fragmentShaderPath;
 	protected int vertexID;
+	protected int geometryID;
 	protected int fragmentID;
 	protected int programID;
 	private int shaderType = SHADER_NONE;
@@ -34,9 +37,19 @@ public abstract class ShaderProgram {
 		vertexShaderPath = shaderPath+File.separator+vertexShaderName;
 		fragmentShaderPath = shaderPath+File.separator+fragmentShaderName;
 		
-		loadShader();
+		loadShader(false);
 	}
 	
+	public ShaderProgram(String shaderPath, String vertexShaderName, String fragmentShaderName, String geometryShaderName, int shaderType){
+		this.shaderType = shaderType;
+		ShaderManager.registerShader(this);
+		vertexShaderPath = shaderPath+File.separator+vertexShaderName;
+		fragmentShaderPath = shaderPath+File.separator+fragmentShaderName;
+		geometryShaderPath = shaderPath+File.separator+geometryShaderName;
+		
+		loadShader(true);
+	}
+
 	public void cleanup(){
 		GL20.glDetachShader(programID, vertexID);
 		GL20.glDetachShader(programID, fragmentID);
@@ -45,12 +58,14 @@ public abstract class ShaderProgram {
 		GL20.glDeleteProgram(programID);
 	}
 	
-	protected void loadShader(){
+	protected void loadShader(boolean useGeometryShader){
 		vertexID = ShaderManager.loadShader(vertexShaderPath, GL20.GL_VERTEX_SHADER);
 		fragmentID = ShaderManager.loadShader(fragmentShaderPath, GL20.GL_FRAGMENT_SHADER);
+		if(useGeometryShader) geometryID = ShaderManager.loadShader(geometryShaderPath, GL32.GL_GEOMETRY_SHADER);
 		programID = GL20.glCreateProgram();
 		GL20.glAttachShader(programID, vertexID);
 		GL20.glAttachShader(programID, fragmentID);
+		if(useGeometryShader) GL20.glAttachShader(programID, geometryID);
 		bindAttributes();
 		GL20.glLinkProgram(programID);
 		GL20.glValidateProgram(programID);

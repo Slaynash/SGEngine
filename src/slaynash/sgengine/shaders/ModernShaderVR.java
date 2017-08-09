@@ -8,7 +8,7 @@ import slaynash.sgengine.Configuration;
 public class ModernShaderVR extends ModernShader {
 
 	public ModernShaderVR() {
-		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "modernVR.vs", "modernVR.fs", ShaderProgram.SHADER_VR_MODERN);
+		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "modernVR.vs", "modernVR.fs", "modernVR.gs", ShaderProgram.SHADER_VR_MODERN);
 	}
 
 	private int colorTexture_location;
