@@ -204,15 +204,15 @@ public class GUIFrame extends GUIElement {
 	@Override
 	public void render() {
 		renderInside = false;
-		ShaderManager.shaderGUI_loadTranslation(getTopLeft());
+		ShaderManager.shader_loadTranslation(getTopLeft());
 		modelBack.render();
-		ShaderManager.shaderGUI_loadTranslation(new Vector2f());
+		ShaderManager.shader_loadTranslation(new Vector2f());
 		/*
 		float t = getTopLeft().y;
 		float l = getTopLeft().x;
 		float b = getBottomRight().y;
 		float r = getBottomRight().x;
-		ShaderManager.shader2d_bindTextureID(backID, ShaderManager.TEXTURE_COLOR);
+		ShaderManager.shader_bindTextureID(backID, ShaderManager.TEXTURE_COLOR);
 		GL11.glBegin(GL11.GL_QUADS);
 			GL11.glTexCoord2f(0      , 0);
 			GL11.glVertex2f  (l+leftPadding, t+topPadding);
@@ -230,7 +230,7 @@ public class GUIFrame extends GUIElement {
 		for(GUIElement child:getChildrens()) if(child.getClass() == GUIComboBox.class && (((GUIComboBox)child).isExpanded()|| isInElement(child, mousePos) )) child.render();
 		renderInside = false;
 		
-		ShaderManager.shaderGUI_loadTranslation(getTopLeft());
+		ShaderManager.shader_loadTranslation(getTopLeft());
 		modelBottom.render();
 		
 		if(!isFocused()) modelTop.setTexture(texTop);
@@ -242,14 +242,14 @@ public class GUIFrame extends GUIElement {
 		
 		if(title != null) title.render();
 
-		ShaderManager.shaderGUI_loadTranslation(getTopLeft());
+		ShaderManager.shader_loadTranslation(getTopLeft());
 		
-		if(mouseInClose) ShaderManager.shaderGUI_setColorsInverted(true);
+		if(mouseInClose) ShaderManager.shader_setColorsInverted(true);
 		
 		modelClose.render();
 
-		if(mouseInClose) ShaderManager.shaderGUI_setColorsInverted(false);
-		ShaderManager.shaderGUI_loadTranslation(new Vector2f());
+		if(mouseInClose) ShaderManager.shader_setColorsInverted(false);
+		ShaderManager.shader_loadTranslation(new Vector2f());
 		
 		renderInside = true;
 		
@@ -272,7 +272,7 @@ public class GUIFrame extends GUIElement {
 		
 		
 		/*
-		ShaderManager.shader2d_bindTextureID(bottomID, ShaderManager.TEXTURE_COLOR);
+		ShaderManager.shader_bindTextureID(bottomID, ShaderManager.TEXTURE_COLOR);
 		GL11.glBegin(GL11.GL_QUADS);
 			GL11.glTexCoord2f(0      , 0);
 			GL11.glVertex2f  (l      , b-bottomPadding);
@@ -283,8 +283,8 @@ public class GUIFrame extends GUIElement {
 			GL11.glTexCoord2f(0      , 1);
 			GL11.glVertex2f  (l      , b);
 		GL11.glEnd();
-		if(!isFocused()) ShaderManager.shader2d_bindTextureID(topID, ShaderManager.TEXTURE_COLOR);
-		else ShaderManager.shader2d_bindTextureID(topFocusedID, ShaderManager.TEXTURE_COLOR);
+		if(!isFocused()) ShaderManager.shader_bindTextureID(topID, ShaderManager.TEXTURE_COLOR);
+		else ShaderManager.shader_bindTextureID(topFocusedID, ShaderManager.TEXTURE_COLOR);
 		GL11.glBegin(GL11.GL_QUADS);
 			GL11.glTexCoord2f(0      , 0);
 			GL11.glVertex2f  (l      , t);
@@ -295,7 +295,7 @@ public class GUIFrame extends GUIElement {
 			GL11.glTexCoord2f(0      , 1);
 			GL11.glVertex2f  (l      , t+topPadding);
 		GL11.glEnd();
-		ShaderManager.shader2d_bindTextureID(sideID, ShaderManager.TEXTURE_COLOR);
+		ShaderManager.shader_bindTextureID(sideID, ShaderManager.TEXTURE_COLOR);
 		GL11.glBegin(GL11.GL_QUADS);
 			GL11.glTexCoord2f(0      , 0);
 			GL11.glVertex2f  (l      , t+topPadding);
@@ -321,8 +321,8 @@ public class GUIFrame extends GUIElement {
 		float ctX = r-(topPadding/2)-1;
 		float ctY = t+(topPadding/2);
 		float hs = topPadding/2-2;
-		ShaderManager.shader2d_bindTextureID(closeID, ShaderManager.TEXTURE_COLOR);
-		if(mouseInClose) ShaderManager.shader2d_setColorsInverted(true);
+		ShaderManager.shader_bindTextureID(closeID, ShaderManager.TEXTURE_COLOR);
+		if(mouseInClose) ShaderManager.shader_setColorsInverted(true);
 		GL11.glBegin(GL11.GL_QUADS);
 			GL11.glTexCoord2f(0      , 0);
 			GL11.glVertex2f  (ctX-hs      , ctY-hs);
@@ -333,7 +333,7 @@ public class GUIFrame extends GUIElement {
 			GL11.glTexCoord2f(0      , 1);
 			GL11.glVertex2f  (ctX-hs      , ctY+hs);
 		GL11.glEnd();
-		if(mouseInClose) ShaderManager.shader2d_setColorsInverted(false);
+		if(mouseInClose) ShaderManager.shader_setColorsInverted(false);
 		renderInside = true;
 		/*
 		GL11.glBegin(GL11.GL_QUADS);
@@ -403,7 +403,7 @@ public class GUIFrame extends GUIElement {
 				Vector2f mouseD = new Vector2f(mousePos.x - mouseOldPos.x, mousePos.y - mouseOldPos.y);
 				translate(mouseD);
 				mouseOldPos = new Vector2f(mousePos);
-				//System.out.println("frame moved to "+mouseD.x+";"+mouseD.y);
+				//LogSystem.out_println("frame moved to "+mouseD.x+";"+mouseD.y);
 				return;
 			}
 		}

@@ -5,6 +5,7 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
 import slaynash.sgengine.Configuration;
+import slaynash.sgengine.deferredRender.DeferredRenderer;
 import slaynash.sgengine.shaders.ShaderManager;
 import slaynash.sgengine.textureUtils.TextureDef;
 import slaynash.sgengine.textureUtils.TextureManager;
@@ -20,6 +21,7 @@ public class Renderable3dModel extends RenderableModel {
 	private VAO vao;
 	private boolean isIndexed = false;
 	private boolean renderable = true;
+	private boolean drRegistered = false;
 	
 	public Renderable3dModel(float[] vertices, float[] textureCoords, float[] normals, float[] tangents, TextureDef textureColor, TextureDef textureNormal, TextureDef textureSpecular){
 		isIndexed = true;
@@ -42,6 +44,11 @@ public class Renderable3dModel extends RenderableModel {
 			int[] indices = new int[vertices.length/3];
 			for(int i=0;i<indices.length;i++) indices[i] = i;
 			vao = VOLoader.loadToVAO(vertices, textureCoords, normals, tangents, indices);
+		}
+		
+		if(Configuration.isUsingDeferredRender() && !drRegistered){
+			drRegistered = true;
+			DeferredRenderer.registerModelRenderer(this, Renderable3dModelDeferredRender.class);
 		}
 		
 	}
@@ -67,55 +74,67 @@ public class Renderable3dModel extends RenderableModel {
 			vao = VOLoader.loadToVAO(vertices, textureCoords, normals, tangents, indices);
 		}
 		
+		if(Configuration.isUsingDeferredRender() && !drRegistered){
+			drRegistered = true;
+			DeferredRenderer.registerModelRenderer(this, Renderable3dModelDeferredRender.class);
+		}
+		
 	}
 	
 	@Override
 	protected void renderFree() {
 		if(!renderable) return;
-		//TODO add ShaderManager.shader3d_bindShineDamper(shineDamper);
-		//TODO add ShaderManager.shader3d_bindReflectivity(reflectivity);
-		ShaderManager.shader3d_bindTextureID(textureColor.getTextureID(), ShaderManager.TEXTURE_COLOR);
-		ShaderManager.shader3d_bindTextureID(textureNormal.getTextureID(), ShaderManager.TEXTURE_NORMAL);
-		ShaderManager.shader3d_bindTextureID(textureSpecular.getTextureID(), ShaderManager.TEXTURE_SPECULAR);
-		GL11.glCallList(listId);
+		else{
+			//TODO add ShaderManager.shader_bindShineDamper(shineDamper);
+			//TODO add ShaderManager.shader_bindReflectivity(reflectivity);
+			ShaderManager.shader_bindTextureID(textureColor.getTextureID(), ShaderManager.TEXTURE_COLOR);
+			ShaderManager.shader_bindTextureID(textureNormal.getTextureID(), ShaderManager.TEXTURE_NORMAL);
+			ShaderManager.shader_bindTextureID(textureSpecular.getTextureID(), ShaderManager.TEXTURE_SPECULAR);
+			GL11.glCallList(listId);
+		}
 	}
 
 	@Override
 	protected void renderModern() {
 		if(!renderable) return;
-		GL30.glBindVertexArray(vao.getVaoID());
-		GL20.glEnableVertexAttribArray(0);
-		GL20.glEnableVertexAttribArray(1);
-		GL20.glEnableVertexAttribArray(2);
-		GL20.glEnableVertexAttribArray(3);
-		//TODO add ShaderManager.shader3d_bindShineDamper(shineDamper);
-		//TODO add ShaderManager.shader3d_bindReflectivity(reflectivity);
-		ShaderManager.shader3d_bindTextureID(textureColor.getTextureID(), ShaderManager.TEXTURE_COLOR);
-		ShaderManager.shader3d_bindTextureID(textureNormal.getTextureID(), ShaderManager.TEXTURE_NORMAL);
-		ShaderManager.shader3d_bindTextureID(textureSpecular.getTextureID(), ShaderManager.TEXTURE_SPECULAR);
-		if(isIndexed) GL11.glDrawElements(GL11.GL_TRIANGLES, vao.getVertexCount(), GL11.GL_UNSIGNED_INT, 0); else GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, vao.getVertexCount());
-	}
-	
-	@Override
-	public void renderVR() {
-		if(!renderable) return;
-		if(Configuration.getRenderMethod() == Configuration.RENDER_FREE){
-			ShaderManager.shaderVR_bindTextureID(textureColor.getTextureID(), ShaderManager.TEXTURE_COLOR);
-			ShaderManager.shaderVR_bindTextureID(textureNormal.getTextureID(), ShaderManager.TEXTURE_NORMAL);
-			ShaderManager.shaderVR_bindTextureID(textureSpecular.getTextureID(), ShaderManager.TEXTURE_SPECULAR);
-			GL11.glCallList(listId);
-		}else{
+		else{
 			GL30.glBindVertexArray(vao.getVaoID());
 			GL20.glEnableVertexAttribArray(0);
 			GL20.glEnableVertexAttribArray(1);
 			GL20.glEnableVertexAttribArray(2);
 			GL20.glEnableVertexAttribArray(3);
-			//TODO add ShaderManager.shader3d_bindShineDamper(shineDamper);
-			//TODO add ShaderManager.shader3d_bindReflectivity(reflectivity);
-			ShaderManager.shader3d_bindTextureID(textureColor.getTextureID(), ShaderManager.TEXTURE_COLOR);
-			ShaderManager.shader3d_bindTextureID(textureNormal.getTextureID(), ShaderManager.TEXTURE_NORMAL);
-			ShaderManager.shader3d_bindTextureID(textureSpecular.getTextureID(), ShaderManager.TEXTURE_SPECULAR);
+			//TODO add ShaderManager.shader_bindShineDamper(shineDamper);
+			//TODO add ShaderManager.shader_bindReflectivity(reflectivity);
+			ShaderManager.shader_bindTextureID(textureColor.getTextureID(), ShaderManager.TEXTURE_COLOR);
+			ShaderManager.shader_bindTextureID(textureNormal.getTextureID(), ShaderManager.TEXTURE_NORMAL);
+			ShaderManager.shader_bindTextureID(textureSpecular.getTextureID(), ShaderManager.TEXTURE_SPECULAR);
 			if(isIndexed) GL11.glDrawElements(GL11.GL_TRIANGLES, vao.getVertexCount(), GL11.GL_UNSIGNED_INT, 0); else GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, vao.getVertexCount());
+		}
+	}
+	
+	@Override
+	public void renderVR() {
+		
+		if(!renderable) return;
+		else{
+			if(Configuration.getRenderMethod() == Configuration.RENDER_FREE){
+				ShaderManager.shader_bindTextureID(textureColor.getTextureID(), ShaderManager.TEXTURE_COLOR);
+				ShaderManager.shader_bindTextureID(textureNormal.getTextureID(), ShaderManager.TEXTURE_NORMAL);
+				ShaderManager.shader_bindTextureID(textureSpecular.getTextureID(), ShaderManager.TEXTURE_SPECULAR);
+				GL11.glCallList(listId);
+			}else{
+				GL30.glBindVertexArray(vao.getVaoID());
+				GL20.glEnableVertexAttribArray(0);
+				GL20.glEnableVertexAttribArray(1);
+				GL20.glEnableVertexAttribArray(2);
+				GL20.glEnableVertexAttribArray(3);
+				//TODO add ShaderManager.shader_bindShineDamper(shineDamper);
+				//TODO add ShaderManager.shader_bindReflectivity(reflectivity);
+				ShaderManager.shader_bindTextureID(textureColor.getTextureID(), ShaderManager.TEXTURE_COLOR);
+				ShaderManager.shader_bindTextureID(textureNormal.getTextureID(), ShaderManager.TEXTURE_NORMAL);
+				ShaderManager.shader_bindTextureID(textureSpecular.getTextureID(), ShaderManager.TEXTURE_SPECULAR);
+				if(isIndexed) GL11.glDrawElements(GL11.GL_TRIANGLES, vao.getVertexCount(), GL11.GL_UNSIGNED_INT, 0); else GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, vao.getVertexCount());
+			}
 		}
 	}
 	
@@ -127,5 +146,23 @@ public class Renderable3dModel extends RenderableModel {
 		vao.dispose();
 		renderable = false;
 	}
+
+	public boolean isIndexed() {
+		return isIndexed;
+	}
+	
+	public VAO getVao(){
+		return vao;
+	}
+
+	public int[] getTextureIds() {
+		return new int[]{textureColor.getTextureID(), textureNormal.getTextureID(), textureSpecular.getTextureID()};
+	}
+
+	public int getListId() {
+		return listId;
+	}
+	
+	
 	
 }

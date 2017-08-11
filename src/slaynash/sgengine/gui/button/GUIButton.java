@@ -63,9 +63,9 @@ public class GUIButton extends GUIElement{
 		// DRAW PART
 		if(backgroundEnabled){
 			
-			ShaderManager.shaderGUI_loadTranslation(getTopLeft());
+			ShaderManager.shader_loadTranslation(getTopLeft());
 			model.render();
-			ShaderManager.shaderGUI_loadTranslation(new Vector2f());
+			ShaderManager.shader_loadTranslation(new Vector2f());
 			
 		}
 		if(textEnable){

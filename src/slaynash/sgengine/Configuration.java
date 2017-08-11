@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
+import slaynash.sgengine.deferredRender.DRSortingMethod;
 import slaynash.sgengine.playercharacters.PlayerCharacter;
 import slaynash.sgengine.utils.PageManager;
 
@@ -35,14 +36,18 @@ public class Configuration {
 	private static boolean vsync = true;
 	private static boolean collisionManager3dEnabled = false;
 	private static boolean collisionManager2dEnabled = false;
+	private static boolean deferredRender = false;
+	private static boolean deferredRenderShadows = false;
+	private static DRSortingMethod deferredRenderSorting = DRSortingMethod.TEXTURES_FOR_OBJECTS;
+	private static boolean cleanBetweenDeferredRenderEnabled = true;
 
 	public static String getAbsoluteInstallPath() {
 		if(installPath.equals("")){
 			try {
 				String path = Configuration.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 				installPath = new File(URLDecoder.decode(path, "UTF-8")).getParent();
-				System.out.println("[Configuration] Root directory: "+installPath);
-			}catch (UnsupportedEncodingException e1) {e1.printStackTrace();}
+				LogSystem.out_println("[Configuration] Root directory: "+installPath);
+			}catch (UnsupportedEncodingException e1) {e1.printStackTrace(LogSystem.getErrStream());}
 		}
 		return installPath;
 	}
@@ -127,7 +132,7 @@ public class Configuration {
     	if(!PageManager.isInitialized()){
     		vr = enable;
     	}
-    	else System.out.println("[PageManager] Display manager already initialized ! Please enable or disable VR before !");
+    	else LogSystem.out_println("[PageManager] Display manager already initialized ! Please enable or disable VR before !");
     }
     
     public static boolean isVR(){
@@ -222,5 +227,39 @@ public class Configuration {
 	public static void enableVSync(boolean vsync) {
 		Configuration.vsync = vsync;
 	}
+
+	public static boolean isUsingDeferredRender() {
+		return deferredRender;
+	}
+
+	public static void useDeferedRender(boolean deferredRender) {
+		Configuration.deferredRender = deferredRender;
+	}
+
+	public static boolean isUsingDeferredRenderShadows() {
+		return deferredRenderShadows;
+	}
+
+	public static void useDeferredRenderShadows(boolean deferredRenderShadows) {
+		Configuration.deferredRenderShadows = deferredRenderShadows;
+	}
+	
+	public static void setDeferredRenderSortingMethod(DRSortingMethod method) {
+		Configuration.deferredRenderSorting = method;
+	}
+	
+	public static DRSortingMethod getDeferredRenderSortingMethod() {
+		return deferredRenderSorting;
+	}
+
+	public static boolean isCleanBetweenDeferredRenderEnabled() {
+		return cleanBetweenDeferredRenderEnabled;
+	}
+
+	public static void setCleanBetweenDeferredRenderEnabled(boolean cleanBetweenDeferredRenderEnabled) {
+		Configuration.cleanBetweenDeferredRenderEnabled = cleanBetweenDeferredRenderEnabled;
+	}
+	
+	
 	
 }

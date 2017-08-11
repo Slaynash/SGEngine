@@ -11,6 +11,8 @@ import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureImpl;
 import org.newdawn.slick.opengl.renderer.SGL;
 
+import slaynash.sgengine.LogSystem;
+
 public class TextureDef {
 	
 	private Texture texture;
@@ -61,11 +63,11 @@ public class TextureDef {
 		 
 		byte[] texbytes = texture.getTextureData();
 		int components = texbytes.length / (width*height);
-		//System.out.println(components);
+		//LogSystem.out_println(components);
 		ByteBuffer texdata = ByteBuffer.allocate(texbytes.length);
 		texdata.put(texbytes);
 		texdata.rewind();
-		System.out.println(components+"/"+width+"/"+height);
+		LogSystem.out_println(components+"/"+width+"/"+height);
 		//GLU.gluBuild2DMipmaps(GL_TEXTURE_2D, components, width, height, GL_RGB, GL_UNSIGNED_BYTE, texdata);
 		//MipMap.gluBuild2DMipmaps(GL_TEXTURE_2D, components, width, height, (components==3 ? GL_RGB : GL_RGBA), GL_UNSIGNED_BYTE, texdata);
 		 

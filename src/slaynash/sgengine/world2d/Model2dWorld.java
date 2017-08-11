@@ -31,7 +31,7 @@ public class Model2dWorld {
 	}
 
 	public void render() {
-		ShaderManager.shader2d_loadTransformationMatrix(MatrixUtils.createTransformationMatrix(position, 1));
+		ShaderManager.shader_loadTransformationMatrix(MatrixUtils.createTransformationMatrix(position, 1));
 		model.render();
 	}
 

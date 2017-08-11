@@ -6,9 +6,10 @@ import java.util.List;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
-import slaynash.sgengine.models.Renderable2dModel;
+import slaynash.sgengine.LogSystem;
 import slaynash.sgengine.gui.GUIElement;
 import slaynash.sgengine.gui.text2d.Text2d;
+import slaynash.sgengine.models.Renderable2dModel;
 import slaynash.sgengine.shaders.ShaderManager;
 import slaynash.sgengine.textureUtils.TextureDef;
 import slaynash.sgengine.textureUtils.TextureManager;
@@ -66,7 +67,7 @@ public class GUIComboBox extends GUIElement{ //TODO create events for comboBox
 				}
 				else{
 					Vector2f mousePos = UserInputUtil.getMousePos();
-					System.out.println("[GUICombobox] "+mousePos.y);
+					LogSystem.out_println("[GUICombobox] "+mousePos.y);
 					if(mousePos.y <= getTopLeft().y+20)
 						close();
 					else{
@@ -81,20 +82,20 @@ public class GUIComboBox extends GUIElement{ //TODO create events for comboBox
 		}
 
 		int err = 0;
-		if((err = GL11.glGetError()) != 0) System.out.println("0:"+err);
+		if((err = GL11.glGetError()) != 0) LogSystem.out_println("0:"+err);
 		
-		ShaderManager.shaderGUI_setComboBoxMode(true);
-		ShaderManager.shaderGUI_loadComboBoxCuts(getTopLeft().y, getBottomRight().y);
+		ShaderManager.shader_setComboBoxMode(true);
+		ShaderManager.shader_loadComboBoxCuts(getTopLeft().y, getBottomRight().y);
 		
-		if((err = GL11.glGetError()) != 0) System.out.println("1:"+err);
+		if((err = GL11.glGetError()) != 0) LogSystem.out_println("1:"+err);
 		
 		for(int i=0;i<listText.size();i++){
 			if(i<listText.size()-1) modelBox.setTexture(texMiddle);
 			else modelBox.setTexture(texEnd);
 			
-			ShaderManager.shaderGUI_loadTranslation(new Vector2f(getTopLeft().x, getTopLeft().y+(i+1)*20));
+			ShaderManager.shader_loadTranslation(new Vector2f(getTopLeft().x, getTopLeft().y+(i+1)*20));
 			modelBox.render();
-			ShaderManager.shaderGUI_loadTranslation(new Vector2f());
+			ShaderManager.shader_loadTranslation(new Vector2f());
 			/*
 			GL11.glBegin(GL11.GL_QUADS);
 				GL11.glTexCoord2f(0      , 0);
@@ -110,7 +111,7 @@ public class GUIComboBox extends GUIElement{ //TODO create events for comboBox
 			listText.get(i).render();
 		}
 		
-		ShaderManager.shaderGUI_loadTranslation(getTopLeft());
+		ShaderManager.shader_loadTranslation(getTopLeft());
 		modelBox.setTexture(texBox);
 		modelBox.render();
 		/*
@@ -127,7 +128,7 @@ public class GUIComboBox extends GUIElement{ //TODO create events for comboBox
 		*/
 		selectedText.render();
 		
-		ShaderManager.shaderGUI_loadTranslation(new Vector2f(getBottomRight().x, getTopLeft().y));
+		ShaderManager.shader_loadTranslation(new Vector2f(getBottomRight().x, getTopLeft().y));
 		modelExp.render();
 		/*
 		GL11.glBegin(GL11.GL_QUADS);
@@ -141,12 +142,12 @@ public class GUIComboBox extends GUIElement{ //TODO create events for comboBox
 			GL11.glVertex2f  (getBottomRight().x-20, getTopLeft().y+20);
 		GL11.glEnd();
 		*/
-		ShaderManager.shaderGUI_loadTranslation(new Vector2f());
+		ShaderManager.shader_loadTranslation(new Vector2f());
 		
-		ShaderManager.shaderGUI_setComboBoxMode(false);
+		ShaderManager.shader_setComboBoxMode(false);
 		
 
-		if((err = GL11.glGetError()) != 0) System.out.println("[GUIComboBox] Opengl error "+err);
+		if((err = GL11.glGetError()) != 0) LogSystem.out_println("[GUIComboBox] Opengl error "+err);
 	}
 	
 	private void open(){

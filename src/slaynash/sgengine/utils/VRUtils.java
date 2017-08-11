@@ -30,6 +30,7 @@ import jopenvr.VRTextureBounds_t;
 import jopenvr.VR_IVRCompositor_FnTable;
 import jopenvr.VR_IVRSystem_FnTable;
 import slaynash.sgengine.Configuration;
+import slaynash.sgengine.LogSystem;
 import slaynash.sgengine.models.Renderable3dModel;
 import slaynash.sgengine.objloader.ObjLoader;
 import slaynash.sgengine.shaders.ShaderManager;
@@ -113,7 +114,7 @@ public class VRUtils {
 	}
 	
 	protected static boolean initVR() {
-		System.out.println("[VRUtils] initializing OpenVR...");
+		LogSystem.out_println("[VRUtils] initializing OpenVR...");
 		if(JOpenVRLibrary.VR_IsRuntimeInstalled() == 0){
 			initStatus = "SteamVR not detected on this platform.";
 			return false;
@@ -126,8 +127,8 @@ public class VRUtils {
 			initializeJOpenVR();
 			initOpenVRCompositor(true);
 		} catch (Exception e) {
-			System.out.println("[VRUtils] Unable to initialize JOpenVR");
-			e.printStackTrace();
+			LogSystem.out_println("[VRUtils] Unable to initialize JOpenVR");
+			e.printStackTrace(LogSystem.getErrStream());
 			initSuccess = false;
 			initStatus = e.getLocalizedMessage();
 			return false;
@@ -135,15 +136,15 @@ public class VRUtils {
 		
 		initTextureSubmitStructs();
 		
-		System.out.println( "[VRUtils] OpenVR initialized & VR connected." );
+		LogSystem.out_println( "[VRUtils] OpenVR initialized & VR connected." );
 		
 		rendersize = getRenderSize();
-		System.out.println("[VRUtils] Render size: "+rendersize.x+"x"+rendersize.y);
+		LogSystem.out_println("[VRUtils] Render size: "+rendersize.x+"x"+rendersize.y);
 	    initFBOs(rendersize.x, rendersize.y, rendersize.x, rendersize.y);
 	    initRBOs(rendersize.x, rendersize.y, rendersize.x, rendersize.y);
-		System.out.println( "[VRUtils] Render buffers/textures created" );
+		LogSystem.out_println( "[VRUtils] Render buffers/textures created" );
 		setupCameras();
-		System.out.println( "[VRUtils] Matrices created" );
+		LogSystem.out_println( "[VRUtils] Matrices created" );
 		initialized = true;
 		return true;
 	}
@@ -305,7 +306,7 @@ public class VRUtils {
 			vrsystem.setAutoSynch(false);
 			vrsystem.read();
 			
-			System.out.println("[VRUtils] OpenVR initialized & VR connected.");
+			LogSystem.out_println("[VRUtils] OpenVR initialized & VR connected.");
 
 			hmdDisplayFrequency = IntBuffer.allocate(1);
 			hmdDisplayFrequency.put( JOpenVRLibrary.ETrackedDeviceProperty.ETrackedDeviceProperty_Prop_DisplayFrequency_Float);
@@ -323,7 +324,7 @@ public class VRUtils {
 		if( set && vrsystem.GetFloatTrackedDeviceProperty != null ) {
 			vrCompositor = new VR_IVRCompositor_FnTable(JOpenVRLibrary.VR_GetGenericInterface(JOpenVRLibrary.IVRCompositor_Version, hmdErrorStore));
 			if(vrCompositor != null && hmdErrorStore.get(0) == 0){                
-				System.out.println("[VRUtils] OpenVR Compositor initialized OK.");
+				LogSystem.out_println("[VRUtils] OpenVR Compositor initialized OK.");
 				vrCompositor.setAutoSynch(false);
 				vrCompositor.read();
 				vrCompositor.SetTrackingSpace.apply(JOpenVRLibrary.ETrackingUniverseOrigin.ETrackingUniverseOrigin_TrackingUniverseStanding);
@@ -332,7 +333,7 @@ public class VRUtils {
 			}
 		}
 		if( vrCompositor == null ) {
-			System.out.println("[VRUtils] Skipping VR Compositor...");
+			LogSystem.out_println("[VRUtils] Skipping VR Compositor...");
 			if( vrsystem != null ) {
 				vsyncToPhotons = vrsystem.GetFloatTrackedDeviceProperty.apply(JOpenVRLibrary.k_unTrackedDeviceIndex_Hmd, JOpenVRLibrary.ETrackedDeviceProperty.ETrackedDeviceProperty_Prop_SecondsFromVsyncToPhotons_Float, hmdErrorStore);
 			} else {
@@ -373,7 +374,7 @@ public class VRUtils {
 		texType1.setAutoRead(false);
 		texType1.setAutoWrite(false);
 		
-		System.out.println("[VRUtils] OpenVR Compositor initialized OK.");
+		LogSystem.out_println("[VRUtils] OpenVR Compositor initialized OK.");
 
 	}
 	
@@ -393,8 +394,8 @@ public class VRUtils {
             
             if( enableDebugLatency ) {
                 if( frames == 10 ) {
-                    System.out.println("[VRUtils] Waited (nanos): " + Long.toString(latencyWaitTime));
-                    System.out.println("[VRUtils] Predict ahead time: " + Float.toString(fSecondsUntilPhotons));
+                    LogSystem.out_println("[VRUtils] Waited (nanos): " + Long.toString(latencyWaitTime));
+                    LogSystem.out_println("[VRUtils] Predict ahead time: " + Float.toString(fSecondsUntilPhotons));
                 }
                 frames = (frames + 1) % 60;            
             }            
@@ -403,7 +404,7 @@ public class VRUtils {
             long nowCount = _tframeCount;
             if( nowCount - frameCount > 1 ) {
                 // skipped a frame!
-                if( enableDebugLatency ) System.out.println("[VRUtils] Frame skipped!");
+                if( enableDebugLatency ) LogSystem.out_println("[VRUtils] Frame skipped!");
                 frameCountRun = 0;
                 if( latencyWaitTime > 0 ) {
                     latencyWaitTime -= TimeUnit.MILLISECONDS.toNanos(1);
@@ -508,7 +509,7 @@ public class VRUtils {
 		GL30.glBlitFramebuffer(0, 0, rendersize.x, rendersize.y, 0, 0, rendersize.x, rendersize.y, GL11.GL_COLOR_BUFFER_BIT, GL11.GL_NEAREST);
 		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
 
-		//System.out.println("fill rbos: "+(System.nanoTime()-pinnedTime)+"ns");
+		//LogSystem.out_println("fill rbos: "+(System.nanoTime()-pinnedTime)+"ns");
 		//pinnedTime = System.nanoTime();
 		
 		vrCompositor.Submit.apply(
@@ -524,7 +525,7 @@ public class VRUtils {
 		vrCompositor.PostPresentHandoff.apply();//require ?
 		GL11.glEnable(GL13.GL_MULTISAMPLE);
 		
-		//System.out.println("send frames: "+(System.nanoTime()-pinnedTime)+"ns");
+		//LogSystem.out_println("send frames: "+(System.nanoTime()-pinnedTime)+"ns");
 	}
 	
 	private static void sleepNanos(long nanoDuration) {
@@ -697,7 +698,7 @@ public class VRUtils {
     private static void processVREvent(VREvent_t event) {
     	
     	if(event.eventType >= 700 && event.eventType <= 704 && event.eventType != 701){
-    		System.out.println("[VRUtils] Close requested by SteamVR... (id: "+event.eventType+")");
+    		LogSystem.out_println("[VRUtils] Close requested by SteamVR... (id: "+event.eventType+")");
     		isCloseRequested = true;
     	}
     	
@@ -705,15 +706,15 @@ public class VRUtils {
     	
         switch (event.eventType) {
             case JOpenVRLibrary.EVREventType.EVREventType_VREvent_TrackedDeviceActivated:
-                System.out.printf("[VRUtils] Device %d attached. Setting up render model.\n", event.trackedDeviceIndex);
+                LogSystem.out_printf("[VRUtils] Device %d attached. Setting up render model.\n", event.trackedDeviceIndex);
                 break;
 
             case JOpenVRLibrary.EVREventType.EVREventType_VREvent_TrackedDeviceDeactivated:
-                System.out.printf("[VRUtils] Device %d detached.\n", event.trackedDeviceIndex);
+                LogSystem.out_printf("[VRUtils] Device %d detached.\n", event.trackedDeviceIndex);
                 break;
 
             case JOpenVRLibrary.EVREventType.EVREventType_VREvent_TrackedDeviceUpdated:
-                System.out.printf("[VRUtils] Device %d updated.\n", event.trackedDeviceIndex);
+                LogSystem.out_printf("[VRUtils] Device %d updated.\n", event.trackedDeviceIndex);
                 break;
         }
     }
@@ -738,7 +739,7 @@ public class VRUtils {
 			if(trackedDevicePose[i].bPoseIsValid != 1) continue;
 			switch(vrsystem.GetTrackedDeviceClass.apply(i)){
 				case JOpenVRLibrary.ETrackedDeviceClass.ETrackedDeviceClass_TrackedDeviceClass_Controller:
-					ShaderManager.shaderVR_loadTransformationMatrix(Matrix4f.mul(envMatrix, mat4DevicePose[i], new Matrix4f()));
+					ShaderManager.shader_loadTransformationMatrix(Matrix4f.mul(envMatrix, mat4DevicePose[i], new Matrix4f()));
 					controllerModel.renderVR();
 					break;
 			}
@@ -751,7 +752,7 @@ public class VRUtils {
 			if(trackedDevicePose[i].bPoseIsValid != 1) continue;
 			switch(vrsystem.GetTrackedDeviceClass.apply(i)){
 				case JOpenVRLibrary.ETrackedDeviceClass.ETrackedDeviceClass_TrackedDeviceClass_TrackingReference:
-					ShaderManager.shaderVR_loadTransformationMatrix(Matrix4f.mul(envMatrix, mat4DevicePose[i], new Matrix4f()));
+					ShaderManager.shader_loadTransformationMatrix(Matrix4f.mul(envMatrix, mat4DevicePose[i], new Matrix4f()));
 					basestationModel.renderVR();
 					break;
 			}
@@ -765,7 +766,7 @@ public class VRUtils {
 			if(trackedDevicePose[i].bPoseIsValid != 1) continue;
 			switch(vrsystem.GetTrackedDeviceClass.apply(i)){
 				case JOpenVRLibrary.ETrackedDeviceClass.ETrackedDeviceClass_TrackedDeviceClass_Controller:
-					ShaderManager.shader3d_loadTransformationMatrix(Matrix4f.mul(envMatrix, mat4DevicePose[i], new Matrix4f()));
+					ShaderManager.shader_loadTransformationMatrix(Matrix4f.mul(envMatrix, mat4DevicePose[i], new Matrix4f()));
 					controllerModel.render();
 					break;
 			}
@@ -778,7 +779,7 @@ public class VRUtils {
 			if(trackedDevicePose[i].bPoseIsValid != 1) continue;
 			switch(vrsystem.GetTrackedDeviceClass.apply(i)){
 				case JOpenVRLibrary.ETrackedDeviceClass.ETrackedDeviceClass_TrackedDeviceClass_TrackingReference:
-					ShaderManager.shader3d_loadTransformationMatrix(Matrix4f.mul(envMatrix, mat4DevicePose[i], new Matrix4f()));
+					ShaderManager.shader_loadTransformationMatrix(Matrix4f.mul(envMatrix, mat4DevicePose[i], new Matrix4f()));
 					basestationModel.render();
 					break;
 			}

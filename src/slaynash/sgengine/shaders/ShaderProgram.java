@@ -1,11 +1,19 @@
 package slaynash.sgengine.shaders;
 
 import java.io.File;
+import java.nio.FloatBuffer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL32;
+import org.lwjgl.util.vector.Matrix4f;
+import org.lwjgl.util.vector.Vector2f;
+import org.lwjgl.util.vector.Vector3f;
+
+import slaynash.sgengine.LogSystem;
 
 public abstract class ShaderProgram {
 
@@ -30,6 +38,10 @@ public abstract class ShaderProgram {
 	protected int programID;
 	private int shaderType = SHADER_NONE;
 	private Map<String, Integer> locations = new HashMap<String, Integer>();
+	private Map<String, Object> datas = new HashMap<String, Object>();
+	
+	
+	private static FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
 
 	public ShaderProgram(String shaderPath, String vertexShaderName, String fragmentShaderName, int shaderType){
 		this.shaderType = shaderType;
@@ -72,18 +84,23 @@ public abstract class ShaderProgram {
 		GL20.glUseProgram(programID);
 		getAllUniformLocations();
 		connectTextureUnits();
-		System.out.println("[ShaderProgram] Shader loaded ! Type: "+shaderType);
+		LogSystem.out_println("[ShaderProgram] Shader loaded ! Type: "+shaderType);
 	}
 
 	protected abstract void bindAttributes();
 	protected abstract void getAllUniformLocations();
 	protected abstract void connectTextureUnits();
-	protected abstract void prepare();
-	protected abstract void stop();
+	public abstract void prepare();
+	public abstract void stop();
+
+	public abstract void bindModel(int modelID);
 	
 	public void use(){
 		ShaderManager.useShader(this);
-		prepare();
+	}
+	
+	public void useDirect(){
+		ShaderManager.useShaderDirect(this);
 	}
 	
 
@@ -102,12 +119,50 @@ public abstract class ShaderProgram {
 		return shaderType;
 	}
 
-	public int getLocation(String string) {
+	protected int getLocation(String string) {
 		Integer key = locations.get(string);
 		if(key == null){
 			System.err.println("[ShaderProgram] Uniform "+string+" not found in shader !");
 			return -1;
 		}
 		return key;
+	}
+	
+	public void bindData(String locationName, Object value){
+		if(value.equals(datas.get(locationName))) return;
+		else datas.put(locationName, value);
+		int location = getLocation(locationName);
+		if(location != -1){
+			if(value instanceof Matrix4f){
+				((Matrix4f) value).store(matrixBuffer);
+				matrixBuffer.flip();
+				GL20.glUniformMatrix4(location, false, matrixBuffer);
+			}else if(value instanceof Float){
+				GL20.glUniform1f(location, (Float)value);
+			}else if(value instanceof Integer){
+				GL20.glUniform1f(location, (Integer)value);
+			}else if(value instanceof Vector3f){
+				Vector3f v = (Vector3f) value;
+				GL20.glUniform3f(location, v.x, v.y, v.z);
+			}else if(value instanceof Vector2f){
+				Vector2f v = (Vector2f) value;
+				GL20.glUniform2f(location, v.x, v.y);
+			}
+			else{
+				LogSystem.out_println("[ShaderProgram] Unable to bind data of type "+value.getClass()+" in shader "+this.getClass()+".");
+			}
+		}
+	}
+
+	public void bindDatas(Map<String, Object> datas) {
+		for(Entry<String, Object> data:datas.entrySet()){
+			bindData(data.getKey(), data.getValue());
+		}
+	}
+
+	public Map<String, Object> getDatas() {
+		Map<String, Object> datasave = datas;
+		datas = new HashMap<String, Object>();
+		return datasave;
 	}
 }

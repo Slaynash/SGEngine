@@ -10,11 +10,12 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
 import slaynash.sgengine.Configuration;
-import slaynash.sgengine.models.Renderable2dModel;
+import slaynash.sgengine.LogSystem;
 import slaynash.sgengine.gui.button.GUIButton;
 import slaynash.sgengine.gui.button.GUIButtonEvent;
 import slaynash.sgengine.gui.button.GUIButtonListener;
 import slaynash.sgengine.gui.comboBox.GUIComboBox;
+import slaynash.sgengine.models.Renderable2dModel;
 import slaynash.sgengine.textureUtils.TextureDef;
 import slaynash.sgengine.textureUtils.TextureManager;
 import slaynash.sgengine.utils.DisplayManager;
@@ -172,7 +173,7 @@ public class GUIManager {
 				}
 			}
 		}
-		//System.out.println(overFound);
+		//LogSystem.out_println(overFound);
 		if(!overFound && !elementDragged()) setMouseInElement(null);
 		if(UserInputUtil.mouseLeftClicked()){
 			if(isPopup){
@@ -491,7 +492,7 @@ public class GUIManager {
 			    popupCloseText = (String)getText.invoke(null, (Object)new String("POPUP_BUTTON_CLOSE"));
 			} catch (Exception e) {
 				popupCloseText = "Close";
-				System.out.println("[GUIManager] Class slaynash.text.utils.Localization not found, popup closebutton text is now \""+popupCloseText+"\".");
+				LogSystem.out_println("[GUIManager] Class slaynash.text.utils.Localization not found, popup closebutton text is now \""+popupCloseText+"\".");
 			}
 		}
 		popup = new GUIPopup(400, 150, text, text, popupType);

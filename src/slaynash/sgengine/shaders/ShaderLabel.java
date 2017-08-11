@@ -28,9 +28,12 @@ public class ShaderLabel extends FreeShader {
 	protected void bindAttributes() {}
 
 	@Override
-	protected void prepare() {}
+	public void prepare() {}
 
 	@Override
-	protected void stop() {}
+	public void stop() {}
+
+	@Override
+	public void bindModel(int modelID) {}
 	
 }

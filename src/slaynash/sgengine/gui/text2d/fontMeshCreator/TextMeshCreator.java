@@ -75,7 +75,7 @@ public class TextMeshCreator {
 					addTexCoords(textureCoords, letter.getxTextureCoord(), letter.getyTextureCoord(),
 							letter.getXMaxTextureCoord(), letter.getYMaxTextureCoord());
 					curserX += letter.getxAdvance() * text.getFontSize();
-					//System.out.println(letter.getxAdvance());
+					//LogSystem.out_println(letter.getxAdvance());
 				}
 				curserX += metaData.getSpaceWidth() * text.getFontSize();
 			}

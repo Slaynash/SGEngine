@@ -57,8 +57,8 @@ public class GUICheckBox extends GUIElement{
 			}
 		}
 		/*
-		if(checked) ShaderManager.shader2d_bindTextureID(texYID, ShaderManager.TEXTURE_COLOR);
-		else ShaderManager.shader2d_bindTextureID(texNID, ShaderManager.TEXTURE_COLOR);
+		if(checked) ShaderManager.shader_bindTextureID(texYID, ShaderManager.TEXTURE_COLOR);
+		else ShaderManager.shader_bindTextureID(texNID, ShaderManager.TEXTURE_COLOR);
 		GL11.glBegin(GL11.GL_QUADS);
 			GL11.glTexCoord2f(0      , 0);
 			GL11.glVertex2f  (getTopLeft().x, getTopLeft().y);
@@ -70,11 +70,11 @@ public class GUICheckBox extends GUIElement{
 			GL11.glVertex2f  (getTopLeft().x, getBottomRight().y);
 		GL11.glEnd();
 		*/
-		ShaderManager.shaderGUI_loadTranslation(getTopLeft());
+		ShaderManager.shader_loadTranslation(getTopLeft());
 		if(checked) model.setTexture(texY);
 		else model.setTexture(texN);
 		model.render();
-		ShaderManager.shaderGUI_loadTranslation(new Vector2f());
+		ShaderManager.shader_loadTranslation(new Vector2f());
 	}
 
 	private void toggle() {

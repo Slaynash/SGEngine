@@ -5,6 +5,8 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Vector2f;
 
+import slaynash.sgengine.LogSystem;
+
 public class UserInputUtil {
 	
 	private static boolean button0down = false;
@@ -16,7 +18,7 @@ public class UserInputUtil {
 		try {
 			Keyboard.create();
 			Mouse.create();
-		} catch (LWJGLException e) {e.printStackTrace();}
+		} catch (LWJGLException e) {e.printStackTrace(LogSystem.getErrStream());}
 	}
 
 	private static Vector2f mousePos = new Vector2f(0,0);
@@ -32,7 +34,7 @@ public class UserInputUtil {
 			boutton0released = !b0;
 			button0down = b0;
 		}
-		//System.out.println(button0down+""+boutton0clicked);
+		//LogSystem.out_println(button0down+""+boutton0clicked);
 		mousePos.x = Mouse.getX();
 		mousePos.y = -Mouse.getY()+DisplayManager.getHeight();
 	}

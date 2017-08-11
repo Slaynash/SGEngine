@@ -59,15 +59,15 @@ public class Text2d {
 	
 	
 	public void render(){
-		ShaderManager.shaderGUI_setTextMode();
-		ShaderManager.shaderGUI_loadColor(getColour());
+		ShaderManager.shader_setTextMode();
+		ShaderManager.shader_loadColor(getColour());
 		float px = position.x;
 		float py = position.y;
 		if(parent != null){
 			px += parent.getTopLeft().x;
 			py += parent.getTopLeft().y;
 		}
-		ShaderManager.shaderGUI_loadTranslation(new Vector2f(px, -DisplayManager.getHeight()+py));
+		ShaderManager.shader_loadTranslation(new Vector2f(px, -DisplayManager.getHeight()+py));
 		/*
 		GL11.glBegin(GL11.GL_TRIANGLES);
 		for(int i=0;i<vertices.length;i+=2){
@@ -77,8 +77,8 @@ public class Text2d {
 		GL11.glEnd();
 		*/
 		textModel.render();
-		ShaderManager.shaderGUI_loadTranslation(new Vector2f());
-		ShaderManager.shaderGUI_exitTextMode();
+		ShaderManager.shader_loadTranslation(new Vector2f());
+		ShaderManager.shader_exitTextMode();
 	}
 	
 	public Renderable2dModel getModel() {

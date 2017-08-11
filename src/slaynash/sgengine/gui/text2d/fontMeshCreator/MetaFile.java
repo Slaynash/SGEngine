@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import slaynash.sgengine.Configuration;
+import slaynash.sgengine.LogSystem;
 
 /**
  * Provides functionality for getting the values from a font file.
@@ -125,7 +126,7 @@ public class MetaFile {
 		try {
 			reader.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			e.printStackTrace(LogSystem.getErrStream());
 		}
 	}
 
@@ -139,7 +140,7 @@ public class MetaFile {
 		try {
 			reader = new BufferedReader(new FileReader(Configuration.getAbsoluteInstallPath()+"/"+file));
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace(LogSystem.getErrStream());
 			System.err.println("Couldn't read font meta file!");
 		}
 	}

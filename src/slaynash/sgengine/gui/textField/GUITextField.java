@@ -74,9 +74,9 @@ public class GUITextField extends GUIElement{
 			updateText();
 		}
 
-		ShaderManager.shaderGUI_loadTranslation(getTopLeft());
+		ShaderManager.shader_loadTranslation(getTopLeft());
 		model.render();
-		ShaderManager.shaderGUI_loadTranslation(new Vector2f());
+		ShaderManager.shader_loadTranslation(new Vector2f());
 		
 		if((!isFocused() && !text.equals(text2d.getTextString())) || (isFocused() && !text2d.getTextString().equals(text+"|"))){
 			setTextInternal(text);

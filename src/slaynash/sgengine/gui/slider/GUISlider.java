@@ -78,16 +78,16 @@ public class GUISlider extends GUIElement{
 				listener.sliderChanged(event);
 			}
 		}
-		ShaderManager.shaderGUI_loadTranslation(getTopLeft());
+		ShaderManager.shader_loadTranslation(getTopLeft());
 		trackModel.render();
-		ShaderManager.shaderGUI_loadTranslation(new Vector2f(getTopLeft().x+(trackPercent/100)*getWidth(), getTopLeft().y));
+		ShaderManager.shader_loadTranslation(new Vector2f(getTopLeft().x+(trackPercent/100)*getWidth(), getTopLeft().y));
 		thumbModel.render();
-		ShaderManager.shaderGUI_loadTranslation(new Vector2f());
+		ShaderManager.shader_loadTranslation(new Vector2f());
 		/*
 		
 		float cy = getTopLeft().y+getHeight()/2;
 		
-		ShaderManager.shader2d_bindTextureID(track, ShaderManager.TEXTURE_COLOR);
+		ShaderManager.shader_bindTextureID(track, ShaderManager.TEXTURE_COLOR);
 		GL11.glBegin(GL11.GL_QUADS);
 			GL11.glTexCoord2f(0      , 0);
 			GL11.glVertex2f  (getTopLeft().x, cy+2);
@@ -100,7 +100,7 @@ public class GUISlider extends GUIElement{
 		GL11.glEnd();
 		*/
 		/*
-		ShaderManager.shader2d_bindTextureID(thumb, ShaderManager.TEXTURE_COLOR);
+		ShaderManager.shader_bindTextureID(thumb, ShaderManager.TEXTURE_COLOR);
 		GL11.glBegin(GL11.GL_QUADS);
 			GL11.glTexCoord2f(0      , 0);
 			GL11.glVertex2f  (trackPos+2, getTopLeft().y);

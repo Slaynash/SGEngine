@@ -1,6 +1,7 @@
 package slaynash.sgengine.audio;
 
 import paulscode.sound.SoundSystemLogger;
+import slaynash.sgengine.LogSystem;
 
 public class AudioLogger extends SoundSystemLogger {
 	@Override
@@ -17,7 +18,7 @@ public class AudioLogger extends SoundSystemLogger {
         messageText = spacer + message;
         
         // Print the message:
-        System.out.println("[SoundSystemLogger] "+ messageText );
+        LogSystem.out_println("[SoundSystemLogger] "+ messageText );
     }
 	
 	@Override
@@ -34,7 +35,7 @@ public class AudioLogger extends SoundSystemLogger {
         messageText = spacer + message;
         
         // Print the message:
-        System.out.println("[SoundSystemLogger] "+ messageText );
+        LogSystem.out_println("[SoundSystemLogger] "+ messageText );
     }
 	
 	@Override
@@ -53,7 +54,7 @@ public class AudioLogger extends SoundSystemLogger {
         messageText = "    " + spacer + message;
         
         // Print the error message:
-        System.out.println("[SoundSystemLogger] "+ headerLine );
-        System.out.println("[SoundSystemLogger] "+ messageText );
+        LogSystem.out_println("[SoundSystemLogger] "+ headerLine );
+        LogSystem.out_println("[SoundSystemLogger] "+ messageText );
     }
 }

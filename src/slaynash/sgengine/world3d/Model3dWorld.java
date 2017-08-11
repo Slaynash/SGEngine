@@ -92,7 +92,7 @@ public class Model3dWorld extends Entity{
 	@Override
 	public void render() {
 		
-		ShaderManager.shader3d_loadTransformationMatrix(
+		ShaderManager.shader_loadTransformationMatrix(
 				createTransformationMatrix(getPosition(), getAngle().x, getAngle().y, getAngle().z, 1f)
 		);
 		
@@ -103,7 +103,7 @@ public class Model3dWorld extends Entity{
 
 	@Override
 	public void renderVR() {
-		ShaderManager.shaderVR_loadTransformationMatrix(
+		ShaderManager.shader_loadTransformationMatrix(
 				createTransformationMatrix(getPosition(), getAngle().x, getAngle().y, getAngle().z, 1f)
 		);
 		

@@ -18,7 +18,7 @@ public class KeyboardControl {
 	
 	public void setPressed(boolean pressed){
 		activated = pressed;
-		//System.out.println("["+control+" pressed");
+		//LogSystem.out_println("["+control+" pressed");
 	}
 	
 	public void updateState(){
@@ -33,6 +33,6 @@ public class KeyboardControl {
 			activated = false;
 			//ConnectionManager.sendKey(control, false);
 		}
-		//System.out.println(control+": "+activated);
+		//LogSystem.out_println(control+": "+activated);
 	}
 }

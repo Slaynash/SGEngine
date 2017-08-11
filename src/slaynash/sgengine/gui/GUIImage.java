@@ -37,9 +37,9 @@ public class GUIImage extends GUIElement{
 
 	@Override
 	public void render() {
-		ShaderManager.shaderGUI_loadTranslation(getTopLeft());
+		ShaderManager.shader_loadTranslation(getTopLeft());
 		model.render();
-		ShaderManager.shaderGUI_loadTranslation(new Vector2f());
+		ShaderManager.shader_loadTranslation(new Vector2f());
 		/*
 		GL11.glBegin(GL11.GL_QUADS);
 			GL11.glTexCoord2f(0      , 0);

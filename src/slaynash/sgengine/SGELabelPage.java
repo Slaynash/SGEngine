@@ -157,7 +157,7 @@ public class SGELabelPage extends RenderablePage {
 		
 		
 		backgroundModel = new Renderable2dModel(vertices, textCoords, background);
-		int err = 0; if((err = GL11.glGetError()) != 0) System.out.println("LabelInit 1: OpenGL Error "+err);
+		int err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("LabelInit 1: OpenGL Error "+err);
 	}
 
 	@Override
@@ -168,11 +168,26 @@ public class SGELabelPage extends RenderablePage {
 		
 		startTime = System.nanoTime()/1E9f;
 	}
+	
+	@Override
+	public void update() {
+		if(Configuration.isVR()){
+			if(!check){
+				VRController[] controllers = VRUtils.getValidControllers();
+				if(controllers.length != 0) mainHand = controllers[0];
+				LogSystem.out_println(mainHand == null ? "[SMLabelPage] Controller not found" : "[SMLabelPage] Main hand is device "+mainHand.getId());
+				check = true;
+			}
+			
+			if(mainHand != null){
+				Vector3f pos = new Vector3f(mainHand.getPose().m30, mainHand.getPose().m31, mainHand.getPose().m32);
+				controllerLight.setPosition(pos);
+			}
+		}
+	}
 
 	@Override
 	public void render() {
-		
-		if(Configuration.isVR()) VRUtils.setCurrentRenderEye(VRUtils.EYE_CENTER);
 		
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		GL11.glClearColor(0, 0, 0, 1);
@@ -191,21 +206,21 @@ public class SGELabelPage extends RenderablePage {
 		elapsedTime = (System.nanoTime()/1E9f)-startTime;
 		if(Configuration.isVR()){//Default: 15s
 			if(elapsedTime < 1)
-				ShaderManager.shaderLabel_setVisibility(elapsedTime/1f);
+				ShaderManager.shader_setVisibility(elapsedTime/1f);
 			else if (elapsedTime < 2)
-				ShaderManager.shaderLabel_setVisibility(1);
+				ShaderManager.shader_setVisibility(1);
 			else if (elapsedTime < 3){
-				ShaderManager.shaderLabel_setVisibility((-elapsedTime+3)/1f);
+				ShaderManager.shader_setVisibility((-elapsedTime+3)/1f);
 			}
 			else doneRendering = true;
 		}
 		else{
 			if(elapsedTime < 1)
-				ShaderManager.shaderLabel_setVisibility(elapsedTime/1f);
+				ShaderManager.shader_setVisibility(elapsedTime/1f);
 			else if (elapsedTime < 2)
-				ShaderManager.shaderLabel_setVisibility(1);
+				ShaderManager.shader_setVisibility(1);
 			else if (elapsedTime < 3){
-				ShaderManager.shaderLabel_setVisibility((-elapsedTime+3)/1f);
+				ShaderManager.shader_setVisibility((-elapsedTime+3)/1f);
 			}
 			else doneRendering = true;
 		}
@@ -214,57 +229,30 @@ public class SGELabelPage extends RenderablePage {
 		
 		backgroundModel.render();
 		
-		int err; if((err = GL11.glGetError()) != 0) System.out.println("LabelRender: OpenGL Error "+err);
+		int err; if((err = GL11.glGetError()) != 0) LogSystem.out_println("LabelRender: OpenGL Error "+err);
 		ShaderManager.stopShader();
 	}
 
 	@Override
-	public void renderVR() {
-
-		if(!check){
-			VRController[] controllers = VRUtils.getValidControllers();
-			if(controllers.length != 0) mainHand = controllers[0];
-			System.out.println(mainHand == null ? "[SMLabelPage] Controller not found" : "[SMLabelPage] Main hand is device "+mainHand.getId());
-			check = true;
-		}
-		
-		
-		
-		if(mainHand != null){
-			Vector3f pos = new Vector3f(mainHand.getPose().m30, mainHand.getPose().m31, mainHand.getPose().m32);
-			controllerLight.setPosition(pos);
-		}
+	public void renderVR(int eye) {
 		
 		ShaderManager.startVRShader();
 		
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
-		
-		renderEye(VRUtils.EYE_LEFT);
-		renderEye(VRUtils.EYE_RIGHT);
-		
-		GL11.glDisable(GL11.GL_DEPTH_TEST);
-		
-		int err = 0; if((err = GL11.glGetError()) != 0) System.out.println(err);
-		ShaderManager.stopShader();
-	}
-
-	private void renderEye(int eye) {
-		VRUtils.setCurrentRenderEye(eye);
-		
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		GL11.glClearColor(0, 0, 0, 1);
 		
-		ShaderManager.shaderVR_loadViewMatrix(VRUtils.getViewMatrix(eye));
-		ShaderManager.shaderVR_loadProjectionMatrix(VRUtils.getProjectionMatrix(eye));
-		ShaderManager.shaderVR_loadTransformationMatrix(new Matrix4f());
-		ShaderManager.shaderVR_loadLights(lights, VRUtils.getViewMatrix(eye));
+		ShaderManager.shader_loadViewMatrix(VRUtils.getViewMatrix(eye));
+		ShaderManager.shader_loadProjectionMatrix(VRUtils.getProjectionMatrix(eye));
+		ShaderManager.shader_loadTransformationMatrix(new Matrix4f());
+		ShaderManager.shader_loadLights(lights, VRUtils.getViewMatrix(eye));
 
 		
 		if(Configuration.getRenderMethod() == Configuration.RENDER_FREE){
 	    	GL11.glLoadIdentity();
 		}
 		
-		ShaderManager.shaderVR_loadTransformationMatrix(
+		ShaderManager.shader_loadTransformationMatrix(
 				MatrixUtils.createTransformationMatrix(new Vector3f(0, 1.6f, -2f), 0, 0, 0, 1f)
 		);
 		
@@ -272,6 +260,12 @@ public class SGELabelPage extends RenderablePage {
 		
 		VRUtils.renderBaseStations();
 		VRUtils.renderControllers();
+		
+		
+		GL11.glDisable(GL11.GL_DEPTH_TEST);
+		
+		int err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println(err);
+		ShaderManager.stopShader();
 	}
 
 	@Override

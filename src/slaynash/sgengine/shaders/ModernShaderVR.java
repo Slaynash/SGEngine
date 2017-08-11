@@ -51,12 +51,12 @@ public class ModernShaderVR extends ModernShader {
 	}
 
 	@Override
-	protected void prepare() {
+	public void prepare() {
 		
 	}
 
 	@Override
-	protected void stop() {
+	public void stop() {
 		/*
 		GL20.glDisableVertexAttribArray(0);
 		GL20.glDisableVertexAttribArray(1);
@@ -64,5 +64,16 @@ public class ModernShaderVR extends ModernShader {
 		GL20.glDisableVertexAttribArray(3);
 		*/
 		GL30.glBindVertexArray(0);
+	}
+
+	@Override
+	public void bindModel(int modelID) {
+		if(Configuration.getRenderMethod() == Configuration.RENDER_MODERN){
+			GL30.glBindVertexArray(modelID);
+			GL20.glEnableVertexAttribArray(0);
+			GL20.glEnableVertexAttribArray(1);
+			GL20.glEnableVertexAttribArray(2);
+			GL20.glEnableVertexAttribArray(3);
+		}
 	}
 }

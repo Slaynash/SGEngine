@@ -19,6 +19,6 @@ public class FontManager {
 	}
 	
 	public static void bind2DShaderAtlas(FontType font) {
-		ShaderManager.shaderGUI_bindTextureID(font.getTextureAtlas().getTextureID(), ShaderManager.TEXTURE_COLOR);
+		ShaderManager.shader_bindTextureID(font.getTextureAtlas().getTextureID(), ShaderManager.TEXTURE_COLOR);
 	}
 }

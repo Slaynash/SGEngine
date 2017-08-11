@@ -7,6 +7,7 @@ import com.studiohartman.jamepad.ControllerButton;
 import com.studiohartman.jamepad.ControllerManager;
 
 import slaynash.sgengine.Configuration;
+import slaynash.sgengine.LogSystem;
 
 public class ControllersControlManager {
 	
@@ -17,7 +18,7 @@ public class ControllersControlManager {
 
 	public static void init() {
 		if(initialized) {
-			System.out.println("[ControllerscontrolManager] Trying to re-initialize Controllers, ingoring.");
+			LogSystem.out_println("[ControllerscontrolManager] Trying to re-initialize Controllers, ingoring.");
 			return;
 		}
 		initialized = true;
@@ -41,7 +42,7 @@ public class ControllersControlManager {
 	
 	public static void loadDefaultControls(){
 		if(!Configuration.isControllersEnabled()) {
-			System.out.println("[ControllerscontrolManager] Controllers are disabled, ignoring the load of default controls");
+			LogSystem.out_println("[ControllerscontrolManager] Controllers are disabled, ignoring the load of default controls");
 			return;
 		}
 		if(!initialized) init();

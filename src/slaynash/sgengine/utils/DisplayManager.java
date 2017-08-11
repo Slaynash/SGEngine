@@ -10,6 +10,7 @@ import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.PixelFormat;
 
 import slaynash.sgengine.Configuration;
+import slaynash.sgengine.LogSystem;
 import slaynash.sgengine.gui.text2d.Text2d;
 
 public class DisplayManager {
@@ -28,7 +29,7 @@ public class DisplayManager {
 		try {
 			return Display.getAvailableDisplayModes();
 		}
-		catch (LWJGLException e) {e.printStackTrace();}
+		catch (LWJGLException e) {e.printStackTrace(LogSystem.getErrStream());}
 		return new DisplayMode[]{};
 	}
 	
@@ -83,7 +84,7 @@ public class DisplayManager {
 					GL11.glEnable(GL13.GL_MULTISAMPLE);
 				}else Display.create(new PixelFormat());
 			}
-		} catch (LWJGLException e) {e.printStackTrace();}
+		} catch (LWJGLException e) {e.printStackTrace(LogSystem.getErrStream());}
 		
 		w = Display.getWidth();
 		h = Display.getHeight();
@@ -97,7 +98,7 @@ public class DisplayManager {
 	}
 	
 	public static void updateDisplay(){
-		//System.out.println(UserInputUtil.getMousePos().toString());
+		//LogSystem.out_println(UserInputUtil.getMousePos().toString());
 		Display.update();
 		if(!Configuration.isVR() && Configuration.isVSyncEnabled()) Display.sync(fps);
 		long currentFrameTime = getCurrentTime();
@@ -139,7 +140,7 @@ public class DisplayManager {
 			try {
 				Display.setDisplayMode(displayMode);
 				Display.setFullscreen(fullscreen);
-			} catch (LWJGLException e) {e.printStackTrace();}
+			} catch (LWJGLException e) {e.printStackTrace(LogSystem.getErrStream());}
 			w = Display.getWidth();
 			h = Display.getHeight();
 			fps = displayMode.getFrequency();

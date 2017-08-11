@@ -29,7 +29,7 @@ public class PlayerCharacterVR extends PlayerCharacter {
 		viewMatrix = VRUtils.getViewMatrix(VRUtils.EYE_CENTER);
 		
 		//Matrix4f tm = Matrix4f.translate(envPos, new Matrix4f(), new Matrix4f());
-		//System.out.println("ENVPOS: "+tm);
+		//LogSystem.out_println("ENVPOS: "+tm);
 		
 		//viewMatrix = Matrix4f.mul(tm, VRUtils.getViewMatrix(VRUtils.EYE_CENTER), new Matrix4f());
 	}

@@ -14,6 +14,7 @@ import paulscode.sound.SoundSystemException;
 import paulscode.sound.codecs.CodecWav;
 import paulscode.sound.libraries.LibraryLWJGLOpenAL;
 import slaynash.sgengine.Configuration;
+import slaynash.sgengine.LogSystem;
 
 public class AudioManager {
 	
@@ -45,7 +46,7 @@ public class AudioManager {
 	
 	public static void init() {
 		if(init){
-			System.out.println("[AudioManager] Trying to re-init AudioManager, ignoring.");
+			LogSystem.out_println("[AudioManager] Trying to re-init AudioManager, ignoring.");
 			return;
 		}
 		random = new Random();
@@ -60,12 +61,12 @@ public class AudioManager {
 			try 
 			{ 
 			    soundSystem = new SoundSystem( libraryType ); 
-			}catch(SoundSystemException sse){sse.printStackTrace();}
+			}catch(SoundSystemException sse){sse.printStackTrace(LogSystem.getErrStream());}
 		} catch (SoundSystemException e) {
-			e.printStackTrace();
+			e.printStackTrace(LogSystem.getErrStream());
 		}
 		init = true;
-		System.out.println("[AudioManager] SoundSystem started !");
+		LogSystem.out_println("[AudioManager] SoundSystem started !");
 		soundSystem.setMasterVolume(0.5f);
 	}
 	
@@ -87,7 +88,7 @@ public class AudioManager {
 		try {
 			soundSystem.quickPlay(false, new URL("file:///"+new File(Configuration.getAbsoluteInstallPath()+"/"+audioPath).getAbsolutePath()), Configuration.getAbsoluteInstallPath()+"/"+audioPath, false, x, y, z, SoundSystemConfig.getDefaultAttenuation(), SoundSystemConfig.getDefaultRolloff());
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
+			e.printStackTrace(LogSystem.getErrStream());
 		}
 	}
 	
@@ -95,7 +96,7 @@ public class AudioManager {
 		try {
 			soundSystem.quickPlay(false, new URL("file:///"+new File(Configuration.getAbsoluteInstallPath()+"/"+audioPath).getAbsolutePath()), Configuration.getAbsoluteInstallPath()+"/"+audioPath, false, 0, 0, 0, SoundSystemConfig.ATTENUATION_NONE, SoundSystemConfig.getDefaultRolloff());
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
+			e.printStackTrace(LogSystem.getErrStream());
 		}
 	}
 

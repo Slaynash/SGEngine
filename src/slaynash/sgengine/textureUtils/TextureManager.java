@@ -17,6 +17,7 @@ import org.newdawn.slick.opengl.TextureLoader;
 import org.newdawn.slick.util.Log;
 
 import slaynash.sgengine.Configuration;
+import slaynash.sgengine.LogSystem;
 
 public class TextureManager {
 
@@ -33,7 +34,7 @@ public class TextureManager {
 	
 	public static void init(){
 		if(init){
-			System.out.println("[AudioManager] Trying to re-init AudioManager, ignoring.");
+			LogSystem.out_println("[AudioManager] Trying to re-init AudioManager, ignoring.");
 			return;
 		}
 		Log.setLogSystem(new TextureManagerLogSystem());
@@ -45,13 +46,13 @@ public class TextureManager {
 		
 		for(TextureDef tex:textureList) if(texturePath.equals(tex.getTexturePath())) return tex.getTexture();
 		try {
-			System.out.println("[TextureManager] Loading texture: "+texturePath);
+			LogSystem.out_println("[TextureManager] Loading texture: "+texturePath);
 			Texture texture = getSlickTexture(new File(Configuration.getAbsoluteInstallPath()+"/"+texturePath));
 			textureList.add(new TextureDef(texture, texturePath));
 			return texture;
 		}
-		catch (FileNotFoundException e) {e.printStackTrace();}
-		catch (IOException e) {e.printStackTrace();}
+		catch (FileNotFoundException e) {e.printStackTrace(LogSystem.getErrStream());}
+		catch (IOException e) {e.printStackTrace(LogSystem.getErrStream());}
 		return null;
 	}
 	
@@ -66,7 +67,7 @@ public class TextureManager {
 	public static TextureDef getTextureDef(String texturePath, int type) {
 		for(TextureDef tex:textureList) if(texturePath.equals(tex.getTexturePath())) return tex;
 		try {
-			System.out.println("[TextureManager] Loading texture: "+texturePath);
+			LogSystem.out_println("[TextureManager] Loading texture: "+texturePath);
 			TextureDef textureDef = new TextureDef(getSlickTexture(new File(Configuration.getAbsoluteInstallPath()+"/"+texturePath)), texturePath);
 			textureList.add(textureDef);
 			return textureDef;
@@ -81,8 +82,8 @@ public class TextureManager {
 						textureList.add(textureDef);
 						return textureDef;
 					}
-					catch (FileNotFoundException e1) {e1.printStackTrace();}
-					catch (IOException e1) {e1.printStackTrace();}
+					catch (FileNotFoundException e1) {e1.printStackTrace(LogSystem.getErrStream());}
+					catch (IOException e1) {e1.printStackTrace(LogSystem.getErrStream());}
 					break;
 				case SPECULAR:
 					for(TextureDef tex:textureList) if(texturePath.equals("res/textures/default_specular.png")) return tex;
@@ -91,8 +92,8 @@ public class TextureManager {
 						textureList.add(textureDef);
 						return textureDef;
 					}
-					catch (FileNotFoundException e1) {e1.printStackTrace();}
-					catch (IOException e1) {e1.printStackTrace();}
+					catch (FileNotFoundException e1) {e1.printStackTrace(LogSystem.getErrStream());}
+					catch (IOException e1) {e1.printStackTrace(LogSystem.getErrStream());}
 					break;
 				default:
 					for(TextureDef tex:textureList) if(texturePath.equals("res/textures/default.png")) return tex;
@@ -101,8 +102,8 @@ public class TextureManager {
 						textureList.add(textureDef);
 						return textureDef;
 					}
-					catch (FileNotFoundException e1) {e1.printStackTrace();}
-					catch (IOException e1) {e1.printStackTrace();}
+					catch (FileNotFoundException e1) {e1.printStackTrace(LogSystem.getErrStream());}
+					catch (IOException e1) {e1.printStackTrace(LogSystem.getErrStream());}
 			}
 		}
 		return null;
@@ -165,7 +166,7 @@ public class TextureManager {
 				GL11.glTexParameterf(GL11.GL_TEXTURE_2D, EXTTextureFilterAnisotropic.GL_TEXTURE_MAX_ANISOTROPY_EXT, amount);
 			}
 			else{
-				System.out.println("[TextureManager] Anisotropic Filtering not supported, ignoring.");
+				LogSystem.out_println("[TextureManager] Anisotropic Filtering not supported, ignoring.");
 			}
 		}
 		return texture;

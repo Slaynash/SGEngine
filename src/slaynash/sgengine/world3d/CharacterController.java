@@ -14,6 +14,8 @@ import com.bulletphysics.dynamics.ActionInterface;
 import com.bulletphysics.linearmath.IDebugDraw;
 import com.bulletphysics.linearmath.Transform;
 import com.bulletphysics.util.ObjectArrayList;
+
+import slaynash.sgengine.LogSystem;
 /*
 Bullet Continuous Collision Detection and Physics Library
 Copyright (c) 2003-2008 Erwin Coumans  http://bulletphysics.com
@@ -223,11 +225,11 @@ public class CharacterController extends ActionInterface {
 
 			stepUp(collisionWorld);
 			if (useWalkDirection) {
-				//System.out.println("playerStep 3");
+				//LogSystem.out_println("playerStep 3");
 				stepForwardAndStrafe(collisionWorld, walkDirection);
 			}
 			else {
-				System.out.println("playerStep 4");
+				LogSystem.out_println("playerStep 4");
 				//printf("  time: %f", m_velocityTimeInterval);
 
 				// still have some time left for moving!
@@ -386,7 +388,7 @@ public class CharacterController extends ActionInterface {
 								touchingNormal.scale(directionSign);
 							}
 							
-							//System.out.println(Sys.getTime()+"}"+touchingNormal.y/touchingNormal.length());
+							//LogSystem.out_println(Sys.getTime()+"}"+touchingNormal.y/touchingNormal.length());
 							//if(touchingNormal.y/touchingNormal.length() < -0.8f) verticalVelocity = 0;
 							
 							currentPosition.scaleAdd(directionSign * dist * 0.2f, pt.normalWorldOnB, currentPosition);
@@ -411,7 +413,7 @@ public class CharacterController extends ActionInterface {
 			ghostObject.setWorldTransform(newTrans);
 			//printf("m_touchingNormal = %f,%f,%f\n",m_touchingNormal[0],m_touchingNormal[1],m_touchingNormal[2]);
 
-			//System.out.println("recoverFromPenetration "+penetration+" "+touchingNormal);
+			//LogSystem.out_println("recoverFromPenetration "+penetration+" "+touchingNormal);
 
 			return penetration;
 		}

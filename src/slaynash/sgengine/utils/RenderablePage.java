@@ -6,9 +6,11 @@ public abstract class RenderablePage {
 	
 	public abstract void start();
 	
+	public abstract void update();
+	
 	public abstract void render();
 	
-	public abstract void renderVR();
+	public abstract void renderVR(int eye);
 	
 	public abstract void stop();
 

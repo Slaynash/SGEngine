@@ -48,10 +48,10 @@ public class GUIMiniPopup extends GUIElement {
 	@Override
 	public void render() {
 		
-		ShaderManager.shaderGUI_loadTranslation(getTopLeft());
+		ShaderManager.shader_loadTranslation(getTopLeft());
 		
 		model.render();
-		ShaderManager.shaderGUI_loadTranslation(new Vector2f());
+		ShaderManager.shader_loadTranslation(new Vector2f());
 		
 		for(GUIElement child:getChildrens()) child.render();
 	}

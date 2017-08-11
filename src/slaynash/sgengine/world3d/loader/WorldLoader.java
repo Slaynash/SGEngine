@@ -11,6 +11,7 @@ import java.util.List;
 import org.lwjgl.util.vector.Vector3f;
 
 import slaynash.sgengine.Configuration;
+import slaynash.sgengine.LogSystem;
 import slaynash.sgengine.world3d.Model3dWorld;
 
 public class WorldLoader {
@@ -35,7 +36,7 @@ public class WorldLoader {
 	public static void loadMap(String mapPath){
 		if(!clean) reset();
 		clean = false;
-		System.out.println("[WorldLoader] Start loading 3d map \""+mapPath+"\"...");
+		LogSystem.out_println("[WorldLoader] Start loading 3d map \""+mapPath+"\"...");
 		File mapFile = new File(mapPath);
 		BufferedReader reader = null;
 		
@@ -51,7 +52,7 @@ public class WorldLoader {
 				
 			while(!found && (ln=reader.readLine()) != null) {
 				if(ln.split(" ", 2)[0].equals("MapVersion")){
-					System.out.println("[WorldLoader] Map version: "+ln.split(" ", 2)[1]);
+					LogSystem.out_println("[WorldLoader] Map version: "+ln.split(" ", 2)[1]);
 					worldVersion = ln.split(" ", 2)[1];
 					found = true;
 				}
@@ -73,11 +74,11 @@ public class WorldLoader {
 			command = null;
 			args = null;
 		} catch (IOException e) {error = true; errorMessage = e.getMessage(); return;}
-		System.out.println("[WorldLoader] Load finished. map properties:");
-		System.out.println("[WorldLoader] ------------------------------");
-		System.out.println("[WorldLoader] Map \""+worldName+"\" for loader v"+worldVersion+", created by \""+worldCreator+"\".");
-		System.out.println("[WorldLoader] World spawn placed at "+worldSpawn.x+" "+worldSpawn.y+" "+worldSpawn.z);
-		System.out.println("[WorldLoader] ------------------------------");
+		LogSystem.out_println("[WorldLoader] Load finished. map properties:");
+		LogSystem.out_println("[WorldLoader] ------------------------------");
+		LogSystem.out_println("[WorldLoader] Map \""+worldName+"\" for loader v"+worldVersion+", created by \""+worldCreator+"\".");
+		LogSystem.out_println("[WorldLoader] World spawn placed at "+worldSpawn.x+" "+worldSpawn.y+" "+worldSpawn.z);
+		LogSystem.out_println("[WorldLoader] ------------------------------");
 	}
 	
 	private static void readMap1_3(String ln, String command, String args, BufferedReader reader) throws IOException {
@@ -112,7 +113,7 @@ public class WorldLoader {
 					if(command.equals("endworldpart")){
 						Model3dWorld m3dw = new Model3dWorld(faces);
 						entities.add(m3dw);
-						System.out.println("m3dw created with "+faces.length+" faces !");
+						LogSystem.out_println("m3dw created with "+faces.length+" faces !");
 						break;
 					}
 					if(command.equals("face")){
@@ -151,7 +152,7 @@ public class WorldLoader {
 						sf = Float.parseFloat(ln.split(" ", 2)[1]);
 					}
 					else{
-						System.out.println("Unknown worldpart line: "+ln);
+						LogSystem.out_println("Unknown worldpart line: "+ln);
 					}
 				}
 			}
@@ -247,7 +248,7 @@ public class WorldLoader {
 						sf = Float.parseFloat(ln.split(" ", 2)[1]);
 					}
 					else{
-						System.out.println("[WorldLoader] Unknown worldpart line: "+ln);
+						LogSystem.out_println("[WorldLoader] Unknown worldpart line: "+ln);
 					}
 				}
 			}
@@ -272,7 +273,7 @@ public class WorldLoader {
 			if(ln.startsWith("#")) continue;
 			command = ln.split(" ", 2)[0].toLowerCase();
 			if(command.equals("")) continue;
-			//System.out.println("ln="+ln);
+			//LogSystem.out_println("ln="+ln);
 			args = ln.split(" ", 2)[1];
 			if(command.equals("worldspawn")) worldSpawn.set(Float.parseFloat(args.split(" ")[0])*scaleFactor, Float.parseFloat(args.split(" ")[1])*scaleFactor, Float.parseFloat(args.split(" ")[2])*scaleFactor);
 			else if(command.equals("name")) worldName = args;
@@ -343,7 +344,7 @@ public class WorldLoader {
 						sf = Float.parseFloat(ln.split(" ", 2)[1]);
 					}
 					else{
-						System.out.println("[WorldLoader] Unknown worldpart line: "+ln);
+						LogSystem.out_println("[WorldLoader] Unknown worldpart line: "+ln);
 					}
 				}
 			}
