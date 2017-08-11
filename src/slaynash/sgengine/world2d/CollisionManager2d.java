@@ -25,7 +25,7 @@ public class CollisionManager2d {
 		float delta = ct-lastCall;
 		if(delta < 16f) return;
 		lastCall = ct;
-		world.step(delta, 2, 6);
+		world.step(delta/1000f, 2, 6);
 	}
 	
 	public static World getWorld(){

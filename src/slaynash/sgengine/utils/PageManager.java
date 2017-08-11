@@ -176,10 +176,10 @@ public class PageManager {
 		render = true;
 		currentPage.init();
 		if(firstRenderNotLabel && Configuration.isCollisionManager3dEnabled()) CollisionManager3d.reload();
-		if(firstRenderNotLabel && Configuration.isCollisionManager3dEnabled()) CollisionManager2d.reload();
+		if(firstRenderNotLabel && Configuration.isCollisionManager2dEnabled()) CollisionManager2d.reload();
 		currentPage.start();
 		if(firstRenderNotLabel && Configuration.isCollisionManager3dEnabled()) CollisionManager3d.start();
-		if(firstRenderNotLabel && Configuration.isCollisionManager3dEnabled()) CollisionManager2d.start();
+		if(firstRenderNotLabel && Configuration.isCollisionManager2dEnabled()) CollisionManager2d.start();
 		throwPageStartedEvent();
 	}
 	
