@@ -13,6 +13,7 @@ import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
+import slaynash.sgengine.Configuration;
 import slaynash.sgengine.LogSystem;
 
 public abstract class ShaderProgram {
@@ -129,28 +130,38 @@ public abstract class ShaderProgram {
 	}
 	
 	public void bindData(String locationName, Object value){
+		/*
 		if(value.equals(datas.get(locationName))) return;
 		else datas.put(locationName, value);
+		*/
+		if(Configuration.isUsingDeferredRender()) datas.put(locationName, value);
+		else bindDataDirect(locationName, value);
+	}
+	
+	public void bindDataDirect(String locationName, Object value){
 		int location = getLocation(locationName);
 		if(location != -1){
 			if(value instanceof Matrix4f){
 				((Matrix4f) value).store(matrixBuffer);
 				matrixBuffer.flip();
-				GL20.glUniformMatrix4(location, false, matrixBuffer);
+				GL20.glUniformMatrix4(location, false, matrixBuffer.duplicate());
 			}else if(value instanceof Float){
 				GL20.glUniform1f(location, (Float)value);
 			}else if(value instanceof Integer){
 				GL20.glUniform1f(location, (Integer)value);
 			}else if(value instanceof Vector3f){
-				Vector3f v = (Vector3f) value;
+				Vector3f v = new Vector3f().set((Vector3f) value);
 				GL20.glUniform3f(location, v.x, v.y, v.z);
 			}else if(value instanceof Vector2f){
-				Vector2f v = (Vector2f) value;
+				Vector2f v = new Vector2f().set((Vector2f) value);
 				GL20.glUniform2f(location, v.x, v.y);
 			}
 			else{
-				LogSystem.out_println("[ShaderProgram] Unable to bind data of type "+value.getClass()+" in shader "+this.getClass()+".");
+				LogSystem.err_println("[ShaderProgram] Unable to bind data of type "+value.getClass()+" in shader "+this.getClass()+".");
 			}
+		}
+		else{
+			LogSystem.err_println("[ShaderProgram] Unable to find location "+locationName+" in shader "+this.getClass()+".");
 		}
 	}
 
@@ -159,10 +170,14 @@ public abstract class ShaderProgram {
 			bindData(data.getKey(), data.getValue());
 		}
 	}
+	
+	public void bindDatasDirect(Map<String, Object> datas) {
+		for(Entry<String, Object> data:datas.entrySet()){
+			bindDataDirect(data.getKey(), data.getValue());
+		}
+	}
 
 	public Map<String, Object> getDatas() {
-		Map<String, Object> datasave = datas;
-		datas = new HashMap<String, Object>();
-		return datasave;
+		return new HashMap<String, Object>(datas);
 	}
 }

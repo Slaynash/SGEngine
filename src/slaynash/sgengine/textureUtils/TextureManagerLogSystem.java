@@ -1,13 +1,8 @@
 package slaynash.sgengine.textureUtils;
 
-import java.io.PrintStream;
-
 import org.newdawn.slick.util.LogSystem;
 
 public class TextureManagerLogSystem implements LogSystem {
-
-	/** The output stream for dumping the log out on */
-	public static PrintStream out = System.out;
 
 	/**
 	 * Log an error
@@ -28,8 +23,8 @@ public class TextureManagerLogSystem implements LogSystem {
 	 */
 	@Override
 	public void error(Throwable e) {
-		out.println("[TextureManagerLogSystem] ERROR: " +e.getMessage());
-		e.printStackTrace(out);
+		slaynash.sgengine.LogSystem.getOutStream().println("[TextureManagerLogSystem] ERROR: " +e.getMessage());
+		e.printStackTrace(slaynash.sgengine.LogSystem.getOutStream());
 	}
 
 	/**
@@ -39,7 +34,7 @@ public class TextureManagerLogSystem implements LogSystem {
 	 */
 	@Override
 	public void error(String message) {
-		out.println("[TextureManagerLogSystem] ERROR: " +message);
+		slaynash.sgengine.LogSystem.getOutStream().println("[TextureManagerLogSystem] ERROR: " +message);
 	}
 
 	/**
@@ -49,7 +44,7 @@ public class TextureManagerLogSystem implements LogSystem {
 	 */
 	@Override
 	public void warn(String message) {
-		out.println("[TextureManagerLogSystem] WARN: " +message);
+		slaynash.sgengine.LogSystem.getOutStream().println("[TextureManagerLogSystem] WARN: " +message);
 	}
 
 	/**
@@ -59,7 +54,7 @@ public class TextureManagerLogSystem implements LogSystem {
 	 */
 	@Override
 	public  void info(String message) {
-		out.println("[TextureManagerLogSystem] INFO: " +message);
+		slaynash.sgengine.LogSystem.getOutStream().println("[TextureManagerLogSystem] INFO: " +message);
 	}
 
 	/**
@@ -69,7 +64,7 @@ public class TextureManagerLogSystem implements LogSystem {
 	 */
 	@Override
 	public void debug(String message) {
-		out.println("[TextureManagerLogSystem] DEBUG: " +message);
+		slaynash.sgengine.LogSystem.getOutStream().println("[TextureManagerLogSystem] DEBUG: " +message);
 	}
 
 	/**
@@ -80,7 +75,7 @@ public class TextureManagerLogSystem implements LogSystem {
 	 */
 	public void warn(String message, Throwable e) {
 		warn(message);
-		e.printStackTrace(out);
+		e.printStackTrace(slaynash.sgengine.LogSystem.getOutStream());
 	}
 
 }

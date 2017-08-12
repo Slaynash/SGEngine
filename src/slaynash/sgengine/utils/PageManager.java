@@ -3,6 +3,7 @@ package slaynash.sgengine.utils;
 import javax.swing.event.EventListenerList;
 
 import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector3f;
 
 import slaynash.sgengine.Configuration;
@@ -10,6 +11,7 @@ import slaynash.sgengine.LogSystem;
 import slaynash.sgengine.SGELabelPage;
 import slaynash.sgengine.audio.AudioManager;
 import slaynash.sgengine.deferredRender.DeferredRenderer;
+import slaynash.sgengine.gui.GUIManager;
 import slaynash.sgengine.inputs.ControllersControlManager;
 import slaynash.sgengine.inputs.KeyboardControlManager;
 import slaynash.sgengine.shaders.ShaderManager;
@@ -92,9 +94,16 @@ public class PageManager {
 							if(currentPage != label && Configuration.isCollisionManager3dEnabled()) CollisionManager3d.update();
 							if(currentPage != label && Configuration.isCollisionManager2dEnabled()) CollisionManager2d.update();
 							currentPage.update();
+							GUIManager.update();
 							if(Configuration.isVR()) VRUtils.setCurrentRenderEye(VRUtils.EYE_CENTER);
 							currentPage.render();
 							deferredRenderCheck();
+							
+							boolean iudr = Configuration.isUsingDeferredRender();
+							Configuration.useDeferedRender(false);
+							GUIManager.render();
+							int err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[PageManager] GUI Render error: OpenGL Error "+err);
+							Configuration.useDeferedRender(iudr);
 							
 							if(Configuration.isVR()){
 								VRUtils.updatePose();

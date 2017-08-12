@@ -11,10 +11,12 @@ public class Renderable3dModelDeferredRender extends DeferredModelRenderer {
 
 	private Renderable3dModel model;
 	Map<String, Object> datas = null;
+	private int[] textures;
 
 	@Override
 	public void bindModel(Object model) {
 		this.model = (Renderable3dModel) model;
+		this.textures = this.model.getTextureIds();
 	}
 
 	@Override
@@ -25,7 +27,7 @@ public class Renderable3dModelDeferredRender extends DeferredModelRenderer {
 
 	@Override
 	public int[] getTextureIDs() {
-		return model.getTextureIds();
+		return textures;
 	}
 
 	@Override

@@ -51,7 +51,7 @@ public class DeferredRenderer {
 					for(Entry<Integer, ArrayList<DeferredModelRenderer>> entry:map.getObjectList().entrySet()){//for each models
 						shader.bindModel(entry.getKey());
 						for(DeferredModelRenderer dmr:entry.getValue()){//for each textures in model
-							shader.bindDatas(dmr.getShaderDatas());
+							shader.bindDatasDirect(dmr.getShaderDatas());
 							for(int i=0;i<dmr.getTextureIDs().length;i++){
 								GL13.glActiveTexture(GL13.GL_TEXTURE0+i);
 								GL11.glBindTexture(GL11.GL_TEXTURE_2D, dmr.getTextureIDs()[i]);
@@ -75,7 +75,7 @@ public class DeferredRenderer {
 							GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
 						}
 						for(DeferredModelRenderer dmr:entry.getValue()){//for each models with this texture
-							shader.bindDatas(dmr.getShaderDatas());
+							shader.bindDatasDirect(dmr.getShaderDatas());
 							for(int i=1;i<dmr.getTextureIDs().length;i++){
 								if(dmr.getTextureIDs()[i] != bindTextures.get(i)){
 									bindTextures.set(i, dmr.getTextureIDs()[i]);

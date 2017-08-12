@@ -16,6 +16,8 @@ import slaynash.sgengine.gui.button.GUIButtonEvent;
 import slaynash.sgengine.gui.button.GUIButtonListener;
 import slaynash.sgengine.gui.comboBox.GUIComboBox;
 import slaynash.sgengine.models.Renderable2dModel;
+import slaynash.sgengine.shaders.ShaderManager;
+import slaynash.sgengine.shaders.ShaderProgram;
 import slaynash.sgengine.textureUtils.TextureDef;
 import slaynash.sgengine.textureUtils.TextureManager;
 import slaynash.sgengine.utils.DisplayManager;
@@ -236,6 +238,7 @@ public class GUIManager {
 	}
 
 	public static void render() {
+		ShaderManager.startGUIShaderDirect();
 		prepare();
 		if(canDrawBackground()) drawBackground();
 		Vector2f mousePos = UserInputUtil.getMousePos();
@@ -289,6 +292,7 @@ public class GUIManager {
 			popups.get(i).render();
 		}
 		restore();
+		ShaderManager.stopShader();
 	}
 
 	private static void drawBackground() {
@@ -543,6 +547,16 @@ public class GUIManager {
 			gameElementsToRemove.clear();
 			gameElementsToAdd.clear();
 		
+	}
+	
+	@Deprecated
+	public static ShaderProgram getShader() {
+		return ShaderManager.getGUIShaderProgram();
+	}
+	
+	@Deprecated
+	public static void setShader(ShaderProgram shader) {
+		ShaderManager.setGUIShader(shader);
 	}
 	
 }
