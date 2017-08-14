@@ -69,6 +69,7 @@ public class PageManager {
 				UserInputUtil.initController();
 				if(Configuration.isControllersEnabled()) ControllersControlManager.init();
 				AudioManager.init();
+				DeferredRenderer.initShadowMaps();
 				SGELabelPage label = new SGELabelPage();
 				currentPage = label;
 				label.init();
@@ -97,7 +98,7 @@ public class PageManager {
 							GUIManager.update();
 							if(Configuration.isVR()) VRUtils.setCurrentRenderEye(VRUtils.EYE_CENTER);
 							currentPage.render();
-							deferredRenderCheck();
+							deferredRenderCheck(VRUtils.EYE_CENTER);
 							
 							boolean iudr = Configuration.isUsingDeferredRender();
 							Configuration.useDeferedRender(false);
@@ -109,10 +110,10 @@ public class PageManager {
 								VRUtils.updatePose();
 								VRUtils.setCurrentRenderEye(VRUtils.EYE_LEFT);
 								currentPage.renderVR(VRUtils.EYE_LEFT);
-								deferredRenderCheck();
+								deferredRenderCheck(VRUtils.EYE_LEFT);
 								VRUtils.setCurrentRenderEye(VRUtils.EYE_RIGHT);
 								currentPage.renderVR(VRUtils.EYE_RIGHT);
-								deferredRenderCheck();
+								deferredRenderCheck(VRUtils.EYE_RIGHT);
 								
 								Vector3f cpcPos = Configuration.getPlayerCharacter().getPosition();
 								Vector3f cpcDir = Configuration.getPlayerCharacter().getViewDirection();
@@ -166,10 +167,10 @@ public class PageManager {
 		});
 	}
 	
-	private static void deferredRenderCheck(){
+	private static void deferredRenderCheck(int eye){
 		if(Configuration.isUsingDeferredRender()){
 			if(Configuration.isUsingDeferredRenderShadows())
-				DeferredRenderer.renderWithShadows();
+				DeferredRenderer.renderWithShadows(eye);
 			else DeferredRenderer.render();
 			if(Configuration.isCleanBetweenDeferredRenderEnabled()) DeferredRenderer.cleanup();
 		}

@@ -30,6 +30,8 @@ public abstract class ShaderProgram {
 	public static final int SHADER_VR_MODERN = 7;
 	public static final int SHADER_LABEL_MODERN = 8;
 	
+	public static final int SHADER_3D_SHADOWS = 9;
+	
 	private String vertexShaderPath;
 	private String geometryShaderPath;
 	private String fragmentShaderPath;
@@ -38,11 +40,12 @@ public abstract class ShaderProgram {
 	protected int fragmentID;
 	protected int programID;
 	private int shaderType = SHADER_NONE;
-	private Map<String, Integer> locations = new HashMap<String, Integer>();
+	protected Map<String, Integer> locations = new HashMap<String, Integer>();
 	private Map<String, Object> datas = new HashMap<String, Object>();
+	private ShaderProgram shadowShader = null;
 	
 	
-	private static FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
+	protected static FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
 
 	public ShaderProgram(String shaderPath, String vertexShaderName, String fragmentShaderName, int shaderType){
 		this.shaderType = shaderType;
@@ -108,7 +111,7 @@ public abstract class ShaderProgram {
 	protected int getUniformLocation(String uniformName){
 		int uniformLocation = GL20.glGetUniformLocation(programID, uniformName);
 		if(uniformLocation < 0) System.err.println("[ShaderProgram] Error loading shader: Uniform location not found ("+uniformLocation+"): "+uniformName);
-		else locations.put(uniformName, uniformLocation);
+		locations.put(uniformName, uniformLocation);
 		return uniformLocation;
 	}
 	
@@ -123,7 +126,6 @@ public abstract class ShaderProgram {
 	protected int getLocation(String string) {
 		Integer key = locations.get(string);
 		if(key == null){
-			System.err.println("[ShaderProgram] Uniform "+string+" not found in shader !");
 			return -1;
 		}
 		return key;
@@ -160,9 +162,6 @@ public abstract class ShaderProgram {
 				LogSystem.err_println("[ShaderProgram] Unable to bind data of type "+value.getClass()+" in shader "+this.getClass()+".");
 			}
 		}
-		else{
-			LogSystem.err_println("[ShaderProgram] Unable to find location "+locationName+" in shader "+this.getClass()+".");
-		}
 	}
 
 	public void bindDatas(Map<String, Object> datas) {
@@ -179,5 +178,13 @@ public abstract class ShaderProgram {
 
 	public Map<String, Object> getDatas() {
 		return new HashMap<String, Object>(datas);
+	}
+	
+	public void setShadowShader(ShaderProgram shadowShaderChild) {
+		this.shadowShader = shadowShaderChild;
+	}
+	
+	public ShaderProgram getShadowShader() {
+		return shadowShader;
 	}
 }

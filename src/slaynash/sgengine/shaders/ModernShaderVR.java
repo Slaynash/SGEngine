@@ -9,11 +9,13 @@ public class ModernShaderVR extends ModernShader {
 
 	public ModernShaderVR() {
 		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "modernVR.vs", "modernVR.fs", "modernVR.gs", ShaderProgram.SHADER_VR_MODERN);
+		setShadowShader(new ShadowShader());
 	}
 
 	private int colorTexture_location;
 	private int normalTexture_location;
 	private int specularTexture_location;
+	private int lightShadows_location[];
 
 	@Override
 	protected void getAllUniformLocations() {
@@ -28,10 +30,15 @@ public class ModernShaderVR extends ModernShader {
 		super.getUniformLocation("shineDamper");
 		super.getUniformLocation("reflectivity");
 		
+		super.getUniformLocation("far_plane");
+		
+		lightShadows_location = new int[Configuration.MAX_LIGHTS];
+		
 		for(int i=0;i<Configuration.MAX_LIGHTS;i++){
 			super.getUniformLocation("lightPosition["+i+"]");
 			super.getUniformLocation("lightColour["+i+"]");
 			super.getUniformLocation("attenuation["+i+"]");
+			lightShadows_location[i] = super.getUniformLocation("lightShadows["+i+"]");
 		}
 	}
 
@@ -40,6 +47,10 @@ public class ModernShaderVR extends ModernShader {
 		GL20.glUniform1i(colorTexture_location, ShaderManager.TEXTURE_COLOR);
 		GL20.glUniform1i(normalTexture_location, ShaderManager.TEXTURE_NORMAL);
 		GL20.glUniform1i(specularTexture_location, ShaderManager.TEXTURE_SPECULAR);
+
+		for(int i=0;i<Configuration.MAX_LIGHTS;i++){
+			GL20.glUniform1i(lightShadows_location[i], ShaderManager.TEXTURE_SHADOWSMIN+i);
+		}
 	}
 
 	@Override
@@ -52,7 +63,7 @@ public class ModernShaderVR extends ModernShader {
 
 	@Override
 	public void prepare() {
-		
+		bindDataDirect("far_plane", Configuration.getZFar());
 	}
 
 	@Override

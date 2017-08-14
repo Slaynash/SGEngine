@@ -12,7 +12,6 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
-import org.lwjgl.util.vector.Vector4f;
 
 import slaynash.sgengine.Configuration;
 import slaynash.sgengine.LogSystem;
@@ -26,6 +25,7 @@ public class ShaderManager {
 	public static final int TEXTURE_COLOR = 0;
 	public static final int TEXTURE_NORMAL = 1;
 	public static final int TEXTURE_SPECULAR = 2;
+	public static final int TEXTURE_SHADOWSMIN = 3;
 	
 	
 	private static List<ShaderProgram> shaders = new ArrayList<ShaderProgram>();
@@ -314,14 +314,13 @@ public class ShaderManager {
 		currentShader.bindData("reflectivity", reflectivity);
 	}
 	
-	public static void shader_loadLights(List<PointLight> lights, Matrix4f viewMatrix){
+	public static void shader_loadLights(List<PointLight> lights){
 		if(Configuration.getRenderMethod() != Configuration.RENDER_MODERN) return;
 		for(int i=0;i<Configuration.MAX_LIGHTS;i++){
 			if(i<lights.size()){
-				Vector3f eyeSpacePosition = getEyeSpacePosition(lights.get(i), viewMatrix);
 				float[] color = lights.get(i).getColor();
 				float[] attenuation = lights.get(i).getAttenuation();
-				currentShader.bindData("lightPosition["+i+"]", eyeSpacePosition);
+				currentShader.bindData("lightPosition["+i+"]", lights.get(i).getPosition());
 				currentShader.bindData("lightColour["+i+"]", new Vector3f(color[0], color[1], color[2]));
 				currentShader.bindData("attenuation["+i+"]", new Vector3f(attenuation[0], attenuation[1], attenuation[2]));
 			}else{
@@ -339,15 +338,6 @@ public class ShaderManager {
 	
 	public static void registerShader(ShaderProgram shaderProgram) {
 		shaders.add(shaderProgram);
-	}
-	
-
-	
-	private static Vector3f getEyeSpacePosition(PointLight light, Matrix4f viewMatrix){
-		Vector3f position = light.getPosition();
-		Vector4f eyeSpacePos = new Vector4f(position.x,position.y, position.z, 1f);
-		Matrix4f.transform(viewMatrix, eyeSpacePos, eyeSpacePos);
-		return new Vector3f(eyeSpacePos);
 	}
 
 	public static void useShader(ShaderProgram shaderProgram) {

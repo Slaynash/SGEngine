@@ -44,5 +44,10 @@ public class Renderable3dModelDeferredRender extends DeferredModelRenderer {
 	public Map<String, Object> getShaderDatas() {
 		return datas;
 	}
+
+	@Override
+	public boolean isCastingShadow() {
+		return true;
+	}
 	
 }

@@ -8,18 +8,21 @@ import slaynash.sgengine.Configuration;
 public class ModernShader3D extends ModernShader {
 	
 	public ModernShader3D() {
-		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "modern3d.vs", "modern3d.fs", "modern3d.gs", ShaderProgram.SHADER_3D_MODERN);
+		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "modern3d.vs", "modern3d.fs", ShaderProgram.SHADER_3D_MODERN);
+		setShadowShader(new ShadowShader());
 	}
 	
 	private int colorTexture_location;
 	private int normalTexture_location;
 	private int specularTexture_location;
+	private int lightShadows_location[];
 	
 	@Override
 	protected void getAllUniformLocations() {
 		colorTexture_location = super.getUniformLocation("textureDiffuse");
 		normalTexture_location = super.getUniformLocation("textureNormal");
 		specularTexture_location = super.getUniformLocation("textureSpecular");
+		
 		
 		super.getUniformLocation("mMatrix");
 		super.getUniformLocation("vMatrix");
@@ -28,10 +31,15 @@ public class ModernShader3D extends ModernShader {
 		super.getUniformLocation("shineDamper");
 		super.getUniformLocation("reflectivity");
 		
+		super.getUniformLocation("far_plane");
+		
+		lightShadows_location = new int[Configuration.MAX_LIGHTS];
+		
 		for(int i=0;i<Configuration.MAX_LIGHTS;i++){
 			super.getUniformLocation("lightPosition["+i+"]");
 			super.getUniformLocation("lightColour["+i+"]");
 			super.getUniformLocation("attenuation["+i+"]");
+			lightShadows_location[i] = super.getUniformLocation("lightShadows["+i+"]");
 		}
 	}
 	
@@ -40,6 +48,10 @@ public class ModernShader3D extends ModernShader {
 		GL20.glUniform1i(colorTexture_location, ShaderManager.TEXTURE_COLOR);
 		GL20.glUniform1i(normalTexture_location, ShaderManager.TEXTURE_NORMAL);
 		GL20.glUniform1i(specularTexture_location, ShaderManager.TEXTURE_SPECULAR);
+
+		for(int i=0;i<Configuration.MAX_LIGHTS;i++){
+			GL20.glUniform1i(lightShadows_location[i], ShaderManager.TEXTURE_SHADOWSMIN+i);
+		}
 	}
 	
 	@Override
@@ -52,7 +64,7 @@ public class ModernShader3D extends ModernShader {
 
 	@Override
 	public void prepare() {
-		
+		bindDataDirect("far_plane", Configuration.getZFar());
 	}
 
 	@Override

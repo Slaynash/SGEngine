@@ -10,5 +10,6 @@ public abstract class DeferredModelRenderer {
 	public abstract int getModelID();
 	public abstract void setShaderDatas(Map<String, Object> datas);
 	public abstract Map<String, Object> getShaderDatas();
+	public abstract boolean isCastingShadow();
 	
 }

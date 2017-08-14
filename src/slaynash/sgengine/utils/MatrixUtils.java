@@ -155,8 +155,11 @@ public class MatrixUtils {
 	}
 	
 	public static Matrix4f createProjectionMatrix(float near, float far, float fov){
+		return createProjectionMatrix(near, far, fov, (float) Display.getWidth() / (float) Display.getHeight());
+    }
+	
+	public static Matrix4f createProjectionMatrix(float near, float far, float fov, float aspectRatio){
     	Matrix4f projectionMatrix = new Matrix4f();
-		float aspectRatio = (float) Display.getWidth() / (float) Display.getHeight();
 		float y_scale = (float) ((1f / Math.tan(Math.toRadians(fov / 2f))));
 		float x_scale = y_scale / aspectRatio;
 		float frustum_length = far - near;
@@ -182,6 +185,37 @@ public class MatrixUtils {
 		Vector3f negativeCameraPos = new Vector3f(-cameraPos.x,-cameraPos.y, 0);
 		Matrix4f.translate(negativeCameraPos, viewMatrix, viewMatrix);
 		return viewMatrix;
+	}
+
+	public static Matrix4f createViewMatrix(Vector3f position, Vector3f lookAt, Vector3f up) {
+		Vector3f z = Vector3f.sub(position, lookAt, null);
+		z.normalise();
+		Vector3f y = up;
+		Vector3f x = Vector3f.cross(y, z, null);
+		y = Vector3f.cross(z, x, null);
+		x.normalise();
+		y.normalise();
+		
+		Matrix4f matrix = new Matrix4f();
+		
+		matrix.m00 = x.x;
+		matrix.m10 = x.y;
+		matrix.m20 = x.z;
+		matrix.m30 = -Vector3f.dot(x, position);
+		matrix.m01 = y.x;
+		matrix.m11 = y.y;
+		matrix.m21 = y.z;
+		matrix.m31 = -Vector3f.dot(y, position);
+		matrix.m02 = z.x;
+		matrix.m12 = z.y;
+		matrix.m22 = z.z;
+		matrix.m32 = -Vector3f.dot(z, position);
+		matrix.m03 = 0;
+		matrix.m13 = 0;
+		matrix.m23 = 0;
+		matrix.m33 = 1;
+		
+		return matrix;
 	}
 	
 }

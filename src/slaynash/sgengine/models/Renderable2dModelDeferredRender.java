@@ -43,4 +43,9 @@ public class Renderable2dModelDeferredRender extends DeferredModelRenderer{
 		return datas;
 	}
 
+	@Override
+	public boolean isCastingShadow() {
+		return false;
+	}
+
 }

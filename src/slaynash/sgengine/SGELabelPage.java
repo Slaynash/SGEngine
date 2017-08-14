@@ -245,7 +245,7 @@ public class SGELabelPage extends RenderablePage {
 		ShaderManager.shader_loadViewMatrix(VRUtils.getViewMatrix(eye));
 		ShaderManager.shader_loadProjectionMatrix(VRUtils.getProjectionMatrix(eye));
 		ShaderManager.shader_loadTransformationMatrix(new Matrix4f());
-		ShaderManager.shader_loadLights(lights, VRUtils.getViewMatrix(eye));
+		ShaderManager.shader_loadLights(lights);
 
 		
 		if(Configuration.getRenderMethod() == Configuration.RENDER_FREE){

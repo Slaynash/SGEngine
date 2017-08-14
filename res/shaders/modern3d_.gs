@@ -11,6 +11,7 @@ out vec3 toLightVector[8];
 out vec3 toCameraVector;
 out vec3 tang_out;
 out vec2 pass_textureCoordinates;
+out vec3 fragPos;
 
 uniform mat4 mMatrix;
 uniform mat4 vMatrix;
@@ -50,7 +51,11 @@ void main() {
 		
 		for(int i=0;i<8;i++){
 			toLightVector[i] = toTangentSpace * (lightPosition[i] - positionRelativeToCam.xyz);
+			lightPos[i] = lightPosition[i];
 		}
+		
+		fragPos = vec3(mMatrix * vec4(position, 1.0));
+		
 		toCameraVector = toTangentSpace * (-positionRelativeToCam.xyz);
 		
 		EmitVertex();
