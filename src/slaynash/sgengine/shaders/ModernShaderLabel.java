@@ -12,7 +12,7 @@ public class ModernShaderLabel extends ModernShader{
 	private int texture_location;
 
 	public ModernShaderLabel() {
-		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "modernLabel.vs", "modernLabel.fs", ShaderProgram.SHADER_LABEL_MODERN);
+		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "modern/modernLabel.vs", "modern/modernLabel.fs", ShaderProgram.SHADER_LABEL_MODERN);
 	}
 
 	@Override
@@ -71,10 +71,8 @@ public class ModernShaderLabel extends ModernShader{
 
 	@Override
 	public void bindModel(int modelID) {
-		if(Configuration.getRenderMethod() == Configuration.RENDER_MODERN){
-			GL30.glBindVertexArray(modelID);
-			GL20.glEnableVertexAttribArray(0);
-			GL20.glEnableVertexAttribArray(1);
-		}
+		GL30.glBindVertexArray(modelID);
+		GL20.glEnableVertexAttribArray(0);
+		GL20.glEnableVertexAttribArray(1);
 	}
 }

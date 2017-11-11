@@ -1,17 +1,17 @@
 package slaynash.sgengine;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
+import org.lwjgl.Sys;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
+import slaynash.sgengine.gui.GUIManager;
+import slaynash.sgengine.gui.GUIText;
 import slaynash.sgengine.models.Renderable2dModel;
 import slaynash.sgengine.models.Renderable3dModel;
-import slaynash.sgengine.objloader.ObjLoader;
+import slaynash.sgengine.models.utils.ModelManager;
+import slaynash.sgengine.models.utils.VaoManager;
 import slaynash.sgengine.shaders.ShaderManager;
 import slaynash.sgengine.textureUtils.TextureDef;
 import slaynash.sgengine.textureUtils.TextureManager;
@@ -20,7 +20,7 @@ import slaynash.sgengine.utils.MatrixUtils;
 import slaynash.sgengine.utils.RenderablePage;
 import slaynash.sgengine.utils.VRUtils;
 import slaynash.sgengine.utils.vr.VRController;
-import slaynash.sgengine.world3d.loader.PointLight;
+import slaynash.sgengine.world3d.loader.Ent_PointLight;
 
 public class SGELabelPage extends RenderablePage {
 	
@@ -30,37 +30,26 @@ public class SGELabelPage extends RenderablePage {
 	private boolean doneRendering = false;
 	private Renderable2dModel backgroundModel;
 	private Renderable3dModel vrplateform;
-	private List<PointLight> lights = new ArrayList<PointLight>();
 	
 	private VRController mainHand;
-	private PointLight controllerLight;
+	private Ent_PointLight controllerLight;
 	private boolean check;
+	
+
+	private GUIText fpsText;
+	private int fpsCount = 0;
+	private long lastFPS = 0;
 
 	@Override
 	public void init() {
 		ShaderManager.initLabelShader();
 		if(Configuration.isVR()) ShaderManager.initVRShader();
-		
-		if(Configuration.getRenderMethod() == Configuration.RENDER_FREE){
-			GL11.glEnable(GL11.GL_TEXTURE_2D);
-			GL11.glEnable(GL11.GL_BLEND);
-		
-			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-			GL11.glDisable(GL11.GL_DEPTH_TEST);
-			GL11.glMatrixMode(GL11.GL_PROJECTION);
-			GL11.glLoadIdentity();
-			GL11.glOrtho(0, DisplayManager.getWidth(), DisplayManager.getHeight(), 0, 1, -1);
-			GL11.glMatrixMode(GL11.GL_MODELVIEW);
-			
-		}
-		else{
-			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		}
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		
 		background = TextureManager.getTextureDef("res/textures/menu/label.png", TextureManager.COLOR);
 		
 		if(Configuration.isVR()){
-			vrplateform = ObjLoader.loadRenderable3dModel(new File(Configuration.getAbsoluteInstallPath()+"/res/models/label3d.obj"), "/res/models/label3d.png", null, null);
+			vrplateform = ModelManager.loadObj("res/models/label3d.obj", "/res/models/label3d.png", null, "/res/textures/fullbright.png");
 		}
 		
 		
@@ -156,21 +145,26 @@ public class SGELabelPage extends RenderablePage {
 		
 		
 		
-		backgroundModel = new Renderable2dModel(vertices, textCoords, background);
+		backgroundModel = new Renderable2dModel(VaoManager.loadToVao(vertices, textCoords), background);
 		int err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("LabelInit 1: OpenGL Error "+err);
 	}
 
 	@Override
 	public void start() {
 		
-		controllerLight = new PointLight(2, 1, 0, 0f, 1, 0f, 0f, 0f, 2f);
-		lights.add(controllerLight);
+		controllerLight = new Ent_PointLight("l1", 2, 1, 0, 0f, 1, 0f, 0f, 0f, 2f);
+		//LightsManager.addPointlight(controllerLight);
 		
 		startTime = System.nanoTime()/1E9f;
+
+		fpsText = new GUIText("FPS: ?", 5, 5, 400, null, GUIManager.ELEMENT_GAME);
+		lastFPS = (Sys.getTime() * 1000) / Sys.getTimerResolution();
 	}
 	
 	@Override
 	public void update() {
+		updateFPS();
+		
 		if(Configuration.isVR()){
 			if(!check){
 				VRController[] controllers = VRUtils.getValidControllers();
@@ -181,9 +175,21 @@ public class SGELabelPage extends RenderablePage {
 			
 			if(mainHand != null){
 				Vector3f pos = new Vector3f(mainHand.getPose().m30, mainHand.getPose().m31, mainHand.getPose().m32);
-				controllerLight.setPosition(pos);
+				controllerLight.setPosition(pos.x, pos.y, pos.z);
 			}
 		}
+	}
+
+	private void updateFPS() {
+		long ct = (Sys.getTime() * 1000) / Sys.getTimerResolution();
+		
+		if (ct - lastFPS > 1000) {
+			fpsText.setText("FPS: "+fpsCount);
+			fpsCount = 0;
+			lastFPS += 1000;
+		}
+		fpsCount++;
+		
 	}
 
 	@Override
@@ -192,25 +198,16 @@ public class SGELabelPage extends RenderablePage {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		GL11.glClearColor(0, 0, 0, 1);
 		
-		if(Configuration.getRenderMethod() == Configuration.RENDER_FREE){
-			GL11.glMatrixMode(GL11.GL_PROJECTION);
-			GL11.glLoadIdentity();
-			GL11.glOrtho(0, DisplayManager.getWidth(), DisplayManager.getHeight(), 0, 1, -1);
-			GL11.glMatrixMode(GL11.GL_MODELVIEW);
-			
-			GL11.glLoadIdentity();
-		}
-		
 		ShaderManager.startLabelShader();
 		
 		elapsedTime = (System.nanoTime()/1E9f)-startTime;
 		if(Configuration.isVR()){//Default: 15s
 			if(elapsedTime < 1)
 				ShaderManager.shader_setVisibility(elapsedTime/1f);
-			else if (elapsedTime < 2)
+			else if (elapsedTime < 9)
 				ShaderManager.shader_setVisibility(1);
-			else if (elapsedTime < 3){
-				ShaderManager.shader_setVisibility((-elapsedTime+3)/1f);
+			else if (elapsedTime < 10){
+				ShaderManager.shader_setVisibility((-elapsedTime+10)/1f);
 			}
 			else doneRendering = true;
 		}
@@ -245,21 +242,16 @@ public class SGELabelPage extends RenderablePage {
 		ShaderManager.shader_loadViewMatrix(VRUtils.getViewMatrix(eye));
 		ShaderManager.shader_loadProjectionMatrix(VRUtils.getProjectionMatrix(eye));
 		ShaderManager.shader_loadTransformationMatrix(new Matrix4f());
-		ShaderManager.shader_loadLights(lights);
-
-		
-		if(Configuration.getRenderMethod() == Configuration.RENDER_FREE){
-	    	GL11.glLoadIdentity();
-		}
+		//ShaderManager.shader_loadLights(lights);
 		
 		ShaderManager.shader_loadTransformationMatrix(
 				MatrixUtils.createTransformationMatrix(new Vector3f(0, 1.6f, -2f), 0, 0, 0, 1f)
 		);
 		
-		vrplateform.renderVR();
+		vrplateform.renderVR(eye);
 		
-		VRUtils.renderBaseStations();
-		VRUtils.renderControllers();
+		VRUtils.renderBaseStations(eye);
+		VRUtils.renderControllers(eye);
 		
 		
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
@@ -270,7 +262,7 @@ public class SGELabelPage extends RenderablePage {
 
 	@Override
 	public void stop() {
-		
+		//LightsManager.removePointlight(controllerLight);
 	}
 
 	@Override

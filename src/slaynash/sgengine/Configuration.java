@@ -4,26 +4,23 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
-import slaynash.sgengine.deferredRender.DRSortingMethod;
 import slaynash.sgengine.playercharacters.PlayerCharacter;
 import slaynash.sgengine.utils.PageManager;
 
 public class Configuration {
 
-	public static final int RENDER_MODERN = 0;
-	public static final int RENDER_FREE = 1;
-
 	public static final int MAX_LIGHTS = 8;
+	public static final int MAX_WEIGHTS = 40;
 	
 	private static String installPath = "";
 	private static String fontPath = "res/fonts";
 	private static String shaderPath = "res/shaders";
 	private static String shaderMode = "OK";
 	private static String vrFilesPath = "res/vr";
-	private static int renderMethod = RENDER_MODERN;
 	private static float mouseSensibility = 1;
 	private static float fov = 80;
 	private static float znear = 0.1f, zfar = 1000f;
+	private static float lightZNear = 0.001f, lightZFar = 400f;
 	private static boolean vr = false;
 	private static boolean collisionsLoadedWith3dWorldLoad = false;
 	private static boolean collisionsLoadedWith2dWorldLoad = false;
@@ -38,8 +35,78 @@ public class Configuration {
 	private static boolean collisionManager2dEnabled = false;
 	private static boolean deferredRender = false;
 	private static boolean deferredRenderShadows = false;
-	private static DRSortingMethod deferredRenderSorting = DRSortingMethod.TEXTURES_FOR_OBJECTS;
-	private static boolean cleanBetweenDeferredRenderEnabled = true;
+	private static boolean cleanBetweenDeferredRendersEnabled = true;
+	private static boolean selfUpdateEntities = true;
+	private static boolean handRendered = false;
+	private static boolean deferredRenderBloom = true;
+	private static boolean usingTimingDebug = false;
+	private static boolean guiEnabled = true;
+	
+	public static void loadDefault3DFPSConfigurations() {
+		mouseSensibility = 1;
+		setFOV(90);
+		setZNear(0.1f);
+		setZFar(1000f);
+		enableVR(false);
+		setCollisionManager3dEnabled(true);
+		setCollisionsLoadedWith3dWorldLoad(true);
+		setCollisionManager2dEnabled(false);
+		setCollisionsLoadedWith2dWorldLoad(false);
+		setSSAASamples(8);
+		setVRSSAASamples(1);
+		enableVSync(true);
+		useDeferredRender(true);
+		useDeferredRenderShadows(true);
+		useDeferredRenderBloom(true);
+		//useDeferredReflections(true);
+		setCleanBetweenDeferredRendersEnabled(true);
+		setSelfEntitiesUpdateEnabled(true);
+		setHandRendered(true);
+	}
+	
+	public static void loadDefaultVRConfigurations() {
+		mouseSensibility = 1;
+		setFOV(90);
+		setZNear(0.1f);
+		setZFar(1000f);
+		enableVR(true);
+		setCollisionManager3dEnabled(true);
+		setCollisionsLoadedWith3dWorldLoad(true);
+		setCollisionManager2dEnabled(false);
+		setCollisionsLoadedWith2dWorldLoad(false);
+		setSSAASamples(1);
+		setVRSSAASamples(4);
+		enableVSync(true);
+		useDeferredRender(true);
+		useDeferredRenderShadows(true);
+		//useDeferredReflections(true);
+		useDeferredRenderBloom(true);
+		setCleanBetweenDeferredRendersEnabled(true);
+		setSelfEntitiesUpdateEnabled(true);
+		setHandRendered(false);
+	}
+	
+	public static void loadDefault3DRPGConfigurations() {
+		mouseSensibility = 1;
+		setFOV(90);
+		setZNear(0.1f);
+		setZFar(1000f);
+		enableVR(false);
+		setCollisionManager3dEnabled(false);
+		setCollisionsLoadedWith3dWorldLoad(true);
+		setCollisionManager2dEnabled(false);
+		setCollisionsLoadedWith2dWorldLoad(false);
+		setSSAASamples(8);
+		setVRSSAASamples(1);
+		enableVSync(true);
+		useDeferredRender(true);
+		useDeferredRenderShadows(true);
+		useDeferredRenderBloom(false);
+		//useDeferredReflections(true);
+		setCleanBetweenDeferredRendersEnabled(true);
+		setSelfEntitiesUpdateEnabled(true);
+		setHandRendered(false);
+	}
 
 	public static String getAbsoluteInstallPath() {
 		if(installPath.equals("")){
@@ -88,14 +155,6 @@ public class Configuration {
 		return vrFilesPath;
 	}
 
-	public static void setRenderMethod(int method) {
-		renderMethod = method;
-	}
-	
-	public static int getRenderMethod() {
-		return renderMethod;
-	}
-
 	public static float getMouseSensibility() {
 		return mouseSensibility;
 	}
@@ -139,7 +198,7 @@ public class Configuration {
     	return vr;
     }
 
-	public static void setCollisionLoadedWith3dWorldLoad(boolean collisionsLoadedWith3dWorldLoad) {
+	public static void setCollisionsLoadedWith3dWorldLoad(boolean collisionsLoadedWith3dWorldLoad) {
 		Configuration.collisionsLoadedWith3dWorldLoad = collisionsLoadedWith3dWorldLoad;
 	}
 	
@@ -147,7 +206,7 @@ public class Configuration {
 		return collisionsLoadedWith3dWorldLoad;
 	}
 
-	public static void setCollisionLoadedWith2dWorldLoad(boolean collisionsLoadedWith2dWorldLoad) {
+	public static void setCollisionsLoadedWith2dWorldLoad(boolean collisionsLoadedWith2dWorldLoad) {
 		Configuration.collisionsLoadedWith2dWorldLoad = collisionsLoadedWith2dWorldLoad;
 	}
 	
@@ -232,7 +291,7 @@ public class Configuration {
 		return deferredRender;
 	}
 
-	public static void useDeferedRender(boolean deferredRender) {
+	public static void useDeferredRender(boolean deferredRender) {
 		Configuration.deferredRender = deferredRender;
 	}
 
@@ -243,23 +302,61 @@ public class Configuration {
 	public static void useDeferredRenderShadows(boolean deferredRenderShadows) {
 		Configuration.deferredRenderShadows = deferredRenderShadows;
 	}
-	
-	public static void setDeferredRenderSortingMethod(DRSortingMethod method) {
-		Configuration.deferredRenderSorting = method;
-	}
-	
-	public static DRSortingMethod getDeferredRenderSortingMethod() {
-		return deferredRenderSorting;
+
+	public static boolean isCleanBetweenDeferredRendersEnabled() {
+		return cleanBetweenDeferredRendersEnabled;
 	}
 
-	public static boolean isCleanBetweenDeferredRenderEnabled() {
-		return cleanBetweenDeferredRenderEnabled;
+	public static void setCleanBetweenDeferredRendersEnabled(boolean cleanBetweenDeferredRenderEnabled) {
+		Configuration.cleanBetweenDeferredRendersEnabled = cleanBetweenDeferredRenderEnabled;
 	}
 
-	public static void setCleanBetweenDeferredRenderEnabled(boolean cleanBetweenDeferredRenderEnabled) {
-		Configuration.cleanBetweenDeferredRenderEnabled = cleanBetweenDeferredRenderEnabled;
+	public static boolean isSelfEntitiesUpdateEnabled() {
+		return selfUpdateEntities;
 	}
 	
+	public static void setSelfEntitiesUpdateEnabled(boolean selfUpdateEntities) {
+		Configuration.selfUpdateEntities = selfUpdateEntities;
+	}
 	
+	public static boolean isHandRendered() {
+		return handRendered;
+	}
+	
+	public static void setHandRendered(boolean handrendered) {
+		Configuration.handRendered = handrendered;
+	}
+
+	public static boolean isDeferredRenderBloomEnabled() {
+		return deferredRenderBloom;
+	}
+
+	public static void useDeferredRenderBloom(boolean deferredRenderBloom) {
+		Configuration.deferredRenderBloom = deferredRenderBloom;
+	}
+
+	public static boolean isUsingTimingDebug() {
+		return usingTimingDebug;
+	}
+
+	public static void setUsingTimingDebug(boolean timingDebug) {
+		Configuration.usingTimingDebug = timingDebug;
+	}
+
+	public static float getLightsZNear() {
+		return lightZNear;
+	}
+
+	public static float getLightsZFar() {
+		return lightZFar;
+	}
+	
+	public static void setGUIEnabled(boolean enableGUI) {
+		guiEnabled = enableGUI;
+	}
+
+	public static boolean getGUIEnabled() {
+		return guiEnabled;
+	}
 	
 }

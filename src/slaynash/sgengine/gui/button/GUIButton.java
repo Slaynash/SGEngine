@@ -8,6 +8,7 @@ import org.lwjgl.util.vector.Vector2f;
 import org.newdawn.slick.Color;
 
 import slaynash.sgengine.models.Renderable2dModel;
+import slaynash.sgengine.models.utils.VaoManager;
 import slaynash.sgengine.gui.GUIElement;
 import slaynash.sgengine.gui.text2d.Text2d;
 import slaynash.sgengine.shaders.ShaderManager;
@@ -54,7 +55,7 @@ public class GUIButton extends GUIElement{
 		vertices[10] = 0;
 		vertices[11] = 0;
 		
-		model = new Renderable2dModel(vertices, uvs, texBack);
+		model = new Renderable2dModel(VaoManager.loadToVao(vertices, uvs), texBack);
 		
 	}
 	

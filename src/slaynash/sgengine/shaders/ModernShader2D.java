@@ -12,7 +12,7 @@ public class ModernShader2D extends ModernShader {
 	private int texture_location;
 
 	public ModernShader2D() {
-		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "modern2D.vs", "modern2D.fs", ShaderProgram.SHADER_GUI_MODERN);
+		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "modern/modern2d.vs", "modern/modern2d.fs", ShaderProgram.SHADER_GUI_MODERN);
 	}
 
 	@Override
@@ -59,11 +59,9 @@ public class ModernShader2D extends ModernShader {
 
 	@Override
 	public void bindModel(int modelID) {
-		if(Configuration.getRenderMethod() == Configuration.RENDER_MODERN){
-			GL30.glBindVertexArray(modelID);
-			GL20.glEnableVertexAttribArray(0);
-			GL20.glEnableVertexAttribArray(1);
-		}
+		GL30.glBindVertexArray(modelID);
+		GL20.glEnableVertexAttribArray(0);
+		GL20.glEnableVertexAttribArray(1);
 	}
 
 }

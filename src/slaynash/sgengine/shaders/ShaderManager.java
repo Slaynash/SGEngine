@@ -18,7 +18,7 @@ import slaynash.sgengine.LogSystem;
 import slaynash.sgengine.deferredRender.DeferredRenderer;
 import slaynash.sgengine.textureUtils.TextureManager;
 import slaynash.sgengine.utils.DisplayManager;
-import slaynash.sgengine.world3d.loader.PointLight;
+import slaynash.sgengine.world3d.loader.Ent_PointLight;
 
 public class ShaderManager {
 	
@@ -43,23 +43,23 @@ public class ShaderManager {
 	//private static FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
 	
 	public static void initGUIShader() {
-		if(shaderGUI == null) shaderGUI = Configuration.getRenderMethod() == Configuration.RENDER_FREE ? new ShaderGUI() : new ModernShaderGUI();
+		if(shaderGUI == null) shaderGUI = new ModernShaderGUI();
 	}
 	
 	public static void initLabelShader() {
-		if(shaderLabel == null) shaderLabel = Configuration.getRenderMethod() == Configuration.RENDER_FREE ? new ShaderLabel() : new ModernShaderLabel();
+		if(shaderLabel == null) shaderLabel = new ModernShaderLabel();
 	}
 	
 	public static void init3DShader() {
-		if(shader3d == null) shader3d = Configuration.getRenderMethod() == Configuration.RENDER_FREE ? new Shader3D() : new ModernShader3D();
+		if(shader3d == null) shader3d = new ModernShader3D();
 	}
 	
 	public static void init2DShader() {
-		if(shader2d == null) shader2d = Configuration.getRenderMethod() == Configuration.RENDER_FREE ? new Shader2D() : new ModernShader2D();
+		if(shader2d == null) shader2d = new ModernShader2D();
 	}
 	
 	public static void initVRShader() {
-		if(shaderVR == null) shaderVR = Configuration.getRenderMethod() == Configuration.RENDER_FREE ? new ShaderVR() : new ModernShaderVR();
+		if(shaderVR == null) shaderVR = new ModernShaderVR();
 	}
 	
 	public static void set3dShader(ShaderProgram shader){
@@ -282,40 +282,34 @@ public class ShaderManager {
 	
 
 	public static void shader_bindDefaultNormalTexture() {
-		shader_bindTextureID(TextureManager.getTextureID("res/textures/default_normal.png"), TEXTURE_NORMAL);
+		shader_bindTextureID(TextureManager.getTextureID("res/textures/default_normal.png", TextureManager.NORMAL), TEXTURE_NORMAL);
 	}
 
 	public static void shader_bindDefaultSpecularTexture() {
-		shader_bindTextureID(TextureManager.getTextureID("res/textures/default_normal.png"), TEXTURE_SPECULAR);
+		shader_bindTextureID(TextureManager.getTextureID("res/textures/default_normal.png", TextureManager.SPECULAR), TEXTURE_SPECULAR);
 	}
 
 	public static void shader_bindSpecularFactor(float specularFactor) {
-		if(Configuration.getRenderMethod() != Configuration.RENDER_MODERN) return;
 		currentShader.bindData("specularFactor", specularFactor);
 	}
 	
 	public static void shader_setUseNormalMap(boolean useNormalMap) {
-		if(Configuration.getRenderMethod() != Configuration.RENDER_MODERN) return;
 		currentShader.bindData("usesNormalMap", useNormalMap?1:0);
 	}
 	
 	public static void shader_setUseSpecularMap(boolean useSpecularMap) {
-		if(Configuration.getRenderMethod() != Configuration.RENDER_MODERN) return;
 		currentShader.bindData("usesSpecularMap", useSpecularMap?1:0);
 	}
 	
 	public static void shader_bindShineDamper(float shineDamper) {
-		if(Configuration.getRenderMethod() != Configuration.RENDER_MODERN) return;
 		currentShader.bindData("shineDamper", shineDamper);
 	}
 	
 	public static void shader_bindReflectivity(float reflectivity) {
-		if(Configuration.getRenderMethod() != Configuration.RENDER_MODERN) return;
 		currentShader.bindData("reflectivity", reflectivity);
 	}
 	
-	public static void shader_loadLights(List<PointLight> lights){
-		if(Configuration.getRenderMethod() != Configuration.RENDER_MODERN) return;
+	public static void shader_loadLights(List<Ent_PointLight> lights){
 		for(int i=0;i<Configuration.MAX_LIGHTS;i++){
 			if(i<lights.size()){
 				float[] color = lights.get(i).getColor();

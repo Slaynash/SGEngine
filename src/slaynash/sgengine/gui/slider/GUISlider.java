@@ -5,6 +5,7 @@ import javax.swing.event.EventListenerList;
 import org.lwjgl.util.vector.Vector2f;
 
 import slaynash.sgengine.models.Renderable2dModel;
+import slaynash.sgengine.models.utils.VaoManager;
 import slaynash.sgengine.gui.GUIElement;
 import slaynash.sgengine.shaders.ShaderManager;
 import slaynash.sgengine.textureUtils.TextureDef;
@@ -47,7 +48,7 @@ public class GUISlider extends GUIElement{
 		verticesTrack[10] = 0;
 		verticesTrack[11] = getHeight()/2+2;
 		
-		trackModel = new Renderable2dModel(verticesTrack, uvs, track);
+		trackModel = new Renderable2dModel(VaoManager.loadToVao(verticesTrack, uvs), track);
 		
 
 		float[] verticesThumb = new float[12];
@@ -65,7 +66,7 @@ public class GUISlider extends GUIElement{
 		verticesThumb[10] = +2;
 		verticesThumb[11] = 0;
 		
-		thumbModel = new Renderable2dModel(verticesThumb, uvs, thumb);
+		thumbModel = new Renderable2dModel(VaoManager.loadToVao(verticesThumb, uvs), thumb);
 	}
 
 	@Override

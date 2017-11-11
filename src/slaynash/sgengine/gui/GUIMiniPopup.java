@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import org.lwjgl.util.vector.Vector2f;
 
 import slaynash.sgengine.models.Renderable2dModel;
+import slaynash.sgengine.models.utils.VaoManager;
 import slaynash.sgengine.shaders.ShaderManager;
 import slaynash.sgengine.textureUtils.TextureDef;
 import slaynash.sgengine.textureUtils.TextureManager;
@@ -41,7 +42,7 @@ public class GUIMiniPopup extends GUIElement {
 		vertices[10] = 0;
 		vertices[11] = 0;
 		
-		model = new Renderable2dModel(vertices, uvs, texture);
+		model = new Renderable2dModel(VaoManager.loadToVao(vertices, uvs), texture);
 		
 	}
 

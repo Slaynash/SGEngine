@@ -1,5 +1,7 @@
 package slaynash.sgengine.utils;
 
+import javax.vecmath.Quat4f;
+
 import org.jbox2d.common.Vec2;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Matrix4f;
@@ -216,6 +218,36 @@ public class MatrixUtils {
 		matrix.m33 = 1;
 		
 		return matrix;
+	}
+
+	public static Matrix4f quatToMatrix(Quat4f q, Matrix4f mat){
+		
+	    float sqw = q.w*q.w;
+	    float sqx = q.x*q.x;
+	    float sqy = q.y*q.y;
+	    float sqz = q.z*q.z;
+
+	    // invs (inverse square length) is only required if quaternion is not already normalised
+	    float invs = 1 / (sqx + sqy + sqz + sqw);
+	    mat.m00 = ( sqx - sqy - sqz + sqw)*invs ; // since sqw + sqx + sqy + sqz =1/invs*invs
+	    mat.m11 = (-sqx + sqy - sqz + sqw)*invs ;
+	    mat.m22 = (-sqx - sqy + sqz + sqw)*invs ;
+	    
+	    float tmp1 = q.x*q.y;
+	    float tmp2 = q.z*q.w;
+	    mat.m01 = 2.0f * (tmp1 + tmp2)*invs ;
+	    mat.m10 = 2.0f * (tmp1 - tmp2)*invs ;
+	    
+	    tmp1 = q.x*q.z;
+	    tmp2 = q.y*q.w;
+	    mat.m02 = 2.0f * (tmp1 - tmp2)*invs ;
+	    mat.m20 = 2.0f * (tmp1 + tmp2)*invs ;
+	    tmp1 = q.y*q.z;
+	    tmp2 = q.x*q.w;
+	    mat.m12 = 2.0f * (tmp1 + tmp2)*invs ;
+	    mat.m21 = 2.0f * (tmp1 - tmp2)*invs ; 
+	    
+	    return mat;
 	}
 	
 }

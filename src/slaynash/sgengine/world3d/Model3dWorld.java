@@ -10,21 +10,19 @@ import org.lwjgl.util.vector.Vector3f;
 
 import slaynash.sgengine.Configuration;
 import slaynash.sgengine.models.Renderable3dModel;
+import slaynash.sgengine.models.utils.VaoManager;
 import slaynash.sgengine.shaders.ShaderManager;
 import slaynash.sgengine.utils.ShapeHelper;
-import slaynash.sgengine.world3d.loader.Entity;
 import slaynash.sgengine.world3d.loader.TriangleFace;
 
-public class Model3dWorld extends Entity{
+public class Model3dWorld {
 	
 	private TriangleFace[] faces;
 	
 	private Renderable3dModel[] models;
 
 	public Model3dWorld(TriangleFace[] faces) {
-		super();
 		this.faces = faces;
-		setPosition(new Vector3f(0, 0, 0));
 		
 		Map<Integer, List<TriangleFace>> faceGroups = new HashMap<Integer, List<TriangleFace>>();
 		
@@ -77,37 +75,27 @@ public class Model3dWorld extends Entity{
 				texCoords[j*2*3+4] = f.getUVs()[4];
 				texCoords[j*2*3+5] = f.getUVs()[5];
 			}
-			models[i] = new Renderable3dModel(vertices, texCoords, ShapeHelper.calculateNormals(vertices), ShapeHelper.calculateTangents(vertices, texCoords), tf.get(0).getTextureColor(), tf.get(0).getTextureNormal(), tf.get(0).getTextureSpecular());
+			int[] indices = new int[vertices.length/3];
+			for(int j=0;j<indices.length;j++) indices[j] = j;
+			models[i] = new Renderable3dModel(VaoManager.loadToVao(vertices, texCoords, ShapeHelper.calculateNormals(vertices), ShapeHelper.calculateTangents(vertices, texCoords), indices), tf.get(0).getTextureColor(), tf.get(0).getTextureNormal(), tf.get(0).getTextureSpecular());
 			i++;
 		}
 		
 		if(Configuration.isCollisionsLoadedWith3dWorldLoad()) CollisionManager3d.addModel3dWorld(this);
 	}
-
-	@Override
-	public void update() {
-		
-	}
-
-	@Override
+	
 	public void render() {
 		
-		ShaderManager.shader_loadTransformationMatrix(
-				createTransformationMatrix(getPosition(), getAngle().x, getAngle().y, getAngle().z, 1f)
-		);
+		ShaderManager.shader_loadTransformationMatrix(new Matrix4f());
 		
 		for(Renderable3dModel model:models) model.render();
 	}
 	
-
-
-	@Override
-	public void renderVR() {
-		ShaderManager.shader_loadTransformationMatrix(
-				createTransformationMatrix(getPosition(), getAngle().x, getAngle().y, getAngle().z, 1f)
-		);
+	public void renderVR(int eye) {
 		
-		for(Renderable3dModel model:models) model.render();
+		ShaderManager.shader_loadTransformationMatrix(new Matrix4f());
+		
+		for(Renderable3dModel model:models) model.renderVR(eye);
 	}
 
 	public TriangleFace[] getFaces() {
@@ -123,6 +111,10 @@ public class Model3dWorld extends Entity{
 		Matrix4f.rotate((float) Math.toRadians(rz), new Vector3f(0,0,1), matrix, matrix);
 		Matrix4f.scale(new Vector3f(scale,scale,scale), matrix, matrix);
 		return matrix;
+	}
+	
+	public void destroy() {//TODO destroy world part on world unload
+		
 	}
 
 }

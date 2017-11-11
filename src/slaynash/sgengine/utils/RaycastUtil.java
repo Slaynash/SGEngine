@@ -2,10 +2,12 @@ package slaynash.sgengine.utils;
 
 import org.lwjgl.util.vector.Vector3f;
 
+import com.bulletphysics.collision.dispatch.CollisionObject;
 import com.bulletphysics.collision.dispatch.CollisionWorld.ClosestRayResultCallback;
 
 import slaynash.sgengine.Configuration;
 import slaynash.sgengine.world3d.CollisionManager3d;
+import slaynash.sgengine.world3d.entities.DraggableEntity;
 
 public class RaycastUtil {
 
@@ -20,6 +22,20 @@ public class RaycastUtil {
 			CollisionManager3d.getDynamicWorld().rayTest(new javax.vecmath.Vector3f(start.x, start.y, start.z), end, resultCallback);
 			if(resultCallback.hasHit()) {
 			    return new Vector3f(resultCallback.hitPointWorld.x, resultCallback.hitPointWorld.y, resultCallback.hitPointWorld.z);
+			}
+		}
+		return null;
+	}
+	
+	public static DraggableEntity getNearestDraggableEntity(Vector3f start, Vector3f dir, float range){
+		if(Configuration.isCollisionManager3dEnabled()){
+			
+			javax.vecmath.Vector3f end = new javax.vecmath.Vector3f(start.x+dir.x*range, start.y+dir.y*range, start.z+dir.z*range);
+			ClosestRayResultCallback resultCallback = new ClosestRayResultCallback(new javax.vecmath.Vector3f(start.x, start.y, start.z), end);
+			
+			CollisionManager3d.getDynamicWorld().rayTest(new javax.vecmath.Vector3f(start.x, start.y, start.z), end, resultCallback);
+			if(resultCallback.hasHit()) {
+			    return resultCallback.collisionObject.getUserPointer() instanceof DraggableEntity ? (DraggableEntity)resultCallback.collisionObject.getUserPointer() : null;
 			}
 		}
 		return null;
@@ -95,5 +111,19 @@ public class RaycastUtil {
 			return t;
 
 		return 0;
+	}
+
+	public static CollisionObject getNearestEntity(Vector3f start, Vector3f dir, float range) {
+		if(Configuration.isCollisionManager3dEnabled()){
+			
+			javax.vecmath.Vector3f end = new javax.vecmath.Vector3f(start.x+dir.x*range, start.y+dir.y*range, start.z+dir.z*range);
+			ClosestRayResultCallback resultCallback = new ClosestRayResultCallback(new javax.vecmath.Vector3f(start.x, start.y, start.z), end);
+			
+			CollisionManager3d.getDynamicWorld().rayTest(new javax.vecmath.Vector3f(start.x, start.y, start.z), end, resultCallback);
+			if(resultCallback.hasHit()) {
+			    return resultCallback.collisionObject;
+			}
+		}
+		return null;
 	}
 }

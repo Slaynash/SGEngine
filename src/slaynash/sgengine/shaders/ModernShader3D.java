@@ -8,7 +8,7 @@ import slaynash.sgengine.Configuration;
 public class ModernShader3D extends ModernShader {
 	
 	public ModernShader3D() {
-		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "modern3d.vs", "modern3d.fs", ShaderProgram.SHADER_3D_MODERN);
+		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "modern/modern3d.vs", "modern/modern3d.fs", ShaderProgram.SHADER_3D_MODERN);
 		setShadowShader(new ShadowShader());
 	}
 	
@@ -80,12 +80,10 @@ public class ModernShader3D extends ModernShader {
 
 	@Override
 	public void bindModel(int modelID) {
-		if(Configuration.getRenderMethod() == Configuration.RENDER_MODERN){
-			GL30.glBindVertexArray(modelID);
-			GL20.glEnableVertexAttribArray(0);
-			GL20.glEnableVertexAttribArray(1);
-			GL20.glEnableVertexAttribArray(2);
-			GL20.glEnableVertexAttribArray(3);
-		}
+		GL30.glBindVertexArray(modelID);
+		GL20.glEnableVertexAttribArray(0);
+		GL20.glEnableVertexAttribArray(1);
+		GL20.glEnableVertexAttribArray(2);
+		GL20.glEnableVertexAttribArray(3);
 	}
 }

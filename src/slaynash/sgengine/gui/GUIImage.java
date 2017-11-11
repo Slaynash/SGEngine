@@ -3,6 +3,7 @@ package slaynash.sgengine.gui;
 import org.lwjgl.util.vector.Vector2f;
 
 import slaynash.sgengine.models.Renderable2dModel;
+import slaynash.sgengine.models.utils.VaoManager;
 import slaynash.sgengine.shaders.ShaderManager;
 import slaynash.sgengine.textureUtils.TextureManager;
 
@@ -32,7 +33,7 @@ public class GUIImage extends GUIElement{
 
 		
 		
-		model = new Renderable2dModel(vertices, uvs, TextureManager.getTextureDef(imagePath, TextureManager.COLOR));
+		model = new Renderable2dModel(VaoManager.loadToVao(vertices, uvs), TextureManager.getTextureDef(imagePath, TextureManager.COLOR));
 	}
 
 	@Override

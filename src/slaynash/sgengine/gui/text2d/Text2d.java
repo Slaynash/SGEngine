@@ -7,6 +7,7 @@ import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
 import slaynash.sgengine.models.Renderable2dModel;
+import slaynash.sgengine.models.utils.VaoManager;
 import slaynash.sgengine.gui.GUIElement;
 import slaynash.sgengine.gui.text2d.fontMeshCreator.FontType;
 import slaynash.sgengine.gui.text2d.fontMeshCreator.TextMeshData;
@@ -52,7 +53,7 @@ public class Text2d {
 		TextMeshData data = fontType.loadText(this);
 		vertices = data.getVertexPositions();
 		uvs = data.getTextureCoords();
-		textModel = new Renderable2dModel(vertices, uvs, font.getTextureAtlas());
+		textModel = new Renderable2dModel(VaoManager.loadToVao(vertices, uvs), font.getTextureAtlas());
 		
 		text2ds.add(this);
 	}
@@ -225,7 +226,7 @@ public class Text2d {
 			TextMeshData data = t.fontType.loadText(t);
 			t.vertices = data.getVertexPositions();
 			t.uvs = data.getTextureCoords();
-			t.textModel = new Renderable2dModel(t.vertices, t.uvs, t.font.getTextureAtlas());
+			t.textModel = new Renderable2dModel(VaoManager.loadToVao(t.vertices, t.uvs), t.font.getTextureAtlas());
 		}
 	}
 	

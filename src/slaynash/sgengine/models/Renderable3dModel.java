@@ -4,27 +4,23 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
-import slaynash.sgengine.Configuration;
-import slaynash.sgengine.deferredRender.DeferredRenderer;
+import slaynash.sgengine.deferredRender.DeferredModelRenderer;
+import slaynash.sgengine.models.utils.Vao;
 import slaynash.sgengine.shaders.ShaderManager;
 import slaynash.sgengine.textureUtils.TextureDef;
 import slaynash.sgengine.textureUtils.TextureManager;
-import slaynash.sgengine.utils.VAO;
-import slaynash.sgengine.utils.VOLoader;
 
 public class Renderable3dModel extends RenderableModel {
 
-	private int listId = 0;
+	//private int listId = 0;
 	private TextureDef textureColor;
 	private TextureDef textureNormal;
 	private TextureDef textureSpecular;
-	private VAO vao;
-	private boolean isIndexed = false;
+	private Vao vao;
 	private boolean renderable = true;
-	private boolean drRegistered = false;
 	
+	/*
 	public Renderable3dModel(float[] vertices, float[] textureCoords, float[] normals, float[] tangents, TextureDef textureColor, TextureDef textureNormal, TextureDef textureSpecular){
-		isIndexed = true;
 		this.textureColor = textureColor != null ? textureColor : TextureManager.getDefaultTexture();
 		this.textureNormal = textureNormal != null ? textureNormal : TextureManager.getDefaultNormalTexture();
 		this.textureSpecular = textureSpecular != null ? textureSpecular : TextureManager.getDefaultSpecularTexture();
@@ -43,7 +39,7 @@ public class Renderable3dModel extends RenderableModel {
 		}else{
 			int[] indices = new int[vertices.length/3];
 			for(int i=0;i<indices.length;i++) indices[i] = i;
-			vao = VOLoader.loadToVAO(vertices, textureCoords, normals, tangents, indices);
+			vao = VaoManager.loadToVAO(vertices, textureCoords, normals, tangents, indices);
 		}
 		
 		if(Configuration.isUsingDeferredRender() && !drRegistered){
@@ -54,7 +50,6 @@ public class Renderable3dModel extends RenderableModel {
 	}
 	
 	public Renderable3dModel(float[] vertices, float[] textureCoords, float[] normals, float[] tangents, int[] indices, TextureDef textureColor, TextureDef textureNormal, TextureDef textureSpecular){
-		isIndexed = true;
 		this.textureColor = textureColor != null ? textureColor : TextureManager.getDefaultTexture();
 		this.textureNormal = textureNormal != null ? textureNormal : TextureManager.getDefaultNormalTexture();
 		this.textureSpecular = textureSpecular != null ? textureSpecular : TextureManager.getDefaultSpecularTexture();
@@ -71,7 +66,7 @@ public class Renderable3dModel extends RenderableModel {
 			GL11.glEnd();
 			GL11.glEndList();
 		}else{
-			vao = VOLoader.loadToVAO(vertices, textureCoords, normals, tangents, indices);
+			vao = VaoManager.loadToVAO(vertices, textureCoords, normals, tangents, indices);
 		}
 		
 		if(Configuration.isUsingDeferredRender() && !drRegistered){
@@ -80,22 +75,17 @@ public class Renderable3dModel extends RenderableModel {
 		}
 		
 	}
-	
-	@Override
-	protected void renderFree() {
-		if(!renderable) return;
-		else{
-			//TODO add ShaderManager.shader_bindShineDamper(shineDamper);
-			//TODO add ShaderManager.shader_bindReflectivity(reflectivity);
-			ShaderManager.shader_bindTextureID(textureColor.getTextureID(), ShaderManager.TEXTURE_COLOR);
-			ShaderManager.shader_bindTextureID(textureNormal.getTextureID(), ShaderManager.TEXTURE_NORMAL);
-			ShaderManager.shader_bindTextureID(textureSpecular.getTextureID(), ShaderManager.TEXTURE_SPECULAR);
-			GL11.glCallList(listId);
-		}
+	*/
+	public Renderable3dModel(Vao vao, TextureDef textureColor, TextureDef textureNormal, TextureDef textureSpecular){
+		this.textureColor = textureColor != null ? textureColor : TextureManager.getDefaultTexture();
+		this.textureNormal = textureNormal != null ? textureNormal : TextureManager.getDefaultNormalTexture();
+		this.textureSpecular = textureSpecular != null ? textureSpecular : TextureManager.getDefaultSpecularTexture();
+		
+		this.vao = vao;
 	}
 
 	@Override
-	protected void renderModern() {
+	protected void renderToScreen() {
 		if(!renderable) return;
 		else{
 			GL30.glBindVertexArray(vao.getVaoID());
@@ -108,33 +98,26 @@ public class Renderable3dModel extends RenderableModel {
 			ShaderManager.shader_bindTextureID(textureColor.getTextureID(), ShaderManager.TEXTURE_COLOR);
 			ShaderManager.shader_bindTextureID(textureNormal.getTextureID(), ShaderManager.TEXTURE_NORMAL);
 			ShaderManager.shader_bindTextureID(textureSpecular.getTextureID(), ShaderManager.TEXTURE_SPECULAR);
-			if(isIndexed) GL11.glDrawElements(GL11.GL_TRIANGLES, vao.getVertexCount(), GL11.GL_UNSIGNED_INT, 0); else GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, vao.getVertexCount());
+			GL11.glDrawElements(GL11.GL_TRIANGLES, vao.getIndexCount(), GL11.GL_UNSIGNED_INT, 0);
 		}
 	}
 	
 	@Override
-	public void renderVR() {
+	public void renderVREye(int eye) {
 		
 		if(!renderable) return;
 		else{
-			if(Configuration.getRenderMethod() == Configuration.RENDER_FREE){
-				ShaderManager.shader_bindTextureID(textureColor.getTextureID(), ShaderManager.TEXTURE_COLOR);
-				ShaderManager.shader_bindTextureID(textureNormal.getTextureID(), ShaderManager.TEXTURE_NORMAL);
-				ShaderManager.shader_bindTextureID(textureSpecular.getTextureID(), ShaderManager.TEXTURE_SPECULAR);
-				GL11.glCallList(listId);
-			}else{
-				GL30.glBindVertexArray(vao.getVaoID());
-				GL20.glEnableVertexAttribArray(0);
-				GL20.glEnableVertexAttribArray(1);
-				GL20.glEnableVertexAttribArray(2);
-				GL20.glEnableVertexAttribArray(3);
-				//TODO add ShaderManager.shader_bindShineDamper(shineDamper);
-				//TODO add ShaderManager.shader_bindReflectivity(reflectivity);
-				ShaderManager.shader_bindTextureID(textureColor.getTextureID(), ShaderManager.TEXTURE_COLOR);
-				ShaderManager.shader_bindTextureID(textureNormal.getTextureID(), ShaderManager.TEXTURE_NORMAL);
-				ShaderManager.shader_bindTextureID(textureSpecular.getTextureID(), ShaderManager.TEXTURE_SPECULAR);
-				if(isIndexed) GL11.glDrawElements(GL11.GL_TRIANGLES, vao.getVertexCount(), GL11.GL_UNSIGNED_INT, 0); else GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, vao.getVertexCount());
-			}
+			GL30.glBindVertexArray(vao.getVaoID());
+			GL20.glEnableVertexAttribArray(0);
+			GL20.glEnableVertexAttribArray(1);
+			GL20.glEnableVertexAttribArray(2);
+			GL20.glEnableVertexAttribArray(3);
+			//TODO add ShaderManager.shader_bindShineDamper(shineDamper);
+			//TODO add ShaderManager.shader_bindReflectivity(reflectivity);
+			ShaderManager.shader_bindTextureID(textureColor.getTextureID(), ShaderManager.TEXTURE_COLOR);
+			ShaderManager.shader_bindTextureID(textureNormal.getTextureID(), ShaderManager.TEXTURE_NORMAL);
+			ShaderManager.shader_bindTextureID(textureSpecular.getTextureID(), ShaderManager.TEXTURE_SPECULAR);
+			GL11.glDrawElements(GL11.GL_TRIANGLES, vao.getIndexCount(), GL11.GL_UNSIGNED_INT, 0);
 		}
 	}
 	
@@ -146,12 +129,8 @@ public class Renderable3dModel extends RenderableModel {
 		vao.dispose();
 		renderable = false;
 	}
-
-	public boolean isIndexed() {
-		return isIndexed;
-	}
 	
-	public VAO getVao(){
+	public Vao getVao(){
 		return vao;
 	}
 
@@ -159,8 +138,9 @@ public class Renderable3dModel extends RenderableModel {
 		return new int[]{textureColor.getTextureID(), textureNormal.getTextureID(), textureSpecular.getTextureID()};
 	}
 
-	public int getListId() {
-		return listId;
+	@Override
+	public Class<? extends DeferredModelRenderer> getDeferredRenderer() {
+		return Renderable3dModelDeferredRender.class;
 	}
 	
 	

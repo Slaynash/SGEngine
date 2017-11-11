@@ -21,13 +21,13 @@ public class PlayerCharacter3d extends PlayerCharacter {
 	private static final float DEGREE_TO_RADIANS = (float) (Math.PI/180f);
 	private static final float PI = 3.14159f;
 	
-	private static final float WALK_SPEED = 0.02f;
-	private static final float RUN_SPEED = 0.10f;
+	private static final float WALK_SPEED = 0.06f;
+	private static final float RUN_SPEED = 0.30f;
 	
 	private static final float PLAYER_WIDTH = 0.40f;
 	private static final float PLAYER_HEIGHT = 1.50f;
 	private static final float PLAYER_STEP_HEIGHT = 0.4f;
-	private static final float GRAVITY = 0.98f;
+	private static final float GRAVITY = 9.81f;
 	
 	private static float forward, left;
 	
@@ -45,7 +45,7 @@ public class PlayerCharacter3d extends PlayerCharacter {
 		entity.setWorldTransform(t);
 		controller = new CharacterController(entity, playerShape, PLAYER_STEP_HEIGHT);
 		controller.setGravity(GRAVITY);
-		controller.setJumpSpeed(1.2f);
+		controller.setJumpSpeed(4f);
 		
 		CollisionManager3d.registerThePlayer(getEntity(), getController());
 	}

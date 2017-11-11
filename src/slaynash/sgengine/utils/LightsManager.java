@@ -3,30 +3,30 @@ package slaynash.sgengine.utils;
 import java.util.ArrayList;
 
 import slaynash.sgengine.Configuration;
-import slaynash.sgengine.world3d.loader.PointLight;
+import slaynash.sgengine.world3d.loader.Ent_PointLight;
 
 public class LightsManager {
 	
-	private static ArrayList<PointLight> pointlights = new ArrayList<PointLight>();
+	private static ArrayList<Ent_PointLight> pointlights = new ArrayList<Ent_PointLight>();
 	//Upcoming updates
 	//private static ArrayList<SpotLight> spotlights = new ArrayList<SpotLight>();
 	//private static DirectionalLight directionalLight;
 	
-	public static ArrayList<PointLight> getPointlights(){
+	public static ArrayList<Ent_PointLight> getPointlights(){
 		synchronized (pointlights) {
 			while(pointlights.size() > Configuration.MAX_LIGHTS) pointlights.remove(Configuration.MAX_LIGHTS);
 			return pointlights;
 		}
 	}
 	
-	public static void addPointlight(PointLight pointlight) {
+	public static void addPointlight(Ent_PointLight pointlight) {
 		synchronized (pointlights) {
 			if(pointlights.size() >= Configuration.MAX_LIGHTS) return;
 			pointlights.add(pointlight);
 		}
 	}
 	
-	public static void removePointlight(PointLight pointlight) {
+	public static void removePointlight(Ent_PointLight pointlight) {
 		synchronized (pointlights) {
 			pointlights.remove(pointlight);
 		}

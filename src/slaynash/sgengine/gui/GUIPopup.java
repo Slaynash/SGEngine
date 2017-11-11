@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import org.lwjgl.util.vector.Vector2f;
 
 import slaynash.sgengine.models.Renderable2dModel;
+import slaynash.sgengine.models.utils.VaoManager;
 import slaynash.sgengine.gui.comboBox.GUIComboBox;
 import slaynash.sgengine.gui.text2d.Text2d;
 import slaynash.sgengine.shaders.ShaderManager;
@@ -74,7 +75,7 @@ public class GUIPopup extends GUIElement {
 		verticesBack[10] = leftPadding;
 		verticesBack[11] = topPadding;
 		
-		modelBack = new Renderable2dModel(verticesBack, uvs, texBack);
+		modelBack = new Renderable2dModel(VaoManager.loadToVao(verticesBack, uvs), texBack);
 		
 		float[] verticesBottom = new float[12];
 		
@@ -92,7 +93,7 @@ public class GUIPopup extends GUIElement {
 		verticesBottom[10] = 0;
 		verticesBottom[11] = height-bottomPadding;
 		
-		modelBottom = new Renderable2dModel(verticesBottom, uvs, texBottom);
+		modelBottom = new Renderable2dModel(VaoManager.loadToVao(verticesBottom, uvs), texBottom);
 		
 		float[] verticesTop = new float[12];
 		
@@ -110,7 +111,7 @@ public class GUIPopup extends GUIElement {
 		verticesTop[10] = 0;
 		verticesTop[11] = topPadding;
 		
-		modelTop = new Renderable2dModel(verticesTop, uvs, texTop);
+		modelTop = new Renderable2dModel(VaoManager.loadToVao(verticesTop, uvs), texTop);
 		
 		
 		float uvsSides[] = new float[]{0,0,1,0,1,1,1,1,0,1,0,0, 1,0,0,0,0,1, 0,1,1,1,1,0};
@@ -179,7 +180,7 @@ public class GUIPopup extends GUIElement {
 		verticesSides[22] = width-rightPadding;
 		verticesSides[23] = topPadding;
 		
-		modelSides = new Renderable2dModel(verticesSides, uvsSides, texSide);
+		modelSides = new Renderable2dModel(VaoManager.loadToVao(verticesSides, uvsSides), texSide);
 		
 		float ctX = width-(topPadding/2)-1;
 		float ctY = (topPadding/2);
@@ -199,7 +200,7 @@ public class GUIPopup extends GUIElement {
 		verticesClose[10] = ctX-hs;
 		verticesClose[11] = ctY-hs;
 		
-		modelClose = new Renderable2dModel(verticesClose, uvs, texClose);
+		modelClose = new Renderable2dModel(VaoManager.loadToVao(verticesClose, uvs), texClose);
 	}
 
 	@Override

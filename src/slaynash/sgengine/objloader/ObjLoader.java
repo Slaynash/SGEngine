@@ -11,12 +11,11 @@ import java.util.List;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
-import slaynash.sgengine.models.Renderable3dModel;
 import slaynash.sgengine.textureUtils.TextureManager;
 
 public class ObjLoader {
 
-	public static Renderable3dModel loadRenderable3dModel(File file, String diffusemap, String normalmap, String specularmap) {
+	public static ObjMeshData loadObj(File file, String diffusemap, String normalmap, String specularmap) {
 		FileReader isr = null;
 		try {
 			isr = new FileReader(file);
@@ -86,15 +85,12 @@ public class ObjLoader {
 		
 		int[] indicesArray = convertIndicesListToArray(indices);
 		
-		return new Renderable3dModel(
+		return new ObjMeshData(
 				verticesArray,
 				texturesArray,
 				normalsArray,
 				tangentsArray,
-				indicesArray,
-				diffusemap != null ? TextureManager.getTextureDef(diffusemap, TextureManager.COLOR) : TextureManager.getDefaultTexture(),
-				normalmap != null ? TextureManager.getTextureDef(normalmap, TextureManager.NORMAL) : TextureManager.getDefaultNormalTexture(),
-				specularmap != null ? TextureManager.getTextureDef(specularmap, TextureManager.SPECULAR) : TextureManager.getDefaultSpecularTexture()
+				indicesArray
 		);
 	}
 	

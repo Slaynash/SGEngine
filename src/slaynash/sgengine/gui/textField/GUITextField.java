@@ -6,6 +6,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.util.vector.Vector2f;
 
 import slaynash.sgengine.models.Renderable2dModel;
+import slaynash.sgengine.models.utils.VaoManager;
 import slaynash.sgengine.gui.GUIElement;
 import slaynash.sgengine.gui.text2d.Text2d;
 import slaynash.sgengine.shaders.ShaderManager;
@@ -61,7 +62,7 @@ public class GUITextField extends GUIElement{
 		vertices[10] = 0;
 		vertices[11] = 0;
 		
-		model = new Renderable2dModel(vertices, uvs, background);
+		model = new Renderable2dModel(VaoManager.loadToVao(vertices, uvs), background);
 	}
 	
 	public GUITextField(int x, int y, int width, String text, boolean centerText, GUIElement parent, int location) {

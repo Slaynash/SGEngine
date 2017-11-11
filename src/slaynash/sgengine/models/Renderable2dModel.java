@@ -4,41 +4,24 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
-import slaynash.sgengine.Configuration;
-import slaynash.sgengine.LogSystem;
-import slaynash.sgengine.deferredRender.DeferredRenderer;
+import slaynash.sgengine.deferredRender.DeferredModelRenderer;
+import slaynash.sgengine.models.utils.Vao;
 import slaynash.sgengine.shaders.ShaderManager;
 import slaynash.sgengine.textureUtils.TextureDef;
 import slaynash.sgengine.textureUtils.TextureManager;
-import slaynash.sgengine.utils.VAO;
-import slaynash.sgengine.utils.VOLoader;
 
 public class Renderable2dModel extends RenderableModel {
 	
 	private int listId = 0;
 	private TextureDef texture;
-	private VAO vao;
-	private boolean drRegistered = false;
-
+	private Vao vao;
+	
+	/*
 	public Renderable2dModel(float[] vertices, float[] textureCoords, TextureDef texture){
 		
 		this.texture = texture != null ? texture : TextureManager.getDefaultTexture();
 		
-		if(Configuration.getRenderMethod() == Configuration.RENDER_FREE){
-			int err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("Renderable2dModel 1: OpenGL Error "+err);
-			listId = GL11.glGenLists(1);
-			GL11.glNewList(listId, GL11.GL_COMPILE);
-			GL11.glBegin(GL11.GL_TRIANGLES);
-			for(int i=0;i<vertices.length/2;i++){
-				GL11.glTexCoord2f(textureCoords[i*2], textureCoords[i*2+1]);
-				GL11.glVertex2f(vertices[i*2], vertices[i*2+1]);
-			}
-			GL11.glEnd();
-			GL11.glEndList();
-			if((err = GL11.glGetError()) != 0) LogSystem.out_println("Renderable2dModel 2: OpenGL Error "+err);
-		}else{
-			vao = VOLoader.loadToVAO(vertices, textureCoords);
-		}
+		vao = VaoManager.loadToVAO(vertices, textureCoords);
 		
 		if(Configuration.isUsingDeferredRender() && !drRegistered){
 			drRegistered = true;
@@ -46,27 +29,30 @@ public class Renderable2dModel extends RenderableModel {
 		}
 		
 	}
-
-	@Override
-	protected void renderFree() {
-		ShaderManager.shader_bindTextureID(texture.getTextureID(), ShaderManager.TEXTURE_COLOR);
-		GL11.glCallList(listId);
+	*/
+	
+	public Renderable2dModel(Vao vao, TextureDef texture){
+		this.vao = vao;
+		
+		this.texture = texture != null ? texture : TextureManager.getDefaultTexture();
+		
+		//vao = VaoManager.loadToVAO(vertices, textureCoords);
 	}
 
 	@Override
-	protected void renderModern() {
+	protected void renderToScreen() {
 		GL30.glBindVertexArray(vao.getVaoID());
 		GL20.glEnableVertexAttribArray(0);
 		GL20.glEnableVertexAttribArray(1);
 		ShaderManager.shader_bindTextureID(texture.getTextureID(), ShaderManager.TEXTURE_COLOR);
-		GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, vao.getVertexCount());
+		GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, vao.getIndexCount());
 	}
 
 	public void setTexture(TextureDef texture) {
 		this.texture = texture;
 	}
 
-	public VAO getVao() {
+	public Vao getVao() {
 		return vao;
 	}
 
@@ -76,6 +62,11 @@ public class Renderable2dModel extends RenderableModel {
 
 	public int getListId() {
 		return listId;
+	}
+
+	@Override
+	public Class<? extends DeferredModelRenderer> getDeferredRenderer() {
+		return Renderable2dModelDeferredRender.class;
 	}
 
 }

@@ -5,6 +5,7 @@ import javax.swing.event.EventListenerList;
 import org.lwjgl.util.vector.Vector2f;
 
 import slaynash.sgengine.models.Renderable2dModel;
+import slaynash.sgengine.models.utils.VaoManager;
 import slaynash.sgengine.gui.GUIElement;
 import slaynash.sgengine.shaders.ShaderManager;
 import slaynash.sgengine.textureUtils.TextureDef;
@@ -44,7 +45,7 @@ public class GUICheckBox extends GUIElement{
 		vertices[10] = 0;
 		vertices[11] = 0;
 		
-		model = new Renderable2dModel(vertices, uvs, texN);
+		model = new Renderable2dModel(VaoManager.loadToVao(vertices, uvs), texN);
 	}
 
 	@Override
@@ -56,20 +57,6 @@ public class GUICheckBox extends GUIElement{
 				listener.stateChanged(event);
 			}
 		}
-		/*
-		if(checked) ShaderManager.shader_bindTextureID(texYID, ShaderManager.TEXTURE_COLOR);
-		else ShaderManager.shader_bindTextureID(texNID, ShaderManager.TEXTURE_COLOR);
-		GL11.glBegin(GL11.GL_QUADS);
-			GL11.glTexCoord2f(0      , 0);
-			GL11.glVertex2f  (getTopLeft().x, getTopLeft().y);
-			GL11.glTexCoord2f(1      , 0);
-			GL11.glVertex2f  (getBottomRight().x, getTopLeft().y);
-			GL11.glTexCoord2f(1      , 1);
-			GL11.glVertex2f  (getBottomRight().x, getBottomRight().y);
-			GL11.glTexCoord2f(0      , 1);
-			GL11.glVertex2f  (getTopLeft().x, getBottomRight().y);
-		GL11.glEnd();
-		*/
 		ShaderManager.shader_loadTranslation(getTopLeft());
 		if(checked) model.setTexture(texY);
 		else model.setTexture(texN);

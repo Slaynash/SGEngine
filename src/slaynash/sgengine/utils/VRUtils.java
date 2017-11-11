@@ -1,15 +1,10 @@
 package slaynash.sgengine.utils;
 
-import java.io.File;
-import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.concurrent.TimeUnit;
 
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
-import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
@@ -31,8 +26,9 @@ import jopenvr.VR_IVRCompositor_FnTable;
 import jopenvr.VR_IVRSystem_FnTable;
 import slaynash.sgengine.Configuration;
 import slaynash.sgengine.LogSystem;
+import slaynash.sgengine.deferredRender.FrameBufferedObject;
 import slaynash.sgengine.models.Renderable3dModel;
-import slaynash.sgengine.objloader.ObjLoader;
+import slaynash.sgengine.models.utils.ModelManager;
 import slaynash.sgengine.shaders.ShaderManager;
 import slaynash.sgengine.utils.vr.VRController;
 
@@ -72,9 +68,11 @@ public class VRUtils {
 	private static long _tframeCount;
 	
 	
-	private static int[] fbos = new int[2];
-	private static int[] rbos = new int[2];
-	private static int leftEyeTextureId, rightEyeTextureId;
+	//private static int[] fbos = new int[2];
+	//private static int[] rbos = new int[2];
+	//private static int leftEyeTextureId, rightEyeTextureId;
+	private static FrameBufferedObject[] fbos_render = new FrameBufferedObject[2];
+	private static FrameBufferedObject[] fbos_send = new FrameBufferedObject[2];
 	private static Vector2i rendersize = new Vector2i();
 	
 	
@@ -85,7 +83,7 @@ public class VRUtils {
 	private static final long SLEEP_PRECISION = TimeUnit.MILLISECONDS.toNanos(4);
 	private static final long SPIN_YIELD_PRECISION = TimeUnit.MILLISECONDS.toNanos(2);
 	private static long latencyWaitTime;
-	private static boolean enableDebugLatency;
+	private static boolean enableDebugLatency = true;
 	private static int frames;
 	private static float vsyncToPhotons;
     private static double timePerFrame, frameCountRun;
@@ -93,6 +91,7 @@ public class VRUtils {
     
 	private static float posX, posY, posZ;
 	private static float dirX, dirY, dirZ;
+
 	private static float upX, upY, upZ;
 	private static float rightX, rightY, rightZ;
 	
@@ -140,8 +139,9 @@ public class VRUtils {
 		
 		rendersize = getRenderSize();
 		LogSystem.out_println("[VRUtils] Render size: "+rendersize.x+"x"+rendersize.y);
-	    initFBOs(rendersize.x, rendersize.y, rendersize.x, rendersize.y);
-	    initRBOs(rendersize.x, rendersize.y, rendersize.x, rendersize.y);
+	    //initFBOs(rendersize.x, rendersize.y, rendersize.x, rendersize.y);
+	    //initRBOs(rendersize.x, rendersize.y, rendersize.x, rendersize.y);
+		initFBOs(rendersize.x, rendersize.y);
 		LogSystem.out_println( "[VRUtils] Render buffers/textures created" );
 		setupCameras();
 		LogSystem.out_println( "[VRUtils] Matrices created" );
@@ -185,6 +185,20 @@ public class VRUtils {
         return store;
 	}
     
+    private static void initFBOs(int w, int h) {
+    	fbos_render[EYE_LEFT] = new FrameBufferedObject(w, h, 0, true, Configuration.getVRSSAASamples(), GL11.GL_RGBA8);
+    	fbos_render[EYE_RIGHT] = new FrameBufferedObject(w, h, 0, true, Configuration.getVRSSAASamples(), GL11.GL_RGBA8);
+
+    	fbos_send[EYE_LEFT] = new FrameBufferedObject(w, h, FrameBufferedObject.DEPTH_RENDER_BUFFER, false, 1, GL11.GL_RGBA8);
+    	fbos_send[EYE_RIGHT] = new FrameBufferedObject(w, h, FrameBufferedObject.DEPTH_RENDER_BUFFER, false, 1, GL11.GL_RGBA8);
+    	
+    	texType0.handle = fbos_send[EYE_LEFT].getColourTexture();
+    	texType0.write();
+    	texType1.handle = fbos_send[EYE_RIGHT].getColourTexture();
+    	texType1.write();
+    }
+    
+    /*
     private static void initFBOs(int xl, int yl, int xr, int yr) {
     	//EYE LEFT
     	fbos[EYE_LEFT] = GL30.glGenFramebuffers();
@@ -292,6 +306,8 @@ public class VRUtils {
 	    GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
 	}
 	
+	*/
+	
 	private static void initializeJOpenVR() throws Exception { 
 		hmdErrorStore = IntBuffer.allocate(1);
 		vrsystem = null;
@@ -381,7 +397,7 @@ public class VRUtils {
 	protected static void updatePose(){
         if(vrsystem == null) return;
         if(vrCompositor != null) {
-           vrCompositor.WaitGetPoses.apply(trackedDevicePosesReference, JOpenVRLibrary.k_unMaxTrackedDeviceCount, null, 0);
+			vrCompositor.WaitGetPoses.apply(trackedDevicePosesReference, JOpenVRLibrary.k_unMaxTrackedDeviceCount, null, 0);
         } else {
             // wait
             if( latencyWaitTime > 0 ) sleepNanos(latencyWaitTime);
@@ -484,8 +500,7 @@ public class VRUtils {
 	 */
 	public static void setCurrentRenderEye(int renderEye){
 		if(renderEye != EYE_CENTER){
-			GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, fbos[renderEye]);
-			GL11.glViewport(0, 0, rendersize.x, rendersize.y);
+			fbos_render[renderEye].bindFrameBuffer();
 		}
 		else{
 			GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
@@ -498,18 +513,10 @@ public class VRUtils {
 			return;
 
 		//long pinnedTime = System.nanoTime();
-		GL11.glDisable(GL13.GL_MULTISAMPLE);
-		GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, rbos[EYE_LEFT]);
-		GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, fbos[EYE_LEFT]);
-		GL30.glBlitFramebuffer(0, 0, rendersize.x, rendersize.y, 0, 0, rendersize.x, rendersize.y, GL11.GL_COLOR_BUFFER_BIT, GL11.GL_NEAREST);
-		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
-		
-		GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, rbos[EYE_RIGHT]);
-		GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, fbos[EYE_RIGHT]);
-		GL30.glBlitFramebuffer(0, 0, rendersize.x, rendersize.y, 0, 0, rendersize.x, rendersize.y, GL11.GL_COLOR_BUFFER_BIT, GL11.GL_NEAREST);
-		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
+		fbos_render[EYE_LEFT].resolveToFbo(fbos_send[EYE_LEFT]);
+		fbos_render[EYE_RIGHT].resolveToFbo(fbos_send[EYE_RIGHT]);
 
-		//LogSystem.out_println("fill rbos: "+(System.nanoTime()-pinnedTime)+"ns");
+		//LogSystem.out_println("resolve FBOs: "+((System.nanoTime()-pinnedTime)/1e6f)+"ms");
 		//pinnedTime = System.nanoTime();
 		
 		vrCompositor.Submit.apply(
@@ -521,11 +528,12 @@ public class VRUtils {
 				JOpenVRLibrary.EVREye.EVREye_Eye_Right,
 				texType1, texBoundsRight,
 				JOpenVRLibrary.EVRSubmitFlags.EVRSubmitFlags_Submit_Default);
-
-		vrCompositor.PostPresentHandoff.apply();//require ?
-		GL11.glEnable(GL13.GL_MULTISAMPLE);
 		
-		//LogSystem.out_println("send frames: "+(System.nanoTime()-pinnedTime)+"ns");
+		
+		//LogSystem.out_println("send frames to VR Compositor: "+((System.nanoTime()-pinnedTime)/1e6f)+"ms");
+
+		//XXX require ? vrCompositor.PostPresentHandoff.apply();
+		
 	}
 	
 	private static void sleepNanos(long nanoDuration) {
@@ -733,27 +741,27 @@ public class VRUtils {
 		return mat4DevicePose;
 	}
 	
-	public static void renderControllers(){
-		if(controllerModel == null) controllerModel = ObjLoader.loadRenderable3dModel(new File(Configuration.getAbsoluteInstallPath()+"/res/vr/controller.obj"), "res/vr/controller_texture.png", null, "res/vr/controller_spec.png");
+	public static void renderControllers(int eye){
+		if(controllerModel == null) controllerModel = ModelManager.loadObj("res/vr/controller.obj", "res/vr/controller_texture.png", null, "res/vr/controller_spec.png");
 		for(int i=0;i<trackedDevicePose.length;i++){
 			if(trackedDevicePose[i].bPoseIsValid != 1) continue;
 			switch(vrsystem.GetTrackedDeviceClass.apply(i)){
 				case JOpenVRLibrary.ETrackedDeviceClass.ETrackedDeviceClass_TrackedDeviceClass_Controller:
 					ShaderManager.shader_loadTransformationMatrix(Matrix4f.mul(envMatrix, mat4DevicePose[i], new Matrix4f()));
-					controllerModel.renderVR();
+					controllerModel.renderVR(eye);
 					break;
 			}
 		}
 	}
 	
-	public static void renderBaseStations(){
-		if(basestationModel == null) basestationModel = ObjLoader.loadRenderable3dModel(new File(Configuration.getAbsoluteInstallPath()+"/res/vr/basestation.obj"), "res/vr/basestation.tga", null, null);
+	public static void renderBaseStations(int eye){
+		if(basestationModel == null) basestationModel = ModelManager.loadObj("/res/vr/basestation.obj", "res/vr/basestation.tga", null, null);
 		for(int i=0;i<trackedDevicePose.length;i++){
 			if(trackedDevicePose[i].bPoseIsValid != 1) continue;
 			switch(vrsystem.GetTrackedDeviceClass.apply(i)){
 				case JOpenVRLibrary.ETrackedDeviceClass.ETrackedDeviceClass_TrackedDeviceClass_TrackingReference:
 					ShaderManager.shader_loadTransformationMatrix(Matrix4f.mul(envMatrix, mat4DevicePose[i], new Matrix4f()));
-					basestationModel.renderVR();
+					basestationModel.renderVR(eye);
 					break;
 			}
 		}
@@ -761,7 +769,7 @@ public class VRUtils {
 	
 	
 	public static void renderControllers3D(){
-		if(controllerModel == null) controllerModel = ObjLoader.loadRenderable3dModel(new File(Configuration.getAbsoluteInstallPath()+"/res/vr/controller.obj"), "res/vr/controller_texture.png", null, "res/vr/controller_spec.png");
+		if(controllerModel == null) controllerModel = ModelManager.loadObj("res/vr/controller.obj", "res/vr/controller_texture.png", null, "res/vr/controller_spec.png");
 		for(int i=0;i<trackedDevicePose.length;i++){
 			if(trackedDevicePose[i].bPoseIsValid != 1) continue;
 			switch(vrsystem.GetTrackedDeviceClass.apply(i)){
@@ -774,7 +782,7 @@ public class VRUtils {
 	}
 	
 	public static void renderBaseStations3D(){
-		if(basestationModel == null) basestationModel = ObjLoader.loadRenderable3dModel(new File(Configuration.getAbsoluteInstallPath()+"/res/vr/basestation.obj"), "res/vr/basestation.tga", null, null);
+		if(basestationModel == null) basestationModel = ModelManager.loadObj("res/vr/basestation.obj", "res/vr/basestation.tga", null, null);
 		for(int i=0;i<trackedDevicePose.length;i++){
 			if(trackedDevicePose[i].bPoseIsValid != 1) continue;
 			switch(vrsystem.GetTrackedDeviceClass.apply(i)){
@@ -821,5 +829,9 @@ public class VRUtils {
 
 	public static Vector3f getPosition() {
 		return Vector3f.add(getRawPosition(), getEnvPosition(), new Vector3f());
+	}
+	
+	public static Vector2i getRendersize() {
+		return new Vector2i(rendersize.x, rendersize.y);
 	}
 }

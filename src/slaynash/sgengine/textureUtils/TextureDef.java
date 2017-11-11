@@ -18,10 +18,12 @@ public class TextureDef {
 	private Texture texture;
 	private String path;
 	private boolean fakePath = false;
+	private int type = TextureManager.COLOR;
 	
-	public TextureDef(final Texture texture, final String path){
+	public TextureDef(final Texture texture, final String path, final int type){
 		this.texture = texture;
 		this.path = path;
+		this.type = type;
 	}
 	
 	public static TextureDef createTextureFromData(byte[] data, String name, int width, int height){
@@ -51,7 +53,7 @@ public class TextureDef {
 
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
         
-        TextureDef rtd = new TextureDef(textureImpl, name);
+        TextureDef rtd = new TextureDef(textureImpl, name, TextureManager.COLOR);
         rtd.fakePath = true;
 		
         return rtd;
@@ -90,5 +92,9 @@ public class TextureDef {
 	
 	public boolean isFakePath() {
 		return fakePath;
+	}
+
+	public int getType() {
+		return type;
 	}
 }

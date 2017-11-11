@@ -12,7 +12,7 @@ import slaynash.sgengine.LogSystem;
 public class ShadowShader extends ShaderProgram {
 
 	public ShadowShader() {
-		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "shadows.vs", "shadows.fs", "shadows.gs", ShaderProgram.SHADER_3D_SHADOWS);
+		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "shadows/shadows.vs", "shadows/shadows.fs", "shadows/shadows.gs", ShaderProgram.SHADER_3D_SHADOWS);
 		
 	}
 
@@ -50,10 +50,8 @@ public class ShadowShader extends ShaderProgram {
 
 	@Override
 	public void bindModel(int modelID) {
-		if(Configuration.getRenderMethod() == Configuration.RENDER_MODERN){
-			GL30.glBindVertexArray(modelID);
-			GL20.glEnableVertexAttribArray(0);
-		}
+		GL30.glBindVertexArray(modelID);
+		GL20.glEnableVertexAttribArray(0);
 	}
 	
 	public void bindDataDirect(String locationName, Object value){

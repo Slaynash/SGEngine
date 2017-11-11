@@ -9,13 +9,13 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
-import slaynash.sgengine.Configuration;
 import slaynash.sgengine.LogSystem;
 import slaynash.sgengine.gui.button.GUIButton;
 import slaynash.sgengine.gui.button.GUIButtonEvent;
 import slaynash.sgengine.gui.button.GUIButtonListener;
 import slaynash.sgengine.gui.comboBox.GUIComboBox;
 import slaynash.sgengine.models.Renderable2dModel;
+import slaynash.sgengine.models.utils.VaoManager;
 import slaynash.sgengine.shaders.ShaderManager;
 import slaynash.sgengine.shaders.ShaderProgram;
 import slaynash.sgengine.textureUtils.TextureDef;
@@ -391,7 +391,7 @@ public class GUIManager {
 			vertices[11] = 0;
 		}
 		
-		backgroundModel = new Renderable2dModel(vertices, textCoords, background);
+		backgroundModel = new Renderable2dModel(VaoManager.loadToVao(vertices, textCoords), background);
 		useBackground = true;
 	}
 	
@@ -410,10 +410,6 @@ public class GUIManager {
 			glOrtho(0, DisplayManager.getWidth(), DisplayManager.getHeight(), 0, -1, 1);
 			glMatrixMode(GL_MODELVIEW);
 			*/
-			if(Configuration.getRenderMethod() == Configuration.RENDER_FREE){
-				GL11.glPushMatrix();
-				GL11.glLoadIdentity();
-			}
 		}
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -426,10 +422,6 @@ public class GUIManager {
 			glPopMatrix();
 			glMatrixMode(GL_MODELVIEW);
 			*/
-			if(Configuration.getRenderMethod() == Configuration.RENDER_FREE){
-				GL11.glPopMatrix();
-				GL11.glEnable(GL11.GL_DEPTH_TEST);
-			}
 		}
 		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);

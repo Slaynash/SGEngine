@@ -2,8 +2,6 @@ package slaynash.sgengine.world3d;
 
 import javax.vecmath.Vector3f;
 
-import org.lwjgl.opengl.GL11;
-
 import com.bulletphysics.collision.broadphase.CollisionFilterGroups;
 import com.bulletphysics.collision.broadphase.DbvtBroadphase;
 import com.bulletphysics.collision.dispatch.CollisionDispatcher;
@@ -21,7 +19,6 @@ import com.bulletphysics.linearmath.DefaultMotionState;
 import com.bulletphysics.linearmath.IDebugDraw;
 import com.bulletphysics.util.ObjectArrayList;
 
-import slaynash.sgengine.Configuration;
 import slaynash.sgengine.world3d.loader.TriangleFace;
 
 public class CollisionManager3d {
@@ -71,26 +68,26 @@ public class CollisionManager3d {
 			
 			@Override
 			public void drawLine(Vector3f arg0, Vector3f arg1, Vector3f arg2) {
-				if(Configuration.getRenderMethod() == Configuration.RENDER_FREE){
-					GL11.glBegin(GL11.GL_LINES);
-					GL11.glVertex3f(arg0.x, arg0.y, arg0.z);
-					GL11.glVertex3f(arg1.x, arg1.y, arg1.z);
-					GL11.glEnd();
-				}
+				/*
+				GL11.glBegin(GL11.GL_LINES);
+				GL11.glVertex3f(arg0.x, arg0.y, arg0.z);
+				GL11.glVertex3f(arg1.x, arg1.y, arg1.z);
+				GL11.glEnd();
+				*/
 			}
 			
 			@Override
 			public void drawContactPoint(Vector3f arg0, Vector3f arg1, float arg2, int arg3, Vector3f arg4) {
-				if(Configuration.getRenderMethod() == Configuration.RENDER_FREE){
-					GL11.glBegin(GL11.GL_POINT);
-					GL11.glVertex3f(arg0.x, arg0.y, arg0.z);
-					GL11.glEnd();
-					
-					GL11.glBegin(GL11.GL_LINES);
-					GL11.glVertex3f(arg0.x, arg0.y, arg0.z);
-					GL11.glVertex3f(arg0.x+arg1.x*arg2, arg0.y+arg1.y*arg2, arg0.z+arg1.z*arg2);
-					GL11.glEnd();
-				}
+				/*
+				GL11.glBegin(GL11.GL_POINT);
+				GL11.glVertex3f(arg0.x, arg0.y, arg0.z);
+				GL11.glEnd();
+				
+				GL11.glBegin(GL11.GL_LINES);
+				GL11.glVertex3f(arg0.x, arg0.y, arg0.z);
+				GL11.glVertex3f(arg0.x+arg1.x*arg2, arg0.y+arg1.y*arg2, arg0.z+arg1.z*arg2);
+				GL11.glEnd();
+				*/
 				
 			}
 			
@@ -135,7 +132,7 @@ public class CollisionManager3d {
 		float delta = ct-lastCall;
 		if(delta < 16f) return;
 		lastCall = ct;
-		dynamicsWorld.stepSimulation(delta, 5);
+		dynamicsWorld.stepSimulation(delta/1000, 4);
 	}
 	
 	public static void addModel3dWorld(Model3dWorld model){

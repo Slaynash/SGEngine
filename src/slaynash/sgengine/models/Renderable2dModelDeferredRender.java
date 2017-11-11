@@ -4,10 +4,9 @@ import java.util.Map;
 
 import org.lwjgl.opengl.GL11;
 
-import slaynash.sgengine.Configuration;
 import slaynash.sgengine.deferredRender.DeferredModelRenderer;
 
-public class Renderable2dModelDeferredRender extends DeferredModelRenderer{
+public class Renderable2dModelDeferredRender implements DeferredModelRenderer{
 
 	private Renderable2dModel model;
 	Map<String, Object> datas = null;
@@ -19,8 +18,12 @@ public class Renderable2dModelDeferredRender extends DeferredModelRenderer{
 
 	@Override
 	public void render() {
-		if(Configuration.getRenderMethod() == Configuration.RENDER_FREE) GL11.glCallList(model.getListId());
-		else GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, model.getVao().getVertexCount());
+		GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, model.getVao().getIndexCount());
+	}
+
+	@Override
+	public void renderVR(int eye) {
+		GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, model.getVao().getIndexCount());
 	}
 
 	@Override

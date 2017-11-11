@@ -67,22 +67,27 @@ public class DisplayManager {
 		}
 		
 		try {
-			if(Display.isCreated() && !Display.isFullscreen()) {
-				Display.setDisplayMode(displayMode);
-				Display.setFullscreen(fullscreen);
-			}else {
-				Display.setFullscreen(fullscreen);
-				Display.setDisplayMode(displayMode);
-				
+			if(Display.isCreated()){
+				if(!Display.isFullscreen()) {
+					Display.setDisplayMode(displayMode);
+					Display.setFullscreen(fullscreen);
+				}else {
+					Display.setFullscreen(fullscreen);
+					Display.setDisplayMode(displayMode);
+				}
 			}
-			if(!Display.isCreated()){
-				if(Configuration.getRenderMethod() == Configuration.RENDER_MODERN){
-					ContextAttribs attribs = new ContextAttribs(3,3)
-							.withForwardCompatible(true)
-							.withProfileCore(true);
-					Display.create(new PixelFormat().withSamples(Configuration.getSSAASamples()).withDepthBits(24), attribs);
-					GL11.glEnable(GL13.GL_MULTISAMPLE);
-				}else Display.create(new PixelFormat());
+			else {
+				Display.setDisplayMode(displayMode);
+				Display.setFullscreen(fullscreen);
+
+				Display.setVSyncEnabled(Configuration.isVSyncEnabled());
+				Display.setSwapInterval(Configuration.isVSyncEnabled() ? 1 : 0);
+				
+				ContextAttribs attribs = new ContextAttribs(3,3)
+						.withForwardCompatible(true)
+						.withProfileCore(true);
+				Display.create(new PixelFormat().withSamples(Configuration.getSSAASamples()).withDepthBits(24), attribs);
+				GL11.glEnable(GL13.GL_MULTISAMPLE);
 			}
 		} catch (LWJGLException e) {e.printStackTrace(LogSystem.getErrStream());}
 		

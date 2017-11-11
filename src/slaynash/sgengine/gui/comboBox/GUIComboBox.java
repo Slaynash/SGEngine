@@ -10,6 +10,7 @@ import slaynash.sgengine.LogSystem;
 import slaynash.sgengine.gui.GUIElement;
 import slaynash.sgengine.gui.text2d.Text2d;
 import slaynash.sgengine.models.Renderable2dModel;
+import slaynash.sgengine.models.utils.VaoManager;
 import slaynash.sgengine.shaders.ShaderManager;
 import slaynash.sgengine.textureUtils.TextureDef;
 import slaynash.sgengine.textureUtils.TextureManager;
@@ -52,10 +53,10 @@ public class GUIComboBox extends GUIElement{ //TODO create events for comboBox
 		selectedText = new Text2d(listText.get(selectedIndex).getTextString(), "tahoma", 250, new Vector2f(0, 3), width/2, true, this);
 		
 		float[] verticesBox = new float[]{0,0,width,0,width,20,width,20,0,20,0,0};
-		modelBox = new Renderable2dModel(verticesBox, uvs, texBox);
+		modelBox = new Renderable2dModel(VaoManager.loadToVao(verticesBox, uvs), texBox);
 		
 		float[] verticesExp = new float[]{-20,0,0,0,0,20,0,20,-20,20,-20,0};
-		modelExp = new Renderable2dModel(verticesExp, uvs, texExpand);
+		modelExp = new Renderable2dModel(VaoManager.loadToVao(verticesExp, uvs), texExpand);
 	}
 	
 	@Override

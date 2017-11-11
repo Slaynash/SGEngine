@@ -71,4 +71,8 @@ public class AudioSource {
 	public String getPath(){
 		return path;
 	}
+	
+	public String getSourceName() {
+		return sourcename;
+	}
 }
