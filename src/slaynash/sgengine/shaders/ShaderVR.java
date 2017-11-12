@@ -5,9 +5,9 @@ import org.lwjgl.opengl.GL30;
 
 import slaynash.sgengine.Configuration;
 
-public class ModernShaderVR extends ModernShader {
+public class ShaderVR extends ShaderProgram {
 
-	public ModernShaderVR() {
+	public ShaderVR() {
 		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "modern/modernVR.vs", "modern/modernVR.fs", ShaderProgram.SHADER_VR_MODERN);
 		setShadowShader(new ShadowShader());
 	}

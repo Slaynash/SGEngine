@@ -11,8 +11,6 @@ import java.util.List;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
-import slaynash.sgengine.textureUtils.TextureManager;
-
 public class ObjLoader {
 
 	public static ObjMeshData loadObj(File file, String diffusemap, String normalmap, String specularmap) {

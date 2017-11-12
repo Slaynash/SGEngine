@@ -5,9 +5,9 @@ import org.lwjgl.opengl.GL30;
 
 import slaynash.sgengine.Configuration;
 
-public class ModernShader3D extends ModernShader {
+public class Shader3D extends ShaderProgram {
 	
-	public ModernShader3D() {
+	public Shader3D() {
 		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "modern/modern3d.vs", "modern/modern3d.fs", ShaderProgram.SHADER_3D_MODERN);
 		setShadowShader(new ShadowShader());
 	}

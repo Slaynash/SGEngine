@@ -5,7 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
 import slaynash.sgengine.playercharacters.PlayerCharacter;
-import slaynash.sgengine.utils.PageManager;
+import slaynash.sgengine.utils.SceneManager;
 
 public class Configuration {
 
@@ -107,7 +107,11 @@ public class Configuration {
 		setSelfEntitiesUpdateEnabled(true);
 		setHandRendered(false);
 	}
-
+	
+	/**
+	 * @return The install path of the game.<br>
+	 * Default location: jar file location
+	 */
 	public static String getAbsoluteInstallPath() {
 		if(installPath.equals("")){
 			try {
@@ -116,6 +120,7 @@ public class Configuration {
 				LogSystem.out_println("[Configuration] Root directory: "+installPath);
 			}catch (UnsupportedEncodingException e1) {e1.printStackTrace(LogSystem.getErrStream());}
 		}
+		if(!installPath.endsWith("\\") && !installPath.endsWith("/")) installPath += "/";
 		return installPath;
 	}
 	
@@ -188,7 +193,7 @@ public class Configuration {
 	}
 	
     public static void enableVR(boolean enable){
-    	if(!PageManager.isInitialized()){
+    	if(!SceneManager.isInitialized()){
     		vr = enable;
     	}
     	else LogSystem.out_println("[PageManager] Display manager already initialized ! Please enable or disable VR before !");
@@ -327,7 +332,7 @@ public class Configuration {
 		Configuration.handRendered = handrendered;
 	}
 
-	public static boolean isDeferredRenderBloomEnabled() {
+	public static boolean isPostProcessingEnabled() {
 		return deferredRenderBloom;
 	}
 

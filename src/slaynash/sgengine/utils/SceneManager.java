@@ -8,7 +8,7 @@ import org.lwjgl.util.vector.Vector3f;
 
 import slaynash.sgengine.Configuration;
 import slaynash.sgengine.LogSystem;
-import slaynash.sgengine.SGELabelPage;
+import slaynash.sgengine.SGETitleScene;
 import slaynash.sgengine.audio.AudioManager;
 import slaynash.sgengine.deferredRender.DeferredRenderer;
 import slaynash.sgengine.entities.EntityManager;
@@ -18,18 +18,18 @@ import slaynash.sgengine.inputs.KeyboardControlManager;
 import slaynash.sgengine.models.utils.VaoManager;
 import slaynash.sgengine.shaders.ShaderManager;
 import slaynash.sgengine.textureUtils.TextureManager;
-import slaynash.sgengine.utils.pageManagerEvent.PageManagerEvent;
-import slaynash.sgengine.utils.pageManagerEvent.PageManagerListener;
+import slaynash.sgengine.utils.sceneManagerEvent.SceneManagerEvent;
+import slaynash.sgengine.utils.sceneManagerEvent.SceneManagerListener;
 import slaynash.sgengine.world2d.CollisionManager2d;
 import slaynash.sgengine.world3d.CollisionManager3d;
 import slaynash.sgengine.world3d.weapons.PlayerWeaponsManager;
 
-public class PageManager {
+public class SceneManager {
 	
 	private final static EventListenerList listeners = new EventListenerList();
 	
-	private static RenderablePage currentPage;
-	private static Class<? extends RenderablePage> nextPage;
+	private static Scene currentScene;
+	private static Class<? extends Scene> nextScene;
 	private static boolean close = false;
 	private static boolean render = false;
 	private static Thread renderThread;
@@ -37,9 +37,9 @@ public class PageManager {
 	
 	private static boolean initialized = false;
 	
-	public static void init(final int x, final int y, final boolean fullscreen, Class<? extends RenderablePage> nextPage){
+	public static void init(final int x, final int y, final boolean fullscreen, Class<? extends Scene> nextScene){
 		if(Configuration.loadNatives()) LibraryLoader.loadLibraries();
-		PageManager.nextPage = nextPage;
+		SceneManager.nextScene = nextScene;
 		createRenderThread(x,y,fullscreen);
 		renderThread.setName("Render_Thread");
 		
@@ -53,8 +53,8 @@ public class PageManager {
 		}
 	}
 	
-	public static void init(Class<? extends RenderablePage> nextPage){
-		init(1280, 720, false, nextPage);
+	public static void init(Class<? extends Scene> nextScene){
+		init(1280, 720, false, nextScene);
 	}
 	
 	private static void createRenderThread(final int x, final int y, final boolean fullscreen) {
@@ -66,7 +66,7 @@ public class PageManager {
 				DisplayManager.createDisplay(x,y,fullscreen);
 				if(Configuration.isVR()) if(!VRUtils.initVR()) {
 					Configuration.enableVR(false);
-					System.err.println("[PageManager] Unable to start VR: "+VRUtils.initStatus);
+					System.err.println("[SceneManager] Unable to start VR: "+VRUtils.initStatus);
 				}
 				TextureManager.init();
 				UserInputUtil.initController();
@@ -74,14 +74,14 @@ public class PageManager {
 				AudioManager.init();
 				DeferredRenderer.init();
 				EntityManager.init();
-				SGELabelPage label = new SGELabelPage();
-				currentPage = label;
+				SGETitleScene label = new SGETitleScene();
+				currentScene = label;
 				label.init();
 				label.start();
 				render = true;
 				initialized = true;
 				throwInitializedEvent();
-				LogSystem.out_println("[PageManager] Starting render");
+				LogSystem.out_println("[SceneManager] Starting render");
 				while(true){
 					while(render){
 						long pinnedTime = System.nanoTime();
@@ -89,7 +89,7 @@ public class PageManager {
 							render = false;
 							close = true;
 						}
-						else if(currentPage != label && nextPage != null) {
+						else if(currentScene != label && nextScene != null) {
 							render = false;
 							break;
 						}
@@ -99,10 +99,10 @@ public class PageManager {
 							UserInputUtil.update();
 							KeyboardControlManager.update();
 							if(Configuration.isControllersEnabled()) ControllersControlManager.update();
-							if(currentPage != label && Configuration.isCollisionManager3dEnabled()) CollisionManager3d.update();
-							if(currentPage != label && Configuration.isCollisionManager2dEnabled()) CollisionManager2d.update();
+							if(currentScene != label && Configuration.isCollisionManager3dEnabled()) CollisionManager3d.update();
+							if(currentScene != label && Configuration.isCollisionManager2dEnabled()) CollisionManager2d.update();
 							if(Configuration.isSelfEntitiesUpdateEnabled()) EntityManager.updateEntities();
-							currentPage.update();
+							currentScene.update();
 							if(Configuration.isHandRendered()) PlayerWeaponsManager.update();
 							if(Configuration.getGUIEnabled()) GUIManager.update();
 							if(Configuration.isUsingTimingDebug()) {
@@ -114,7 +114,7 @@ public class PageManager {
 							
 							
 							if(Configuration.isVR()) VRUtils.setCurrentRenderEye(VRUtils.EYE_CENTER);
-							currentPage.render();
+							currentScene.render();
 							if(Configuration.isUsingTimingDebug()) {
 								GL11.glFinish();
 								LogSystem.out_println("[TIMING] Render time [main]: "+((System.nanoTime()-startTime)/1e6f)+"ms");
@@ -135,7 +135,7 @@ public class PageManager {
 								PlayerWeaponsManager.renderWeapon();
 							}
 							if(Configuration.getGUIEnabled()) GUIManager.render();
-							int err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[PageManager] GUI Render error: OpenGL Error "+err);
+							int err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[SceneManager] GUI Render error: OpenGL Error "+err);
 							Configuration.useDeferredRender(iudr);
 							if(Configuration.isUsingTimingDebug()) {
 								GL11.glFinish();
@@ -145,7 +145,7 @@ public class PageManager {
 							
 							if(Configuration.isVR()){
 								VRUtils.setCurrentRenderEye(VRUtils.EYE_LEFT);
-								currentPage.renderVR(VRUtils.EYE_LEFT);
+								currentScene.renderVR(VRUtils.EYE_LEFT);
 								if(Configuration.isUsingTimingDebug()) {
 									GL11.glFinish();
 									LogSystem.out_println("[TIMING] VR Render time [Left][Main]: "+((System.nanoTime()-startTime)/1e6f)+"ms");
@@ -165,7 +165,7 @@ public class PageManager {
 									startTime = System.nanoTime();
 								}
 								VRUtils.setCurrentRenderEye(VRUtils.EYE_RIGHT);
-								currentPage.renderVR(VRUtils.EYE_RIGHT);
+								currentScene.renderVR(VRUtils.EYE_RIGHT);
 								if(Configuration.isUsingTimingDebug()) {
 									GL11.glFinish();
 									LogSystem.out_println("[TIMING] VR Render time [Right][Main]: "+((System.nanoTime()-startTime)/1e6f)+"ms");
@@ -225,16 +225,16 @@ public class PageManager {
 								VRUtils.sendFramesToCompositor();
 								VRUtils.updatePose();
 							}
-							if(currentPage == label && label.isRenderingDone()){
-								LogSystem.out_println("[PageManager] Label rendering done");
+							if(currentScene == label && label.isRenderingDone()){
+								LogSystem.out_println("[SceneManager] Label rendering done");
 								render = false;
-								if(nextPage == null) close = true;
+								if(nextScene == null) close = true;
 								firstRenderNotLabel = true;
 							}
 						}
 					}
 					if(close){
-						LogSystem.out_println("[PageManager] Stopping engine...");
+						LogSystem.out_println("[SceneManager] Stopping engine...");
 						stop();
 						UserInputUtil.exitControls();
 						if(Configuration.isVR()) VRUtils.stop();
@@ -246,8 +246,8 @@ public class PageManager {
 						break;
 					}
 					
-					else if(nextPage != null){
-						if(currentPage == null){
+					else if(nextScene != null){
+						if(currentScene == null){
 							start();
 						}
 						else{
@@ -268,39 +268,39 @@ public class PageManager {
 
 	private static void start() {
 		try {
-			currentPage = nextPage.newInstance();
-			nextPage = null;
+			currentScene = nextScene.newInstance();
+			nextScene = null;
 		}
 		catch (InstantiationException e) {e.printStackTrace(LogSystem.getErrStream());}
 		catch (IllegalAccessException e) {e.printStackTrace(LogSystem.getErrStream());}
 		render = true;
-		currentPage.init();
+		currentScene.init();
 		if(firstRenderNotLabel && Configuration.isCollisionManager3dEnabled()) CollisionManager3d.reload();
 		if(firstRenderNotLabel && Configuration.isCollisionManager2dEnabled()) CollisionManager2d.reload();
-		currentPage.start();
+		currentScene.start();
 		if(firstRenderNotLabel && Configuration.isCollisionManager3dEnabled()) CollisionManager3d.start();
 		if(firstRenderNotLabel && Configuration.isCollisionManager2dEnabled()) CollisionManager2d.start();
-		throwPageStartedEvent();
+		throwSceneStartedEvent();
 	}
 	
 	/**
 	 * End current render loop, clear the current GamePage and start a new GamePage instance with his render
 	 * @param page is the GamePage to start
 	 */
-	public static void changePage(Class<? extends RenderablePage> page){
-		nextPage = page;
+	public static void changePage(Class<? extends Scene> page){
+		nextScene = page;
 	}
 	
 	private static void changePage(){
-		LogSystem.out_println("[PageManager] Changing page from "+currentPage.getClass()+" to "+nextPage);
+		LogSystem.out_println("[SceneManager] Changing page from "+currentScene.getClass()+" to "+nextScene);
 		stop();
 		start();
-		throwPageChangedEvent();
+		throwSceneChangedEvent();
 	}
 	
 	private static void stop(){
-		currentPage.stop();
-		throwPageClosedEvent();
+		currentScene.stop();
+		throwSceneClosedEvent();
 	}
 
 	/**
@@ -312,45 +312,41 @@ public class PageManager {
 	}
 
 	public static void resize() {
-		if(currentPage != null)currentPage.resize();
+		if(currentScene != null)currentScene.resize();
 	}
 
-	public static void addPageManagerListener(PageManagerListener listener) {
-        listeners.add(PageManagerListener.class, listener);
+	public static void addSceneManagerListener(SceneManagerListener listener) {
+        listeners.add(SceneManagerListener.class, listener);
     }
  
-    public static void removePageManagerListener(PageManagerListener listener) {
-        listeners.remove(PageManagerListener.class, listener);
+    public static void removeSceneManagerListener(SceneManagerListener listener) {
+        listeners.remove(SceneManagerListener.class, listener);
     }
     
-    public static PageManagerListener[] getPageManagerListener() {
-        return listeners.getListeners(PageManagerListener.class);
+    public static SceneManagerListener[] getSceneManagerListener() {
+        return listeners.getListeners(SceneManagerListener.class);
     }
     
     private static void throwExitedEvent(){
-    	PageManagerEvent event = new PageManagerEvent(currentPage);
-    	for(PageManagerListener l:listeners.getListeners(PageManagerListener.class)) l.exited(event);
+    	SceneManagerEvent event = new SceneManagerEvent(currentScene);
+    	for(SceneManagerListener l:listeners.getListeners(SceneManagerListener.class)) l.exited(event);
     }
     private static void throwInitializedEvent(){
-    	PageManagerEvent event = new PageManagerEvent(null);
-    	for(PageManagerListener l:listeners.getListeners(PageManagerListener.class)) l.initialized(event);
+    	SceneManagerEvent event = new SceneManagerEvent(null);
+    	for(SceneManagerListener l:listeners.getListeners(SceneManagerListener.class)) l.initialized(event);
     }
-    private static void throwPageStartedEvent(){
-    	PageManagerEvent event = new PageManagerEvent(null);
-    	for(PageManagerListener l:listeners.getListeners(PageManagerListener.class)) l.pageStarted(event);
+    private static void throwSceneStartedEvent(){
+    	SceneManagerEvent event = new SceneManagerEvent(null);
+    	for(SceneManagerListener l:listeners.getListeners(SceneManagerListener.class)) l.sceneStarted(event);
     }
-    private static void throwPageChangedEvent(){
-    	PageManagerEvent event = new PageManagerEvent(null);
-    	for(PageManagerListener l:listeners.getListeners(PageManagerListener.class)) l.pageChanged(event);
+    private static void throwSceneChangedEvent(){
+    	SceneManagerEvent event = new SceneManagerEvent(null);
+    	for(SceneManagerListener l:listeners.getListeners(SceneManagerListener.class)) l.sceneChanged(event);
     }
-    private static void throwPageClosedEvent(){
-    	PageManagerEvent event = new PageManagerEvent(null);
-    	for(PageManagerListener l:listeners.getListeners(PageManagerListener.class)) l.pageClosed(event);
+    private static void throwSceneClosedEvent(){
+    	SceneManagerEvent event = new SceneManagerEvent(null);
+    	for(SceneManagerListener l:listeners.getListeners(SceneManagerListener.class)) l.sceneClosed(event);
     }
-
-	public static void setPageName(String title) {
-		Display.setTitle(title);
-	}
 
 	public static boolean isInitialized() {
 		return initialized;

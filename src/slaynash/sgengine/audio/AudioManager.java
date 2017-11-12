@@ -50,7 +50,7 @@ public class AudioManager {
 			return;
 		}
 		random = new Random();
-		SoundSystemConfig.setLogger(new AudioLogger());
+		SoundSystemConfig.setLogger(new SoundSystemLoggerBridge());
 		boolean aLCompatible = SoundSystem.libraryCompatible( LibraryLWJGLOpenAL.class ); 
 		try {
 			Class<? extends Library> libraryType = Library.class;

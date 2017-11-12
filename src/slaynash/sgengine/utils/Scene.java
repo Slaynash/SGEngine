@@ -1,6 +1,6 @@
 package slaynash.sgengine.utils;
 
-public abstract class RenderablePage {
+public abstract class Scene {
 	
 	public abstract void init();
 	

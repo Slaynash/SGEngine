@@ -19,63 +19,7 @@ public class Renderable3dModel extends RenderableModel {
 	private Vao vao;
 	private boolean renderable = true;
 	
-	/*
-	public Renderable3dModel(float[] vertices, float[] textureCoords, float[] normals, float[] tangents, TextureDef textureColor, TextureDef textureNormal, TextureDef textureSpecular){
-		this.textureColor = textureColor != null ? textureColor : TextureManager.getDefaultTexture();
-		this.textureNormal = textureNormal != null ? textureNormal : TextureManager.getDefaultNormalTexture();
-		this.textureSpecular = textureSpecular != null ? textureSpecular : TextureManager.getDefaultSpecularTexture();
-		
-		if(Configuration.getRenderMethod() == Configuration.RENDER_FREE){
-			listId = GL11.glGenLists(1);
-			GL11.glNewList(listId, GL11.GL_COMPILE);
-			GL11.glBegin(GL11.GL_TRIANGLES);
-			for(int i=0;i<vertices.length/3;i++){
-				GL11.glNormal3f(normals[i*3], normals[i*3+1], normals[i*3+2]);
-				GL11.glTexCoord2f(textureCoords[i*2], textureCoords[i*2+1]);
-				GL11.glVertex3f(vertices[i*3], vertices[i*3+1], vertices[i*3+2]);
-			}
-			GL11.glEnd();
-			GL11.glEndList();
-		}else{
-			int[] indices = new int[vertices.length/3];
-			for(int i=0;i<indices.length;i++) indices[i] = i;
-			vao = VaoManager.loadToVAO(vertices, textureCoords, normals, tangents, indices);
-		}
-		
-		if(Configuration.isUsingDeferredRender() && !drRegistered){
-			drRegistered = true;
-			DeferredRenderer.registerModelRenderer(this, Renderable3dModelDeferredRender.class);
-		}
-		
-	}
 	
-	public Renderable3dModel(float[] vertices, float[] textureCoords, float[] normals, float[] tangents, int[] indices, TextureDef textureColor, TextureDef textureNormal, TextureDef textureSpecular){
-		this.textureColor = textureColor != null ? textureColor : TextureManager.getDefaultTexture();
-		this.textureNormal = textureNormal != null ? textureNormal : TextureManager.getDefaultNormalTexture();
-		this.textureSpecular = textureSpecular != null ? textureSpecular : TextureManager.getDefaultSpecularTexture();
-		
-		if(Configuration.getRenderMethod() == Configuration.RENDER_FREE){
-			listId = GL11.glGenLists(1);
-			GL11.glNewList(listId, GL11.GL_COMPILE);
-			GL11.glBegin(GL11.GL_TRIANGLES);
-			for(int i=0;i<indices.length;i++){
-				GL11.glNormal3f(normals[indices[i]*3], normals[indices[i]*3+1], normals[indices[i]*3+2]);
-				GL11.glTexCoord2f(textureCoords[indices[i]*2], textureCoords[indices[i]*2+1]);
-				GL11.glVertex3f(vertices[indices[i]*3], vertices[indices[i]*3+1], vertices[indices[i]*3+2]);
-			}
-			GL11.glEnd();
-			GL11.glEndList();
-		}else{
-			vao = VaoManager.loadToVAO(vertices, textureCoords, normals, tangents, indices);
-		}
-		
-		if(Configuration.isUsingDeferredRender() && !drRegistered){
-			drRegistered = true;
-			DeferredRenderer.registerModelRenderer(this, Renderable3dModelDeferredRender.class);
-		}
-		
-	}
-	*/
 	public Renderable3dModel(Vao vao, TextureDef textureColor, TextureDef textureNormal, TextureDef textureSpecular){
 		this.textureColor = textureColor != null ? textureColor : TextureManager.getDefaultTexture();
 		this.textureNormal = textureNormal != null ? textureNormal : TextureManager.getDefaultNormalTexture();

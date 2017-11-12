@@ -7,11 +7,11 @@ import org.lwjgl.opengl.GL30;
 
 import slaynash.sgengine.Configuration;
 
-public class ModernShaderLabel extends ModernShader{
+public class ShaderLabel extends ShaderProgram {
 	
 	private int texture_location;
 
-	public ModernShaderLabel() {
+	public ShaderLabel() {
 		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "modern/modernLabel.vs", "modern/modernLabel.fs", ShaderProgram.SHADER_LABEL_MODERN);
 	}
 

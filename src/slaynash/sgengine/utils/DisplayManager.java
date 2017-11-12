@@ -97,7 +97,7 @@ public class DisplayManager {
 		bps = displayMode.getBitsPerPixel();
 		GL11.glViewport(0, 0, w, h);
 		if(Configuration.isVR()) GL11.glEnable( GL13.GL_MULTISAMPLE );
-		PageManager.resize();
+		SceneManager.resize();
 		
 		
 	}
@@ -151,7 +151,7 @@ public class DisplayManager {
 			fps = displayMode.getFrequency();
 			bps = displayMode.getBitsPerPixel();
 			GL11.glViewport(0, 0, w, h);
-			PageManager.resize();
+			SceneManager.resize();
 			Text2d.reload();
 		}
 	}

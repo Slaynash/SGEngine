@@ -3,7 +3,7 @@ package slaynash.sgengine.audio;
 import paulscode.sound.SoundSystemLogger;
 import slaynash.sgengine.LogSystem;
 
-public class AudioLogger extends SoundSystemLogger {
+public class SoundSystemLoggerBridge extends SoundSystemLogger {
 	@Override
 	public void message( String message, int indent )
     {

@@ -17,12 +17,12 @@ import slaynash.sgengine.textureUtils.TextureDef;
 import slaynash.sgengine.textureUtils.TextureManager;
 import slaynash.sgengine.utils.DisplayManager;
 import slaynash.sgengine.utils.MatrixUtils;
-import slaynash.sgengine.utils.RenderablePage;
+import slaynash.sgengine.utils.Scene;
 import slaynash.sgengine.utils.VRUtils;
 import slaynash.sgengine.utils.vr.VRController;
 import slaynash.sgengine.world3d.loader.Ent_PointLight;
 
-public class SGELabelPage extends RenderablePage {
+public class SGETitleScene extends Scene {
 	
 	private float startTime;
 	private TextureDef background;

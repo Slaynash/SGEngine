@@ -16,5 +16,6 @@
 	<classpathentry kind="lib" path="libs/physics/jbox2d_sge_edition_0808171240.jar"/>
 	<classpathentry kind="lib" path="libs/jamepad_sge_edition_2607171819.jar"/>
 	<classpathentry kind="lib" path="libs/localizationUtils_1792f78.jar"/>
+	<classpathentry kind="lib" path="libs/PNGDecoder.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

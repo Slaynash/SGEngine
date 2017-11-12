@@ -43,23 +43,23 @@ public class ShaderManager {
 	//private static FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
 	
 	public static void initGUIShader() {
-		if(shaderGUI == null) shaderGUI = new ModernShaderGUI();
+		if(shaderGUI == null) shaderGUI = new ShaderGUI();
 	}
 	
 	public static void initLabelShader() {
-		if(shaderLabel == null) shaderLabel = new ModernShaderLabel();
+		if(shaderLabel == null) shaderLabel = new ShaderLabel();
 	}
 	
 	public static void init3DShader() {
-		if(shader3d == null) shader3d = new ModernShader3D();
+		if(shader3d == null) shader3d = new Shader3D();
 	}
 	
 	public static void init2DShader() {
-		if(shader2d == null) shader2d = new ModernShader2D();
+		if(shader2d == null) shader2d = new Shader2D();
 	}
 	
 	public static void initVRShader() {
-		if(shaderVR == null) shaderVR = new ModernShaderVR();
+		if(shaderVR == null) shaderVR = new ShaderVR();
 	}
 	
 	public static void set3dShader(ShaderProgram shader){

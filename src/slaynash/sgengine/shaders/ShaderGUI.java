@@ -7,11 +7,11 @@ import org.lwjgl.opengl.GL30;
 
 import slaynash.sgengine.Configuration;
 
-public class ModernShaderGUI extends ModernShader {
+public class ShaderGUI extends ShaderProgram {
 
 	private int texture_location;
 
-	public ModernShaderGUI() {
+	public ShaderGUI() {
 		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "modern/modernGUI.vs", "modern/modernGUI.fs", ShaderProgram.SHADER_GUI_MODERN);
 	}
 
