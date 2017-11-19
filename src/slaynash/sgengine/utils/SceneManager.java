@@ -7,6 +7,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector3f;
 
 import slaynash.sgengine.Configuration;
+import slaynash.sgengine.DebugTimer;
 import slaynash.sgengine.LogSystem;
 import slaynash.sgengine.SGETitleScene;
 import slaynash.sgengine.audio.AudioManager;
@@ -84,7 +85,6 @@ public class SceneManager {
 				LogSystem.out_println("[SceneManager] Starting render");
 				while(true){
 					while(render){
-						long pinnedTime = System.nanoTime();
 						if(Display.isCloseRequested() || (Configuration.isVR() && VRUtils.isCloseRequested())){
 							render = false;
 							close = true;
@@ -94,8 +94,7 @@ public class SceneManager {
 							break;
 						}
 						else{
-							long startTime = 0;
-							if(Configuration.isUsingTimingDebug()) startTime = System.nanoTime();
+							DebugTimer.restart();
 							UserInputUtil.update();
 							KeyboardControlManager.update();
 							if(Configuration.isControllersEnabled()) ControllersControlManager.update();
@@ -105,27 +104,16 @@ public class SceneManager {
 							currentScene.update();
 							if(Configuration.isHandRendered()) PlayerWeaponsManager.update();
 							if(Configuration.getGUIEnabled()) GUIManager.update();
-							if(Configuration.isUsingTimingDebug()) {
-								LogSystem.out_println("[TIMING] Update time: "+((System.nanoTime()-startTime)/1e6f)+"ms");
-								startTime = System.nanoTime();
-							}
+							DebugTimer.outputAndUpdateTime("Update time");
 							
 							
 							
 							
 							if(Configuration.isVR()) VRUtils.setCurrentRenderEye(VRUtils.EYE_CENTER);
 							currentScene.render();
-							if(Configuration.isUsingTimingDebug()) {
-								GL11.glFinish();
-								LogSystem.out_println("[TIMING] Render time [main]: "+((System.nanoTime()-startTime)/1e6f)+"ms");
-								startTime = System.nanoTime();
-							}
+							DebugTimer.outputAndUpdateTime("Render time [main]");
 							deferredRenderCheck(VRUtils.EYE_CENTER);
-							if(Configuration.isUsingTimingDebug()) {
-								GL11.glFinish();
-								LogSystem.out_println("[TIMING] Render time [defe]: "+((System.nanoTime()-startTime)/1e6f)+"ms");
-								startTime = System.nanoTime();
-							}
+							DebugTimer.outputAndUpdateTime("Render time [defe]");
 							
 							boolean iudr = Configuration.isUsingDeferredRender();
 							Configuration.useDeferredRender(false);
@@ -137,20 +125,12 @@ public class SceneManager {
 							if(Configuration.getGUIEnabled()) GUIManager.render();
 							int err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[SceneManager] GUI Render error: OpenGL Error "+err);
 							Configuration.useDeferredRender(iudr);
-							if(Configuration.isUsingTimingDebug()) {
-								GL11.glFinish();
-								LogSystem.out_println("[TIMING] GUI Render time: "+((System.nanoTime()-startTime)/1e6f)+"ms");
-								startTime = System.nanoTime();
-							}
+							DebugTimer.outputAndUpdateTime("GUI Render time");
 							
 							if(Configuration.isVR()){
 								VRUtils.setCurrentRenderEye(VRUtils.EYE_LEFT);
 								currentScene.renderVR(VRUtils.EYE_LEFT);
-								if(Configuration.isUsingTimingDebug()) {
-									GL11.glFinish();
-									LogSystem.out_println("[TIMING] VR Render time [Left][Main]: "+((System.nanoTime()-startTime)/1e6f)+"ms");
-									startTime = System.nanoTime();
-								}
+								DebugTimer.outputAndUpdateTime("VR Render time [Left][Main]");
 								deferredRenderCheck(VRUtils.EYE_LEFT);
 								Configuration.useDeferredRender(false);
 								if(Configuration.isHandRendered()) {
@@ -159,18 +139,10 @@ public class SceneManager {
 									PlayerWeaponsManager.renderWeaponVR(VRUtils.EYE_LEFT);
 								}
 								Configuration.useDeferredRender(iudr);
-								if(Configuration.isUsingTimingDebug()) {
-									GL11.glFinish();
-									LogSystem.out_println("[TIMING] VR Render time [Left][Defe]: "+((System.nanoTime()-startTime)/1e6f)+"ms");
-									startTime = System.nanoTime();
-								}
+								DebugTimer.outputAndUpdateTime("VR Render time[Left][Defe]");
 								VRUtils.setCurrentRenderEye(VRUtils.EYE_RIGHT);
 								currentScene.renderVR(VRUtils.EYE_RIGHT);
-								if(Configuration.isUsingTimingDebug()) {
-									GL11.glFinish();
-									LogSystem.out_println("[TIMING] VR Render time [Right][Main]: "+((System.nanoTime()-startTime)/1e6f)+"ms");
-									startTime = System.nanoTime();
-								}
+								DebugTimer.outputAndUpdateTime("VR Render time [Right][Main]");
 								deferredRenderCheck(VRUtils.EYE_RIGHT);
 								Configuration.useDeferredRender(false);
 								if(Configuration.isHandRendered()) {
@@ -179,46 +151,30 @@ public class SceneManager {
 									PlayerWeaponsManager.renderWeaponVR(VRUtils.EYE_LEFT);
 								}
 								Configuration.useDeferredRender(iudr);
-								if(Configuration.isUsingTimingDebug()) {
-									GL11.glFinish();
-									LogSystem.out_println("[TIMING] VR Render time [Right][Defe]: "+((System.nanoTime()-startTime)/1e6f)+"ms");
-									startTime = System.nanoTime();
-								}
+								DebugTimer.outputAndUpdateTime("VR Render time [Right][Defe]");
 								
 								Vector3f cpcPos = Configuration.getPlayerCharacter().getPosition();
 								Vector3f cpcDir = Configuration.getPlayerCharacter().getViewDirection();
 								Vector3f cpcUp = VRUtils.getUpVector();
 								AudioManager.update(cpcPos.x, cpcPos.y, cpcPos.z, cpcDir.x, cpcDir.y, cpcDir.z, cpcUp.x, cpcUp.y, cpcUp.z);
-								if(Configuration.isUsingTimingDebug()) {
-									LogSystem.out_println("[TIMING] Audio update time: "+((System.nanoTime()-startTime)/1e6f)+"ms");
-									startTime = System.nanoTime();
-								}
+								DebugTimer.outputAndUpdateTime("Audio update time");
 							}
 							else{
 								Vector3f cpcPos = Configuration.getPlayerCharacter().getPosition();
 								Vector3f cpcDir = Configuration.getPlayerCharacter().getViewDirection();
 								AudioManager.update(cpcPos.x, cpcPos.y, cpcPos.z, cpcDir.x, cpcDir.y, cpcDir.z, 0, 1, 0);
-								if(Configuration.isUsingTimingDebug()) {
-									LogSystem.out_println("[TIMING] Audio update time: "+((System.nanoTime()-startTime)/1e6f)+"ms");
-									startTime = System.nanoTime();
-								}
+								DebugTimer.outputAndUpdateTime("Audio update time");
 							}
 							
 							DeferredRenderer.cleanup();
-							if(Configuration.isUsingTimingDebug()) {
-								GL11.glFinish();
-								LogSystem.out_println("[TIMING] DeferredRenderer cleanup time: "+((System.nanoTime()-startTime)/1e6f)+"ms");
-								startTime = System.nanoTime();
-							}
+							DebugTimer.outputAndUpdateTime("DeferredRenderer cleanup time");
 							//GL11.glFinish();
 							
 							DisplayManager.updateDisplay();
 							if(Configuration.isUsingTimingDebug()) {
-								GL11.glFinish();
-								LogSystem.out_println("[TIMING] Update display time: "+((System.nanoTime()-startTime)/1e6f)+"ms");
-								startTime = System.nanoTime();
+								DebugTimer.outputAndUpdateTime("Update display time");
 								
-								LogSystem.out_println("[TIMING] TOTAL time: "+((System.nanoTime()-pinnedTime)/1e6f)+"ms");
+								DebugTimer.finishUpdate();
 							}
 							firstRenderNotLabel = false;
 							if(Configuration.isVR()) {

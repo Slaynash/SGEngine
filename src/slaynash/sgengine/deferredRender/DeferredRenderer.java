@@ -12,6 +12,7 @@ import org.lwjgl.opengl.GL30;
 
 import de.fruitfly.ovr.structs.Vector2i;
 import slaynash.sgengine.Configuration;
+import slaynash.sgengine.DebugTimer;
 import slaynash.sgengine.LogSystem;
 import slaynash.sgengine.shaders.ShaderManager;
 import slaynash.sgengine.shaders.ShaderProgram;
@@ -29,7 +30,6 @@ public class DeferredRenderer {
 	protected static FrameBufferedObject[] fbos_color = new FrameBufferedObject[3];
 	
 	private static PostProcessingPipeline postProcessingPipeline;
-	private static long startTime;
 	
 	public static void init() {
 		if(postProcessingPipeline == null) postProcessingPipeline = new PostProcessingPipelineDefault();
@@ -55,10 +55,9 @@ public class DeferredRenderer {
 		GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glCullFace(GL11.GL_BACK);
 		
-		if(Configuration.isUsingTimingDebug()) startTime = System.nanoTime();
 		if(Configuration.isUsingDeferredRenderShadows()) {
 			ShadowsRenderer.renderShadows(eye, shaderLists);
-			timingdebug("Shadows render time");
+			DebugTimer.outputAndUpdateTime("Shadows render time");
 		}
 		if(Configuration.isPostProcessingEnabled()) {
 			
@@ -69,17 +68,17 @@ public class DeferredRenderer {
 			fbos_colorSSAA[eye].resolveToFbo(fbos_color[eye]);
 			
 
-			timingdebug("Deferred render time");
+			DebugTimer.outputAndUpdateTime("Deferred render time");
 			renderPostProcessing(eye);
-			timingdebug("PostProcessing render time");
+			DebugTimer.outputAndUpdateTime("PostProcessing render time");
 		}
 		else {
 			VRUtils.setCurrentRenderEye(eye);
 			renderColor(eye);
-			timingdebug("Deferred render time");
+			DebugTimer.outputAndUpdateTime("Deferred render time");
 		}
 		if(Configuration.isCleanBetweenDeferredRendersEnabled()) cleanup();
-		timingdebug("Deferred cleanup time");
+		DebugTimer.outputAndUpdateTime("Deferred cleanup time");
 		
 		GL11.glDisable(GL11.GL_CULL_FACE);
 	}
@@ -90,23 +89,20 @@ public class DeferredRenderer {
 		if(eye != VRUtils.EYE_CENTER) postProcessingPipeline.renderVR(fbos_color[eye], eye);
 		else postProcessingPipeline.render(fbos_color[VRUtils.EYE_CENTER]);
 	}
-	
-	public static void timingdebug(String text) {
-		if(Configuration.isUsingTimingDebug()) {
-			GL11.glFinish();
-			LogSystem.out_println("[TIMING] > "+text+": "+((System.nanoTime()-startTime)/1e6f)+"ms");
-			startTime = System.nanoTime();
-		}
-	}
 
 	
 	
 	protected static void renderColor(int eye){
+		if(Configuration.isUsingTimingDebug()) LogSystem.out_println("[DR] rendering "+shaderLists.size()+" shader loops:");
+		int l1=0;
 		for(ShaderRenderlist map:shaderLists){//for each shader phase
+			if(Configuration.isUsingTimingDebug()) LogSystem.out_println("[DR] \tShader "+l1+": rendering "+map.getObjectList().size()+" models");
 			ShaderProgram shader = map.getShader();
 			shader.useDirect();
 			if(shader.getShaderType() == ShaderProgram.SHADER_3D_MODERN  || shader.getShaderType() == ShaderProgram.SHADER_VR_MODERN) ShaderManager.shader_loadLights(LightsManager.getPointlights());
+			int l2=0;
 			for(Entry<Integer, ArrayList<DeferredModelRenderer>> entry:map.getObjectList().entrySet()){//for each models of this type
+				if(Configuration.isUsingTimingDebug()) LogSystem.out_println("[DR] \t\tModel "+l2+": rendering "+entry.getValue().size()+" instances");
 				shader.bindModel(entry.getKey());
 				for(DeferredModelRenderer dmr:entry.getValue()){//for each render of this model
 					shader.bindDatasDirect(dmr.getShaderDatas());
@@ -116,8 +112,10 @@ public class DeferredRenderer {
 					}
 					if(eye == VRUtils.EYE_CENTER) dmr.render(); else dmr.renderVR(eye);
 				}
+				l2++;
 			}
 			shader.stop();
+			l1++;
 		}
 	}
 	

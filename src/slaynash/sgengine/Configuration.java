@@ -33,12 +33,12 @@ public class Configuration {
 	private static boolean vsync = true;
 	private static boolean collisionManager3dEnabled = false;
 	private static boolean collisionManager2dEnabled = false;
-	private static boolean deferredRender = false;
-	private static boolean deferredRenderShadows = false;
+	private static boolean deferredRender = true;
+	private static boolean deferredRenderShadows = true;
 	private static boolean cleanBetweenDeferredRendersEnabled = true;
 	private static boolean selfUpdateEntities = true;
 	private static boolean handRendered = false;
-	private static boolean deferredRenderBloom = true;
+	private static boolean deferredRenderPostProcessing = true;
 	private static boolean usingTimingDebug = false;
 	private static boolean guiEnabled = true;
 	
@@ -57,7 +57,7 @@ public class Configuration {
 		enableVSync(true);
 		useDeferredRender(true);
 		useDeferredRenderShadows(true);
-		useDeferredRenderBloom(true);
+		usePostProcessing(true);
 		//useDeferredReflections(true);
 		setCleanBetweenDeferredRendersEnabled(true);
 		setSelfEntitiesUpdateEnabled(true);
@@ -80,7 +80,7 @@ public class Configuration {
 		useDeferredRender(true);
 		useDeferredRenderShadows(true);
 		//useDeferredReflections(true);
-		useDeferredRenderBloom(true);
+		usePostProcessing(true);
 		setCleanBetweenDeferredRendersEnabled(true);
 		setSelfEntitiesUpdateEnabled(true);
 		setHandRendered(false);
@@ -101,7 +101,7 @@ public class Configuration {
 		enableVSync(true);
 		useDeferredRender(true);
 		useDeferredRenderShadows(true);
-		useDeferredRenderBloom(false);
+		usePostProcessing(false);
 		//useDeferredReflections(true);
 		setCleanBetweenDeferredRendersEnabled(true);
 		setSelfEntitiesUpdateEnabled(true);
@@ -333,11 +333,11 @@ public class Configuration {
 	}
 
 	public static boolean isPostProcessingEnabled() {
-		return deferredRenderBloom;
+		return deferredRenderPostProcessing;
 	}
 
-	public static void useDeferredRenderBloom(boolean deferredRenderBloom) {
-		Configuration.deferredRenderBloom = deferredRenderBloom;
+	public static void usePostProcessing(boolean deferredRenderBloom) {
+		Configuration.deferredRenderPostProcessing = deferredRenderBloom;
 	}
 
 	public static boolean isUsingTimingDebug() {
