@@ -207,7 +207,7 @@ public class SceneManager {
 							start();
 						}
 						else{
-							changePage();
+							changeScene();
 						}
 					}
 					try { Thread.sleep(1); } catch (InterruptedException e) { e.printStackTrace(LogSystem.getErrStream()); }
@@ -243,11 +243,11 @@ public class SceneManager {
 	 * End current render loop, clear the current GamePage and start a new GamePage instance with his render
 	 * @param page is the GamePage to start
 	 */
-	public static void changePage(Class<? extends Scene> page){
+	public static void changeScene(Class<? extends Scene> page){
 		nextScene = page;
 	}
 	
-	private static void changePage(){
+	private static void changeScene(){
 		LogSystem.out_println("[SceneManager] Changing page from "+currentScene.getClass()+" to "+nextScene);
 		stop();
 		start();

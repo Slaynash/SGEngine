@@ -3,6 +3,7 @@ package slaynash.sgengine.playercharacters;
 import org.lwjgl.input.Mouse;
 
 import slaynash.sgengine.Configuration;
+import slaynash.sgengine.inputs.ControllersControlManager;
 import slaynash.sgengine.inputs.KeyboardControlManager;
 import slaynash.sgengine.utils.DisplayManager;
 
@@ -40,8 +41,8 @@ public class PlayerCharacterNoclip extends PlayerCharacter{
 	}
 	
 	private void updateAimDir() {
-		yaw -= (Mouse.getDX())*0.01f*Configuration.getMouseSensibility();
-		pitch += (Mouse.getDY())*0.01f*Configuration.getMouseSensibility();
+		yaw -= (Mouse.getDX())*0.01f*Configuration.getMouseSensibility() + ControllersControlManager.getValue(0, "cameraX")*.005f*DisplayManager.getFrameTime();
+		pitch += (Mouse.getDY())*0.01f*Configuration.getMouseSensibility() + ControllersControlManager.getValue(0, "cameraY")*.005f*DisplayManager.getFrameTime();
 		
 		if (yaw >= PI*2f){
 			yaw -= PI*2f;
@@ -100,5 +101,11 @@ public class PlayerCharacterNoclip extends PlayerCharacter{
 				up = -WALK_SPEED;
 			else up = 0;
 		}
+		
+		forward += -ControllersControlManager.getValue(0, "forward")*WALK_SPEED;
+		left += ControllersControlManager.getValue(0, "right")*WALK_SPEED;
+		
+		up += ControllersControlManager.isPressed(0, "jump")?WALK_SPEED:0;
+		up -= ControllersControlManager.isPressed(0, "crouch")?WALK_SPEED:0;
 	}
 }

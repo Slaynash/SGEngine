@@ -81,7 +81,7 @@ public class GUIButton extends GUIElement{
 				if(event == null) event = new GUIButtonEvent();
 				listener.mouseEntered(event);
 			}
-			text.setColour(textColorHover.r, textColorHover.g, textColorHover.b);
+			if(text != null) text.setColour(textColorHover.r, textColorHover.g, textColorHover.b);
 		}
 		if(mouseIn && isFocused()){
 			if(UserInputUtil.mouseLeftClicked()) for(GUIButtonListener listener : getGUIButtonListener()){
@@ -98,7 +98,7 @@ public class GUIButton extends GUIElement{
 				if(event == null) event = new GUIButtonEvent();
 				listener.mouseExited(event);
 			}
-			text.setColour(textColor.r, textColor.g, textColor.b);
+			if(text != null) text.setColour(textColor.r, textColor.g, textColor.b);
 		}
 	}
 	
