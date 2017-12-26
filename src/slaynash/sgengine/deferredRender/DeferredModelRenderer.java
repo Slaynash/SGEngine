@@ -12,5 +12,6 @@ public interface DeferredModelRenderer {
 	public abstract Map<String, Object> getShaderDatas();
 	public abstract boolean isCastingShadow();
 	public abstract void renderVR(int eye);
+	public abstract boolean[] getTexture3ds();
 	
 }

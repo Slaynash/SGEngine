@@ -1,16 +1,15 @@
 package slaynash.sgengine.gui.button;
 
-import java.awt.Dimension;
-
 import javax.swing.event.EventListenerList;
 
 import org.lwjgl.util.vector.Vector2f;
 import org.newdawn.slick.Color;
 
-import slaynash.sgengine.models.Renderable2dModel;
-import slaynash.sgengine.models.utils.VaoManager;
 import slaynash.sgengine.gui.GUIElement;
 import slaynash.sgengine.gui.text2d.Text2d;
+import slaynash.sgengine.maths.Vector2i;
+import slaynash.sgengine.models.Renderable2dModel;
+import slaynash.sgengine.models.utils.VaoManager;
 import slaynash.sgengine.shaders.ShaderManager;
 import slaynash.sgengine.textureUtils.TextureDef;
 import slaynash.sgengine.textureUtils.TextureManager;
@@ -33,12 +32,12 @@ public class GUIButton extends GUIElement{
 	
 	
 
-	public GUIButton(Dimension size, Dimension pos, GUIElement parent, int location){
-		super(pos.width, pos.height, size.width, size.height, parent, false, location);
+	public GUIButton(Vector2i size, Vector2i pos, GUIElement parent, int location){
+		super(pos.x, pos.y, size.x, size.y, parent, false, location);
 		textColor = new Color(255, 255, 255);
 		textColorHover = new Color(140, 140, 140);
 		
-		texBack = TextureManager.getTextureDef("res/textures/gui/backDef.png", TextureManager.COLOR);
+		texBack = TextureManager.getTextureDef("res/textures/gui/backDef.png", TextureManager.TEXTURE_DIFFUSE);
 		
 		float[] vertices = new float[12];
 		vertices[0] = 0;
@@ -55,7 +54,7 @@ public class GUIButton extends GUIElement{
 		vertices[10] = 0;
 		vertices[11] = 0;
 		
-		model = new Renderable2dModel(VaoManager.loadToVao(vertices, uvs), texBack);
+		model = new Renderable2dModel(VaoManager.loadToVao2d(vertices, uvs), texBack);
 		
 	}
 	

@@ -282,11 +282,11 @@ public class ShaderManager {
 	
 
 	public static void shader_bindDefaultNormalTexture() {
-		shader_bindTextureID(TextureManager.getTextureID("res/textures/default_normal.png", TextureManager.NORMAL), TEXTURE_NORMAL);
+		shader_bindTextureID(TextureManager.getTextureID("res/textures/default_normal.png", TextureManager.TEXTURE_NORMAL), TEXTURE_NORMAL);
 	}
 
 	public static void shader_bindDefaultSpecularTexture() {
-		shader_bindTextureID(TextureManager.getTextureID("res/textures/default_normal.png", TextureManager.SPECULAR), TEXTURE_SPECULAR);
+		shader_bindTextureID(TextureManager.getTextureID("res/textures/default_normal.png", TextureManager.TEXTURE_SPECULAR), TEXTURE_SPECULAR);
 	}
 
 	public static void shader_bindSpecularFactor(float specularFactor) {

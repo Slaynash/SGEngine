@@ -1,4 +1,4 @@
-package slaynash.sgengine.utils;
+	package slaynash.sgengine.utils;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.Sys;
@@ -107,8 +107,8 @@ public class DisplayManager {
 		Display.update();
 		if(!Configuration.isVR() && Configuration.isVSyncEnabled()) Display.sync(fps);
 		long currentFrameTime = getCurrentTime();
-		delta = (currentFrameTime - lastFrameTime)/1000f;
 		deltaMS = (currentFrameTime - lastFrameTime);
+		delta = deltaMS/1000f;
 		lastFrameTime = currentFrameTime;
 	}
 	

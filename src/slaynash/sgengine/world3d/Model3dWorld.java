@@ -77,7 +77,7 @@ public class Model3dWorld {
 			}
 			int[] indices = new int[vertices.length/3];
 			for(int j=0;j<indices.length;j++) indices[j] = j;
-			models[i] = new Renderable3dModel(VaoManager.loadToVao(vertices, texCoords, ShapeHelper.calculateNormals(vertices), ShapeHelper.calculateTangents(vertices, texCoords), indices), tf.get(0).getTextureColor(), tf.get(0).getTextureNormal(), tf.get(0).getTextureSpecular());
+			models[i] = new Renderable3dModel(VaoManager.loadToVao3d(vertices, texCoords, ShapeHelper.calculateNormals(vertices), ShapeHelper.calculateTangents(vertices, texCoords), indices), tf.get(0).getTextureColor(), tf.get(0).getTextureNormal(), tf.get(0).getTextureSpecular());
 			i++;
 		}
 		

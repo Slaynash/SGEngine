@@ -1,6 +1,5 @@
 package slaynash.sgengine.gui;
 
-import java.awt.Dimension;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +13,7 @@ import slaynash.sgengine.gui.button.GUIButton;
 import slaynash.sgengine.gui.button.GUIButtonEvent;
 import slaynash.sgengine.gui.button.GUIButtonListener;
 import slaynash.sgengine.gui.comboBox.GUIComboBox;
+import slaynash.sgengine.maths.Vector2i;
 import slaynash.sgengine.models.Renderable2dModel;
 import slaynash.sgengine.models.utils.VaoManager;
 import slaynash.sgengine.shaders.ShaderManager;
@@ -157,7 +157,7 @@ public class GUIManager {
 				}
 			}
 			for(GUIElement e:gameElements){
-				if(e.getClass() == GUIComboBox.class && ((GUIComboBox)e).isExpanded()){
+				if(e.isExpandable() && e.isExpanded()){
 					if(!overFound && isInElement(e, mousePos)){
 						setMouseInElement(e);
 						overFound = true;
@@ -166,7 +166,7 @@ public class GUIManager {
 				}
 			}
 			for(GUIElement e:gameElements){
-				if(e.getClass() != GUIFrame.class){
+				if(!e.isDraggable()){
 					if(!overFound && isInElement(e, mousePos)){
 						setMouseInElement(e);
 						overFound = true;
@@ -190,7 +190,7 @@ public class GUIManager {
 					if(elementUnderMouse != null){
 						elementUnderMouse.setFocus();
 						if(elementUnderMouse.getClass() == GUIFrame.class){
-							setTopFrame((GUIFrame) elementUnderMouse, elementUnderMouse.getLocation());
+							setTopLevel(elementUnderMouse);
 						}
 					}
 				}
@@ -220,14 +220,13 @@ public class GUIManager {
 				}
 			}
 			*/
-		for(GUIElement e:gameElements) if(e.getClass() == GUIFrame.class) ((GUIFrame)e).update();
-		for(GUIElement e:menuElements) if(e.getClass() == GUIFrame.class) ((GUIFrame)e).update();
+		for(GUIElement e:gameElements) if(e.isLevelable()) e.update();
+		for(GUIElement e:menuElements) if(e.isLevelable()) e.update();
 	}
 
 	private static boolean elementDragged() {
 		if(elementUnderMouse == null) return false;
-		if(elementUnderMouse.getClass() == GUIFrame.class) return ((GUIFrame)elementUnderMouse).isDragged();
-		if(elementUnderMouse.getClass() == GUIPopup.class) return ((GUIPopup)elementUnderMouse).isDragged();
+		if(elementUnderMouse.isDraggable()) return elementUnderMouse.isDragged();
 		return false;
 	}
 
@@ -242,26 +241,26 @@ public class GUIManager {
 		prepare();
 		if(canDrawBackground()) drawBackground();
 		Vector2f mousePos = UserInputUtil.getMousePos();
-		for(GUIElement element:gameElements) if(element.getClass() != GUIFrame.class && element.getClass() != GUIComboBox.class || (element.getClass() == GUIComboBox.class && !((GUIComboBox)element).isExpanded() && !isInElement(element, mousePos)) )element.render();
-		for(GUIElement element:gameElements) if(element.getClass() != GUIFrame.class && element.getClass() == GUIComboBox.class && (((GUIComboBox)element).isExpanded() || isInElement(element, mousePos) )) element.render();
+		for(GUIElement element:gameElements) if(!element.isLevelable() && !element.isExpandable() || (element.isExpandable() && !element.isExpanded() && !isInElement(element, mousePos)) )element.render();
+		for(GUIElement element:gameElements) if(!element.isLevelable() && element.isExpandable() && (element.isExpanded() || isInElement(element, mousePos) )) element.render();
 		
 		for(int i=0;i<=gameTopLevel;i++){
 			for(GUIElement element:gameElements){
-				if(element.getClass() == GUIFrame.class){
-					if(((GUIFrame)element).getLevel() == i){
+				if(element.isLevelable()){
+					if(element.getLevel() == i){
 						element.render();
 					}
 				}
 			}
 		}
 		if(menuShown){
-			for(GUIElement element:menuElements) if(element.getClass() != GUIFrame.class && element.getClass() != GUIComboBox.class || (element.getClass() == GUIComboBox.class && !((GUIComboBox)element).isExpanded() && !isInElement(element, mousePos)) )element.render();
-			for(GUIElement element:menuElements) if(element.getClass() != GUIFrame.class && element.getClass() == GUIComboBox.class && (((GUIComboBox)element).isExpanded()|| isInElement(element, mousePos) )) element.render();
+			for(GUIElement element:menuElements) if(!element.isLevelable() && !element.isExpandable() || (element.isExpandable() && !element.isExpanded() && !isInElement(element, mousePos)) )element.render();
+			for(GUIElement element:menuElements) if(!element.isLevelable() && element.isExpandable() && (element.isExpanded() || isInElement(element, mousePos) )) element.render();
 			
 			for(int i=0;i<=menuTopLevel;i++){
 				for(GUIElement element:menuElements){
-					if(element.getClass() == GUIFrame.class){
-						if(((GUIFrame)element).getLevel() == i){
+					if(element.isLevelable()){
+						if(element.getLevel() == i){
 							element.render();
 						}
 					}
@@ -300,8 +299,7 @@ public class GUIManager {
 	}
 
 	private static boolean canDrawBackground() {
-		if((useBackground && drawMode == DRAWMODE_MENU) || (useBackground && drawMode == DRAWMODE_GAME && menuShown)) return true;
-		return false;
+		return useBackground && (drawMode == DRAWMODE_MENU || (drawMode == DRAWMODE_GAME && menuShown));
 	}
 	
 	public static void setBackground(String backgroundPath){
@@ -309,7 +307,7 @@ public class GUIManager {
 			useBackground = false;
 			return;
 		}
-		TextureDef background = TextureManager.getTextureDef(backgroundPath, TextureManager.COLOR);
+		TextureDef background = TextureManager.getTextureDef(backgroundPath, TextureManager.TEXTURE_DIFFUSE);
 		
 		float[] vertices = new float[2*3*2];
 		float[] textCoords = new float[2*3*2];
@@ -391,7 +389,7 @@ public class GUIManager {
 			vertices[11] = 0;
 		}
 		
-		backgroundModel = new Renderable2dModel(VaoManager.loadToVao(vertices, textCoords), background);
+		backgroundModel = new Renderable2dModel(VaoManager.loadToVao2d(vertices, textCoords), background);
 		useBackground = true;
 	}
 	
@@ -400,29 +398,13 @@ public class GUIManager {
 	}
 
 	private static void prepare() {
-		if(drawMode == DRAWMODE_GAME){
-			GL11.glDisable(GL11.GL_DEPTH_TEST);
-			GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
-			/* Useless, it's using a projectionless shader
-			glMatrixMode(GL_PROJECTION);
-			glPushMatrix();
-			glLoadIdentity();
-			glOrtho(0, DisplayManager.getWidth(), DisplayManager.getHeight(), 0, -1, 1);
-			glMatrixMode(GL_MODELVIEW);
-			*/
-		}
+		GL11.glDisable(GL11.GL_DEPTH_TEST);
+		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
 	}
 	private static void restore(){
-		if(drawMode == DRAWMODE_GAME){
-			/* Useless, it's using a projectionless shader
-			glMatrixMode(GL_PROJECTION);
-			glPopMatrix();
-			glMatrixMode(GL_MODELVIEW);
-			*/
-		}
 		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 	}
@@ -443,40 +425,42 @@ public class GUIManager {
 		}
 	}
 	
-	private static void setTopFrame(GUIFrame frame, int location){
-		int baseLevel = frame.getLevel();
-		if(location == ELEMENT_MENU){
+	private static void setTopLevel(GUIElement element){
+		if(!element.isLevelable()) {
+			LogSystem.err_println("[GUIManager] Trying to change level of an unlevelable element");
+			return;
+		}
+		int baseLevel = element.getLevel();
+		if(element.getLocation() == ELEMENT_MENU){
 			for(int i=baseLevel+1;i<=menuTopLevel;i++){
-				for(GUIElement element:menuElements){
-					if(element.getClass() == GUIFrame.class){
-						if(((GUIFrame)element).getLevel() == i){
-							((GUIFrame)element).reduceLevel(1);
+				for(GUIElement e:menuElements){
+					if(e.isLevelable()){
+						if(e.getLevel() == i){
+							e.reduceLevel(1);
 						}
 					}
 				}
 			}
-			frame.setLevel(menuTopLevel);
+			element.setLevel(menuTopLevel);
 		}
 		else{
 			for(int i=baseLevel+1;i<=gameTopLevel;i++){
-				for(GUIElement element:gameElements){
-					if(element.getClass() == GUIFrame.class){
-						if(((GUIFrame)element).getLevel() == i){
-							((GUIFrame)element).reduceLevel(1);
+				for(GUIElement e:gameElements){
+					if(e.isLevelable()){
+						if(e.getLevel() == i){
+							e.reduceLevel(1);
 						}
 					}
 				}
 			}
-			frame.setLevel(gameTopLevel);
+			element.setLevel(gameTopLevel);
 		}
 	}
 	
 	private static boolean isInElement(GUIElement element, Vector2f pos) {
 		Vector2f tl = element.getTopLeft();
 		Vector2f br = element.getBottomRight();
-		if(tl.x < pos.x && tl.y < pos.y && br.x > pos.x && br.y > pos.y)
-			return true;
-		return false;
+		return tl.x < pos.x && tl.y < pos.y && br.x > pos.x && br.y > pos.y;
 	}
 
 	public static void showPopup(int popupType, String text) {
@@ -492,7 +476,7 @@ public class GUIManager {
 			}
 		}
 		popup = new GUIPopup(400, 150, text, text, popupType);
-		final GUIButton close = new GUIButton(new Dimension(100, 30), new Dimension(200-50, 100), popup, 0);
+		final GUIButton close = new GUIButton(new Vector2i(100, 30), new Vector2i(200-50, 100), popup, 0);
 		close.setText(popupCloseText, true);
 		close.addGUIButtonListener(new GUIButtonListener() {
 			
@@ -531,13 +515,13 @@ public class GUIManager {
 	
 	public static void reset() {
 		for(GUIElement e:menuElements) {e.destroy();}
-			menuElements.clear();
-			menuElementsToRemove.clear();
-			menuElementsToAdd.clear();
+		menuElements.clear();
+		menuElementsToRemove.clear();
+		menuElementsToAdd.clear();
 		for(GUIElement e:gameElements) {e.destroy();}
-			gameElements.clear();
-			gameElementsToRemove.clear();
-			gameElementsToAdd.clear();
+		gameElements.clear();
+		gameElementsToRemove.clear();
+		gameElementsToAdd.clear();
 		
 	}
 	

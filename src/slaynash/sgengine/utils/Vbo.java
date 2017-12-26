@@ -51,8 +51,12 @@ public class Vbo {
 		GL15.glBufferData(type, data, GL15.GL_STATIC_DRAW);
 	}
 
-	public void delete(){
+	public void destroy(){
 		GL15.glDeleteBuffers(vboId);
+	}
+	
+	public int getId() {
+		return vboId;
 	}
 
 }

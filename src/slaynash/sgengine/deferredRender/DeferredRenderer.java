@@ -108,7 +108,9 @@ public class DeferredRenderer {
 					shader.bindDatasDirect(dmr.getShaderDatas());
 					for(int i=0;i<dmr.getTextureIDs().length;i++){
 						GL13.glActiveTexture(GL13.GL_TEXTURE0+i);
-						GL11.glBindTexture(GL11.GL_TEXTURE_2D, dmr.getTextureIDs()[i]);
+						if(dmr.getTexture3ds()[i])
+							GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, dmr.getTextureIDs()[i]);
+						else GL11.glBindTexture(GL11.GL_TEXTURE_2D, dmr.getTextureIDs()[i]);
 					}
 					if(eye == VRUtils.EYE_CENTER) dmr.render(); else dmr.renderVR(eye);
 				}

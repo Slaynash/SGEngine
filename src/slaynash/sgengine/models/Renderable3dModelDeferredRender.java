@@ -11,11 +11,13 @@ public class Renderable3dModelDeferredRender implements DeferredModelRenderer {
 	private Renderable3dModel model;
 	Map<String, Object> datas = null;
 	private int[] textures;
+	private boolean[] texture3ds;
 
 	@Override
 	public void bindModel(Object model) {
 		this.model = (Renderable3dModel) model;
 		this.textures = this.model.getTextureIds();
+		this.texture3ds = this.model.getTexture3ds();
 	}
 
 	@Override
@@ -51,6 +53,11 @@ public class Renderable3dModelDeferredRender implements DeferredModelRenderer {
 	@Override
 	public boolean isCastingShadow() {
 		return true;
+	}
+
+	@Override
+	public boolean[] getTexture3ds() {
+		return texture3ds;
 	}
 	
 }

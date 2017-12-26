@@ -1,9 +1,8 @@
 package slaynash.sgengine.gui;
 
-import java.awt.Dimension;
-
 import org.lwjgl.util.vector.Vector2f;
 
+import slaynash.sgengine.maths.Vector2i;
 import slaynash.sgengine.models.Renderable2dModel;
 import slaynash.sgengine.models.utils.VaoManager;
 import slaynash.sgengine.shaders.ShaderManager;
@@ -24,7 +23,7 @@ public class GUIMiniPopup extends GUIElement {
 
 	public GUIMiniPopup() {
 		super(0, 0, 350, HEIGHT, null, true, GUIManager.ELEMENT_POPUP_UP);
-		texture = TextureManager.getTextureDef("res/textures/menu/miniPopup.png", TextureManager.COLOR);
+		texture = TextureManager.getTextureDef("res/textures/menu/miniPopup.png", TextureManager.TEXTURE_DIFFUSE);
 		startTime = System.nanoTime()/1E9f;
 		
 		float[] vertices = new float[12];
@@ -42,7 +41,7 @@ public class GUIMiniPopup extends GUIElement {
 		vertices[10] = 0;
 		vertices[11] = 0;
 		
-		model = new Renderable2dModel(VaoManager.loadToVao(vertices, uvs), texture);
+		model = new Renderable2dModel(VaoManager.loadToVao2d(vertices, uvs), texture);
 		
 	}
 
@@ -63,8 +62,8 @@ public class GUIMiniPopup extends GUIElement {
 	}
 	
 	@Override
-	public Dimension getContainerPos(){
-		return new Dimension(x, y);
+	public Vector2i getContainerPos(){
+		return new Vector2i(x, y);
 	}
 
 	public float getLifeTime() {

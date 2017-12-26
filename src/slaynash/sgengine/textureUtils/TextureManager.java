@@ -28,15 +28,15 @@ public class TextureManager {
 	private static int defaultTextureNormalID = 0;
 	private static int defaultTextureSpecularID = 0;
 	
-	public static final int COLOR = 0;
-	public static final int NORMAL = 1;
-	public static final int SPECULAR = 2;
+	public static final int TEXTURE_DIFFUSE = 0;
+	public static final int TEXTURE_NORMAL = 1;
+	public static final int TEXTURE_SPECULAR = 2;
 	
 	private static boolean init = false;
 	
 	public static void init(){
 		if(init){
-			LogSystem.out_println("[TextureManager] Trying to re-init AudioManager, ignoring.");
+			LogSystem.out_println("[TextureManager] Trying to re-init TextureManager, ignoring.");
 			return;
 		}
 		Log.setLogSystem(new TextureManagerLogSystem());
@@ -56,7 +56,7 @@ public class TextureManager {
 		catch (Exception e) {
 			System.err.println("[TextureManager] Unable to load texture "+texturePath+" ("+e.getMessage()+")");
 			switch(type){
-				case NORMAL:
+				case TEXTURE_NORMAL:
 					if((tex = textureList.get("res/textures/default_normal.png")) != null) return tex;
 					try {
 						TextureDef textureDef = new TextureDef(getSlickTexture(new File(Configuration.getAbsoluteInstallPath()+"/"+"res/textures/default_normal.png")), texturePath, type);
@@ -66,7 +66,7 @@ public class TextureManager {
 					catch (FileNotFoundException e1) {e1.printStackTrace(LogSystem.getErrStream());}
 					catch (IOException e1) {e1.printStackTrace(LogSystem.getErrStream());}
 					break;
-				case SPECULAR:
+				case TEXTURE_SPECULAR:
 					if((tex = textureList.get("res/textures/default_specular.png")) != null) return tex;
 					try {
 						TextureDef textureDef = new TextureDef(getSlickTexture(new File(Configuration.getAbsoluteInstallPath()+"/"+"res/textures/default_specular.png")), texturePath, type);
@@ -99,26 +99,26 @@ public class TextureManager {
 
 
 	public static int getDefaultTextureID() {
-		if(defaultTextureID == 0) defaultTextureID = TextureManager.getTextureID("res/textures/default.png", COLOR);
+		if(defaultTextureID == 0) defaultTextureID = TextureManager.getTextureID("res/textures/default.png", TEXTURE_DIFFUSE);
 		return defaultTextureID;
 	}
 	public static int getDefaultNormalTextureID() {
-		if(defaultTextureNormalID == 0) defaultTextureNormalID = TextureManager.getTextureID("res/textures/default_normal.png", NORMAL);
+		if(defaultTextureNormalID == 0) defaultTextureNormalID = TextureManager.getTextureID("res/textures/default_normal.png", TEXTURE_NORMAL);
 		return defaultTextureNormalID;
 	}
 	public static int getDefaultSpecularTextureID() {
-		if(defaultTextureSpecularID == 0) defaultTextureSpecularID = TextureManager.getTextureID("res/textures/default_specular.png", SPECULAR);
+		if(defaultTextureSpecularID == 0) defaultTextureSpecularID = TextureManager.getTextureID("res/textures/default_specular.png", TEXTURE_SPECULAR);
 		return defaultTextureSpecularID;
 	}
 	
 	public static TextureDef getDefaultTexture() {
-		return TextureManager.getTextureDef("res/textures/default.png", COLOR);
+		return TextureManager.getTextureDef("res/textures/default.png", TEXTURE_DIFFUSE);
 	}
 	public static TextureDef getDefaultNormalTexture() {
-		return TextureManager.getTextureDef("res/textures/default_normal.png", NORMAL);
+		return TextureManager.getTextureDef("res/textures/default_normal.png", TEXTURE_NORMAL);
 	}
 	public static TextureDef getDefaultSpecularTexture() {
-		return TextureManager.getTextureDef("res/textures/default_specular.png", SPECULAR);
+		return TextureManager.getTextureDef("res/textures/default_specular.png", TEXTURE_SPECULAR);
 	}
 
 

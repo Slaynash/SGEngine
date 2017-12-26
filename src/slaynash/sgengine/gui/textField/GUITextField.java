@@ -28,6 +28,8 @@ public class GUITextField extends GUIElement{
 	
 	private TextureDef background;
 	private Renderable2dModel model;
+
+	private boolean hidden = false;
 	
 	private static float[] uvs = new float[]{0,0,1,0,1,1,1,1,0,1,0,0};
 
@@ -45,7 +47,7 @@ public class GUITextField extends GUIElement{
 		setText(text);
 		this.centerText = centerText;
 		this.maxChar = maxChar;
-		background = TextureManager.getTextureDef("res/textures/gui/textfield.png", TextureManager.COLOR);
+		background = TextureManager.getTextureDef("res/textures/gui/textfield.png", TextureManager.TEXTURE_DIFFUSE);
 		
 		float[] vertices = new float[12];
 		vertices[0] = 0;
@@ -62,7 +64,7 @@ public class GUITextField extends GUIElement{
 		vertices[10] = 0;
 		vertices[11] = 0;
 		
-		model = new Renderable2dModel(VaoManager.loadToVao(vertices, uvs), background);
+		model = new Renderable2dModel(VaoManager.loadToVao2d(vertices, uvs), background);
 	}
 	
 	public GUITextField(int x, int y, int width, String text, boolean centerText, GUIElement parent, int location) {
@@ -88,12 +90,18 @@ public class GUITextField extends GUIElement{
 	private void setTextInternal(String text) {
 		if(text2d != null) text2d.release();
 		if(isFocused()){
-			this.text2d = new Text2d(text+"|", "tahoma", 300, new Vector2f(4, 2), getWidth()/2-2, centerText, this);
+			this.text2d = new Text2d((hidden?createHidden(text):text)+"|", "tahoma", 300, new Vector2f(4, 2), getWidth()/2-2, centerText, this);
 		}
 		else{
-			this.text2d = new Text2d(text, "tahoma", 300, new Vector2f(4, 2), getWidth()/2-2, centerText, this);
+			this.text2d = new Text2d((hidden?createHidden(text):text), "tahoma", 300, new Vector2f(4, 2), getWidth()/2-2, centerText, this);
 		}
 	}
+	private String createHidden(String text) {
+		String txt = "";
+		for(int i=0;i<text.length();i++) txt += "*";
+		return txt;
+	}
+
 	private void setText(String text) {
 		this.text = text;
 		setTextInternal(text);
@@ -159,13 +167,13 @@ public class GUITextField extends GUIElement{
     }
 	
     @Override
-    public GUIElement setFocus(){
+    public void setFocus(){
     	super.setFocus();
     	for(GUITextFieldListener listener : getGUITextFieldListener()){
 			GUITextFieldEvent event = new GUITextFieldEvent(text);
 			listener.focusAcquired(event);
 		}
-    	return this;
+    	//return this;
     }
     
     @Override
@@ -186,5 +194,10 @@ public class GUITextField extends GUIElement{
     public String getText(){
     	return text;
     }
+
+	public void setHidden() {
+		hidden = true;
+		setTextInternal(text);
+	}
     
 }

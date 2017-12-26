@@ -1,13 +1,12 @@
 package slaynash.sgengine.gui;
 
-import java.awt.Dimension;
-
 import org.lwjgl.util.vector.Vector2f;
 
-import slaynash.sgengine.models.Renderable2dModel;
-import slaynash.sgengine.models.utils.VaoManager;
 import slaynash.sgengine.gui.comboBox.GUIComboBox;
 import slaynash.sgengine.gui.text2d.Text2d;
+import slaynash.sgengine.maths.Vector2i;
+import slaynash.sgengine.models.Renderable2dModel;
+import slaynash.sgengine.models.utils.VaoManager;
 import slaynash.sgengine.shaders.ShaderManager;
 import slaynash.sgengine.textureUtils.TextureDef;
 import slaynash.sgengine.textureUtils.TextureManager;
@@ -43,18 +42,18 @@ public class GUIPopup extends GUIElement {
 	
 	public GUIPopup(int width, int height, String title, String message, int popupType) {
 		super(DisplayManager.getWidth()/2-width/2, DisplayManager.getHeight()/2-height/2,  Math.max(width, leftPadding+rightPadding), Math.max(height, topPadding+bottomPadding), null, true, false, GUIManager.ELEMENT_MENU);
-		containerPadding = new Dimension(leftPadding, topPadding);
-		containerSize = new Dimension(this.getWidth()-leftPadding-rightPadding, this.getHeight()-topPadding-bottomPadding);
+		containerPadding = new Vector2i(leftPadding, topPadding);
+		containerSize = new Vector2i(this.getWidth()-leftPadding-rightPadding, this.getHeight()-topPadding-bottomPadding);
 		setTitle(title);
 		setMessage(message);
 		setImage(popupType);
 		
-		texBack = TextureManager.getTextureDef("res/textures/gui/frame/frame_background.png", TextureManager.COLOR);
-		texBottom = TextureManager.getTextureDef("res/textures/gui/frame/frame_bottom.png", TextureManager.COLOR);
-		texTop = TextureManager.getTextureDef("res/textures/gui/frame/frame_top.png", TextureManager.COLOR);
-		texTopFocused = TextureManager.getTextureDef("res/textures/gui/frame/frame_top_focused.png", TextureManager.COLOR);
-		texSide = TextureManager.getTextureDef("res/textures/gui/frame/frame_side.png", TextureManager.COLOR);
-		texClose = TextureManager.getTextureDef("res/textures/gui/frame/frame_close.png", TextureManager.COLOR);
+		texBack = TextureManager.getTextureDef("res/textures/gui/frame/frame_background.png", TextureManager.TEXTURE_DIFFUSE);
+		texBottom = TextureManager.getTextureDef("res/textures/gui/frame/frame_bottom.png", TextureManager.TEXTURE_DIFFUSE);
+		texTop = TextureManager.getTextureDef("res/textures/gui/frame/frame_top.png", TextureManager.TEXTURE_DIFFUSE);
+		texTopFocused = TextureManager.getTextureDef("res/textures/gui/frame/frame_top_focused.png", TextureManager.TEXTURE_DIFFUSE);
+		texSide = TextureManager.getTextureDef("res/textures/gui/frame/frame_side.png", TextureManager.TEXTURE_DIFFUSE);
+		texClose = TextureManager.getTextureDef("res/textures/gui/frame/frame_close.png", TextureManager.TEXTURE_DIFFUSE);
 		
 		
 		
@@ -75,7 +74,7 @@ public class GUIPopup extends GUIElement {
 		verticesBack[10] = leftPadding;
 		verticesBack[11] = topPadding;
 		
-		modelBack = new Renderable2dModel(VaoManager.loadToVao(verticesBack, uvs), texBack);
+		modelBack = new Renderable2dModel(VaoManager.loadToVao2d(verticesBack, uvs), texBack);
 		
 		float[] verticesBottom = new float[12];
 		
@@ -93,7 +92,7 @@ public class GUIPopup extends GUIElement {
 		verticesBottom[10] = 0;
 		verticesBottom[11] = height-bottomPadding;
 		
-		modelBottom = new Renderable2dModel(VaoManager.loadToVao(verticesBottom, uvs), texBottom);
+		modelBottom = new Renderable2dModel(VaoManager.loadToVao2d(verticesBottom, uvs), texBottom);
 		
 		float[] verticesTop = new float[12];
 		
@@ -111,7 +110,7 @@ public class GUIPopup extends GUIElement {
 		verticesTop[10] = 0;
 		verticesTop[11] = topPadding;
 		
-		modelTop = new Renderable2dModel(VaoManager.loadToVao(verticesTop, uvs), texTop);
+		modelTop = new Renderable2dModel(VaoManager.loadToVao2d(verticesTop, uvs), texTop);
 		
 		
 		float uvsSides[] = new float[]{0,0,1,0,1,1,1,1,0,1,0,0, 1,0,0,0,0,1, 0,1,1,1,1,0};
@@ -180,7 +179,7 @@ public class GUIPopup extends GUIElement {
 		verticesSides[22] = width-rightPadding;
 		verticesSides[23] = topPadding;
 		
-		modelSides = new Renderable2dModel(VaoManager.loadToVao(verticesSides, uvsSides), texSide);
+		modelSides = new Renderable2dModel(VaoManager.loadToVao2d(verticesSides, uvsSides), texSide);
 		
 		float ctX = width-(topPadding/2)-1;
 		float ctY = (topPadding/2);
@@ -200,7 +199,7 @@ public class GUIPopup extends GUIElement {
 		verticesClose[10] = ctX-hs;
 		verticesClose[11] = ctY-hs;
 		
-		modelClose = new Renderable2dModel(VaoManager.loadToVao(verticesClose, uvs), texClose);
+		modelClose = new Renderable2dModel(VaoManager.loadToVao2d(verticesClose, uvs), texClose);
 	}
 
 	@Override
@@ -451,13 +450,18 @@ public class GUIPopup extends GUIElement {
 	}
 	
 	@Override
-	public Dimension getContainerPos(){
-		if(containerPadding == null) return new Dimension(0,0);
-		if(!renderInside) return new Dimension(x, y);
-		return new Dimension(x+containerPadding.width, y+containerPadding.height);
+	public Vector2i getContainerPos(){
+		if(containerPadding == null) return new Vector2i(0,0);
+		if(!renderInside) return new Vector2i(x, y);
+		return new Vector2i(x+containerPadding.x, y+containerPadding.y);
 	}
 	
 	public boolean isDragged() {
 		return dragged;
+	}
+	
+	@Override
+	public boolean isDraggable() {
+		return true;
 	}
 }

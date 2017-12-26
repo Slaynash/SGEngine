@@ -136,6 +136,7 @@ public abstract class ShaderProgram {
 		if(value.equals(datas.get(locationName))) return;
 		else datas.put(locationName, value);
 		*/
+		if(value == null) throw new NullPointerException("Trying to load null value to location "+locationName);
 		if(Configuration.isUsingDeferredRender()) datas.put(locationName, value);
 		else bindDataDirect(locationName, value);
 	}
@@ -143,7 +144,10 @@ public abstract class ShaderProgram {
 	public void bindDataDirect(String locationName, Object value){
 		int location = getLocation(locationName);
 		if(location != -1){
-			if(value instanceof Matrix4f){
+			if(value == null) {
+				LogSystem.err_println("[ShaderProgram] Unable to bind data of type null in shader "+this.getClass()+".");
+			}
+			else if(value instanceof Matrix4f){
 				((Matrix4f) value).store(matrixBuffer);
 				matrixBuffer.flip();
 				GL20.glUniformMatrix4(location, false, matrixBuffer.duplicate());

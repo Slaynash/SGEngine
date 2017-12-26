@@ -28,8 +28,8 @@ public class GUISlider extends GUIElement{
 	public GUISlider(int value, int x, int y, int width, int height, GUIElement parent, int location) {
 		super(x, y, width, height, parent, false, location);
 		
-		track = TextureManager.getTextureDef("res/textures/gui/slider_track.png", TextureManager.COLOR);
-		thumb = TextureManager.getTextureDef("res/textures/gui/slider_thumb.png", TextureManager.COLOR);
+		track = TextureManager.getTextureDef("res/textures/gui/slider_track.png", TextureManager.TEXTURE_DIFFUSE);
+		thumb = TextureManager.getTextureDef("res/textures/gui/slider_thumb.png", TextureManager.TEXTURE_DIFFUSE);
 		trackPercent = value;
 		
 		
@@ -48,7 +48,7 @@ public class GUISlider extends GUIElement{
 		verticesTrack[10] = 0;
 		verticesTrack[11] = getHeight()/2+2;
 		
-		trackModel = new Renderable2dModel(VaoManager.loadToVao(verticesTrack, uvs), track);
+		trackModel = new Renderable2dModel(VaoManager.loadToVao2d(verticesTrack, uvs), track);
 		
 
 		float[] verticesThumb = new float[12];
@@ -66,7 +66,7 @@ public class GUISlider extends GUIElement{
 		verticesThumb[10] = +2;
 		verticesThumb[11] = 0;
 		
-		thumbModel = new Renderable2dModel(VaoManager.loadToVao(verticesThumb, uvs), thumb);
+		thumbModel = new Renderable2dModel(VaoManager.loadToVao2d(verticesThumb, uvs), thumb);
 	}
 
 	@Override

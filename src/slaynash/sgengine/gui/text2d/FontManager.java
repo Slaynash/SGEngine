@@ -13,7 +13,7 @@ public class FontManager {
 
 	public static FontType createFont(String fontPath){
 		for(FontType ft:fontTypes) if(ft.getFontPath().equals(fontPath)) return ft;
-		FontType ft = new FontType(TextureManager.getTextureDef(Configuration.getFontPath()+"/"+fontPath+".png", TextureManager.COLOR), Configuration.getFontPath()+"/"+fontPath+".fnt");
+		FontType ft = new FontType(TextureManager.getTextureDef(Configuration.getFontPath()+"/"+fontPath+".png", TextureManager.TEXTURE_DIFFUSE), Configuration.getFontPath()+"/"+fontPath+".fnt");
 		fontTypes.add(ft);
 		return ft;
 	}

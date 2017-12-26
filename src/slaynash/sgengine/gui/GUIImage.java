@@ -33,7 +33,7 @@ public class GUIImage extends GUIElement{
 
 		
 		
-		model = new Renderable2dModel(VaoManager.loadToVao(vertices, uvs), TextureManager.getTextureDef(imagePath, TextureManager.COLOR));
+		model = new Renderable2dModel(VaoManager.loadToVao2d(vertices, uvs), TextureManager.getTextureDef(imagePath, TextureManager.TEXTURE_DIFFUSE));
 	}
 
 	@Override

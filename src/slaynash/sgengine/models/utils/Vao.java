@@ -86,8 +86,12 @@ public class Vao {
 		destroyed = true;
 		
 		GL30.glDeleteVertexArrays(id);
-		for(Vbo vbo : dataVbos) vbo.delete();
-		if(indexVbo != null) indexVbo.delete();
+		for(Vbo vbo : dataVbos) vbo.destroy();
+		if(indexVbo != null) indexVbo.destroy();
+	}
+	
+	public Vbo getVbo(int index) {
+		return dataVbos.get(index);
 	}
 	
 }

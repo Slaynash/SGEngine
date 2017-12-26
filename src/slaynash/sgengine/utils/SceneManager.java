@@ -69,6 +69,7 @@ public class SceneManager {
 					Configuration.enableVR(false);
 					System.err.println("[SceneManager] Unable to start VR: "+VRUtils.initStatus);
 				}
+				EngineUpdateThread.setRenderthreadAsCurrent();
 				TextureManager.init();
 				UserInputUtil.initController();
 				if(Configuration.isControllersEnabled()) ControllersControlManager.init();
@@ -95,6 +96,7 @@ public class SceneManager {
 						}
 						else{
 							DebugTimer.restart();
+							EngineUpdateThread.runAll();
 							UserInputUtil.update();
 							KeyboardControlManager.update();
 							if(Configuration.isControllersEnabled()) ControllersControlManager.update();

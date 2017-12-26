@@ -18,7 +18,7 @@ public class TextureDef {
 	private Texture texture;
 	private String path;
 	private boolean fakePath = false;
-	private int type = TextureManager.COLOR;
+	private int type = TextureManager.TEXTURE_DIFFUSE;
 	
 	public TextureDef(final Texture texture, final String path, final int type){
 		this.texture = texture;
@@ -53,7 +53,7 @@ public class TextureDef {
 
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
         
-        TextureDef rtd = new TextureDef(textureImpl, name, TextureManager.COLOR);
+        TextureDef rtd = new TextureDef(textureImpl, name, TextureManager.TEXTURE_DIFFUSE);
         rtd.fakePath = true;
 		
         return rtd;

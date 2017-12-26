@@ -16,7 +16,6 @@ import slaynash.sgengine.daeloader.model.Joint;
 import slaynash.sgengine.models.Renderable3dModel;
 import slaynash.sgengine.objloader.ObjLoader;
 import slaynash.sgengine.objloader.ObjMeshData;
-import slaynash.sgengine.textureUtils.TextureDef;
 import slaynash.sgengine.textureUtils.TextureManager;
 
 public class ModelManager {
@@ -27,36 +26,36 @@ public class ModelManager {
 		Vao vao;
 		if((vao = models.get(path)) == null) {
 			ObjMeshData meshdatas = ObjLoader.loadObj(new File(Configuration.getAbsoluteInstallPath()+"/"+path), diffusemap, normalmap, specularmap);
-			vao = VaoManager.loadToVao(meshdatas.getVerticesArray(), meshdatas.getTexturesArray(), meshdatas.getNormalsArray(), meshdatas.getTangentsArray(), meshdatas.getIndicesArray());
+			vao = VaoManager.loadToVao3d(meshdatas.getVerticesArray(), meshdatas.getTexturesArray(), meshdatas.getNormalsArray(), meshdatas.getTangentsArray(), meshdatas.getIndicesArray());
 			models.put(path, vao);
 		}
 		return new Renderable3dModel(
 				models.get(path),
-				diffusemap != null ? TextureManager.getTextureDef(diffusemap, TextureManager.COLOR) : TextureManager.getDefaultTexture(),
-				normalmap != null ? TextureManager.getTextureDef(normalmap, TextureManager.NORMAL) : TextureManager.getDefaultNormalTexture(),
-				specularmap != null ? TextureManager.getTextureDef(specularmap, TextureManager.SPECULAR) : TextureManager.getDefaultSpecularTexture()
+				diffusemap != null ? TextureManager.getTextureDef(diffusemap, TextureManager.TEXTURE_DIFFUSE) : TextureManager.getDefaultTexture(),
+				normalmap != null ? TextureManager.getTextureDef(normalmap, TextureManager.TEXTURE_NORMAL) : TextureManager.getDefaultNormalTexture(),
+				specularmap != null ? TextureManager.getTextureDef(specularmap, TextureManager.TEXTURE_SPECULAR) : TextureManager.getDefaultSpecularTexture()
 		);
 	}
 	
 	
-	public static AnimatedModel loadAnimatedDae(String modelPath, String texturePath) {
+	public static AnimatedModel loadAnimatedDae(String modelPath) {
 		AnimatedModelData entityData = ColladaLoader.loadColladaModel(modelPath, Configuration.MAX_WEIGHTS);
 		Vao model;
 		if((model = models.get(modelPath)) == null) {
-			model = VaoManager.loadToVao(
+			model = VaoManager.loadToVao3d(
 					entityData.getMeshData().getVertices(),
 					entityData.getMeshData().getTextureCoords(),
 					entityData.getMeshData().getNormals(),
+					entityData.getMeshData().getTangents(),
 					entityData.getMeshData().getJointIds(),
 					entityData.getMeshData().getVertexWeights(),
 					entityData.getMeshData().getIndices()
 			);
 		}
 		
-		TextureDef textureDef = TextureManager.getTextureDef(texturePath, TextureManager.COLOR);
 		SkeletonData skeletonData = entityData.getJointsData();
 		Joint headJoint = createJoints(skeletonData.headJoint);
-		return new AnimatedModel(model, textureDef, headJoint, skeletonData.jointCount);
+		return new AnimatedModel(model, headJoint, skeletonData.jointCount);
 	}
 	
 	private static Joint createJoints(JointData data) {

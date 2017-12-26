@@ -18,10 +18,10 @@ public class TriangleFace {
 		this.vs = vs;
 		this.vns = ShapeHelper.calculateNormals(vs);
 		this.uvs = uvs;
-		if(!texC.equals("")) this.texC = TextureManager.getTextureDef(texC, TextureManager.COLOR);
+		if(!texC.equals("")) this.texC = TextureManager.getTextureDef(texC, TextureManager.TEXTURE_DIFFUSE);
 		else this.texC = TextureManager.getDefaultTexture();
-		if(!texN.equals("")) this.texN = TextureManager.getTextureDef(texN, TextureManager.NORMAL);
-		if(!texS.equals("")) this.texS = TextureManager.getTextureDef(texS, TextureManager.SPECULAR);
+		if(!texN.equals("")) this.texN = TextureManager.getTextureDef(texN, TextureManager.TEXTURE_NORMAL);
+		if(!texS.equals("")) this.texS = TextureManager.getTextureDef(texS, TextureManager.TEXTURE_SPECULAR);
 		this.sf = sf;
 	}
 

@@ -12,6 +12,7 @@ import slaynash.sgengine.daeloader.dataStructures.AnimatedModelMeshData;
 import slaynash.sgengine.daeloader.dataStructures.Vertex;
 import slaynash.sgengine.daeloader.dataStructures.VertexSkinData;
 import slaynash.sgengine.daeloader.xmlParser.XmlNode;
+import slaynash.sgengine.utils.ShapeHelper;
 
 /**
  * Loads the mesh data for a model from a collada XML file.
@@ -50,7 +51,7 @@ public class GeometryLoader {
 		initArrays();
 		convertDataToArrays();
 		convertIndicesListToArray();
-		return new AnimatedModelMeshData(verticesArray, texturesArray, normalsArray, indicesArray, jointIdsArray, weightsArray);
+		return new AnimatedModelMeshData(verticesArray, texturesArray, normalsArray, ShapeHelper.calculateTangents(verticesArray, texturesArray, indicesArray), indicesArray, jointIdsArray, weightsArray);
 	}
 
 	private void readRawData() {
@@ -111,6 +112,7 @@ public class GeometryLoader {
 			int positionIndex = Integer.parseInt(indexData[i * typeCount]);
 			int normalIndex = Integer.parseInt(indexData[i * typeCount + 1]);
 			int texCoordIndex = Integer.parseInt(indexData[i * typeCount + 2]);
+			//We don't need to do it for tangents, as they are calculated with vertices and uvs
 			processVertex(positionIndex, normalIndex, texCoordIndex);
 		}
 	}

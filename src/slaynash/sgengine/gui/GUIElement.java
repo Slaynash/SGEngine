@@ -1,11 +1,11 @@
 package slaynash.sgengine.gui;
 
-import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.lwjgl.util.vector.Vector2f;
 
+import slaynash.sgengine.maths.Vector2i;
 import slaynash.sgengine.utils.UserInputUtil;
 
 public abstract class GUIElement {
@@ -20,13 +20,14 @@ public abstract class GUIElement {
 	private boolean canParent = false;
 	private GUIElement parent;
 	protected GUIElement focusedChild;
-	protected Dimension containerPadding;
-	protected Dimension containerSize;
+	protected Vector2i containerPadding;
+	protected Vector2i containerSize;
 	private boolean canChild;
 	private boolean destroyed;
 	private int location;
 	
 	public abstract void render();
+	public void update() {}
 	
 	
 	/**
@@ -109,21 +110,20 @@ public abstract class GUIElement {
 
 	public Vector2f getTopLeft() {
 		if(parent != null)
-			return new Vector2f(x+parent.getContainerPos().width, y+parent.getContainerPos().height);
+			return new Vector2f(x+parent.getContainerPos().x, y+parent.getContainerPos().y);
 		else
 			return new Vector2f(x, y);
 	}
 	
 	public Vector2f getBottomRight() {
 		if(parent != null)
-			return new Vector2f(x+parent.getContainerPos().width+width, y+parent.getContainerPos().height+height);
+			return new Vector2f(x+parent.getContainerPos().x+width, y+parent.getContainerPos().y+height);
 		else
 			return new Vector2f(x+width, y+height);
 	}
 
-	public GUIElement setFocus() {
+	public void setFocus() {
 		focus = true;
-		return this;
 	}
 
 	public void resetFocus() {
@@ -138,12 +138,12 @@ public abstract class GUIElement {
 		return parent;
 	}
 	
-	public Dimension getContainerPos(){
-		if(containerPadding == null) return new Dimension(x,y);
-		return new Dimension(x+containerPadding.width, y+containerPadding.height);
+	public Vector2i getContainerPos(){
+		if(containerPadding == null) return new Vector2i(x,y);
+		return new Vector2i(x+containerPadding.x, y+containerPadding.y);
 	}
-	public Dimension getContainerSize(){
-		if(containerSize == null) return new Dimension(0,0);
+	public Vector2i getContainerSize(){
+		if(containerSize == null) return new Vector2i(0,0);
 		return containerSize;
 	}
 
@@ -160,15 +160,11 @@ public abstract class GUIElement {
 	}
 
 	public boolean isMouseClickedIn() {
-		if(mouseIn && UserInputUtil.mouseLeftClicked())
-			return true;
-		return false;
+		return mouseIn && UserInputUtil.mouseLeftClicked();
 	}
 	
 	public boolean isMousePressedIn() {
-		if(mouseIn && UserInputUtil.mouseLeftPressed())
-			return true;
-		return false;
+		return mouseIn && UserInputUtil.mouseLeftPressed();
 	}
 
 	public boolean isDestroyed() {
@@ -187,9 +183,9 @@ public abstract class GUIElement {
 		return height;
 	}
 	
-	public void setPosition(Dimension position) {
-		this.x = position.width;
-		this.y = position.height;
+	public void setPosition(Vector2i position) {
+		this.x = position.x;
+		this.y = position.y;
 	}
 	
 	public void setWidth(int width){
@@ -203,4 +199,40 @@ public abstract class GUIElement {
 	}
 	
 	public void redraw(){}
+
+
+	public boolean isDraggable() {
+		return false;
+	}
+
+
+	public boolean isDragged() {
+		return false;
+	}
+
+
+	public boolean isLevelable() {
+		return false;
+	}
+
+
+	public int getLevel() {
+		return 0;
+	}
+
+
+	public void setLevel(int menuTopLevel) {}
+
+
+	public void reduceLevel(int i) {}
+
+
+	public boolean isExpandable() {
+		return false;
+	}
+
+
+	public boolean isExpanded() {
+		return false;
+	}
 }

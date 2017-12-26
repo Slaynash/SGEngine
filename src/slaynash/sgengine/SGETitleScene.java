@@ -46,7 +46,7 @@ public class SGETitleScene extends Scene {
 		if(Configuration.isVR()) ShaderManager.initVRShader();
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		
-		background = TextureManager.getTextureDef("res/textures/menu/label.png", TextureManager.COLOR);
+		background = TextureManager.getTextureDef("res/textures/menu/label.png", TextureManager.TEXTURE_DIFFUSE);
 		
 		if(Configuration.isVR()){
 			vrplateform = ModelManager.loadObj("res/models/label3d.obj", "/res/models/label3d.png", null, "/res/textures/fullbright.png");
@@ -145,7 +145,7 @@ public class SGETitleScene extends Scene {
 		
 		
 		
-		backgroundModel = new Renderable2dModel(VaoManager.loadToVao(vertices, textCoords), background);
+		backgroundModel = new Renderable2dModel(VaoManager.loadToVao2d(vertices, textCoords), background);
 		int err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("LabelInit 1: OpenGL Error "+err);
 	}
 

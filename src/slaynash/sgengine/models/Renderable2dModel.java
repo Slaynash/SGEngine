@@ -69,4 +69,7 @@ public class Renderable2dModel extends RenderableModel {
 		return Renderable2dModelDeferredRender.class;
 	}
 
+	public boolean[] getTexture3ds() {
+		return new boolean[] {false, false};
+	}
 }

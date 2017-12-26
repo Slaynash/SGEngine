@@ -13,15 +13,17 @@ public class AnimatedModelMeshData {
 	private float[] vertices;
 	private float[] textureCoords;
 	private float[] normals;
+	private float[] tangents;
 	private int[] indices;
 	private int[] jointIds;
 	private float[] vertexWeights;
 
-	public AnimatedModelMeshData(float[] vertices, float[] textureCoords, float[] normals, int[] indices,
+	public AnimatedModelMeshData(float[] vertices, float[] textureCoords, float[] normals, float[] tangents, int[] indices,
 			int[] jointIds, float[] vertexWeights) {
 		this.vertices = vertices;
 		this.textureCoords = textureCoords;
 		this.normals = normals;
+		this.tangents = tangents;
 		this.indices = indices;
 		this.jointIds = jointIds;
 		this.vertexWeights = vertexWeights;
@@ -45,6 +47,10 @@ public class AnimatedModelMeshData {
 
 	public float[] getNormals() {
 		return normals;
+	}
+
+	public float[] getTangents() {
+		return tangents;
 	}
 
 	public int[] getIndices() {

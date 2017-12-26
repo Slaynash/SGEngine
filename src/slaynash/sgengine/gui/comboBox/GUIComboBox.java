@@ -36,10 +36,10 @@ public class GUIComboBox extends GUIElement{ //TODO create events for comboBox
 		super(x, y, width, 20, parent, false, location);
 		this.list = list;
 		
-		texBox = TextureManager.getTextureDef("res/textures/gui/comboBox/cb_box.png", TextureManager.COLOR);
-		texMiddle = TextureManager.getTextureDef("res/textures/gui/comboBox/cb_middle.png", TextureManager.COLOR);
-		texEnd = TextureManager.getTextureDef("res/textures/gui/comboBox/cb_end.png", TextureManager.COLOR);
-		texExpand = TextureManager.getTextureDef("res/textures/gui/comboBox/cb_expand.png", TextureManager.COLOR);
+		texBox = TextureManager.getTextureDef("res/textures/gui/comboBox/cb_box.png", TextureManager.TEXTURE_DIFFUSE);
+		texMiddle = TextureManager.getTextureDef("res/textures/gui/comboBox/cb_middle.png", TextureManager.TEXTURE_DIFFUSE);
+		texEnd = TextureManager.getTextureDef("res/textures/gui/comboBox/cb_end.png", TextureManager.TEXTURE_DIFFUSE);
+		texExpand = TextureManager.getTextureDef("res/textures/gui/comboBox/cb_expand.png", TextureManager.TEXTURE_DIFFUSE);
 		
 		listText = new ArrayList<Text2d>();
 		
@@ -53,10 +53,10 @@ public class GUIComboBox extends GUIElement{ //TODO create events for comboBox
 		selectedText = new Text2d(listText.get(selectedIndex).getTextString(), "tahoma", 250, new Vector2f(0, 3), width/2, true, this);
 		
 		float[] verticesBox = new float[]{0,0,width,0,width,20,width,20,0,20,0,0};
-		modelBox = new Renderable2dModel(VaoManager.loadToVao(verticesBox, uvs), texBox);
+		modelBox = new Renderable2dModel(VaoManager.loadToVao2d(verticesBox, uvs), texBox);
 		
 		float[] verticesExp = new float[]{-20,0,0,0,0,20,0,20,-20,20,-20,0};
-		modelExp = new Renderable2dModel(VaoManager.loadToVao(verticesExp, uvs), texExpand);
+		modelExp = new Renderable2dModel(VaoManager.loadToVao2d(verticesExp, uvs), texExpand);
 	}
 	
 	@Override
@@ -179,9 +179,15 @@ public class GUIComboBox extends GUIElement{ //TODO create events for comboBox
 		for(Text2d t:listText) t.release();
 		selectedText.release();
 	}
-
+	
+	@Override
 	public boolean isExpanded() {
 		if(getHeight() == 20) return false;
+		return true;
+	}
+	
+	@Override
+	public boolean isExpandable() {
 		return true;
 	}
 	

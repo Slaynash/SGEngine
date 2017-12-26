@@ -51,4 +51,9 @@ public class Renderable2dModelDeferredRender implements DeferredModelRenderer{
 		return false;
 	}
 
+	@Override
+	public boolean[] getTexture3ds() {
+		return model.getTexture3ds();
+	}
+
 }

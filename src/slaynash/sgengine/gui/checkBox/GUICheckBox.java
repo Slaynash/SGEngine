@@ -26,8 +26,8 @@ public class GUICheckBox extends GUIElement{
 	public GUICheckBox(int x, int y, int size, boolean defaultState, GUIElement parent, int location) {
 		super(x, y, size, size, parent, false, location);
 		checked = defaultState;
-		texY = TextureManager.getTextureDef("res/textures/gui/checkBox_checked.png", TextureManager.COLOR);
-		texN = TextureManager.getTextureDef("res/textures/gui/checkBox_unchecked.png", TextureManager.COLOR);
+		texY = TextureManager.getTextureDef("res/textures/gui/checkBox_checked.png", TextureManager.TEXTURE_DIFFUSE);
+		texN = TextureManager.getTextureDef("res/textures/gui/checkBox_unchecked.png", TextureManager.TEXTURE_DIFFUSE);
 
 		
 		float[] vertices = new float[12];
@@ -45,7 +45,7 @@ public class GUICheckBox extends GUIElement{
 		vertices[10] = 0;
 		vertices[11] = 0;
 		
-		model = new Renderable2dModel(VaoManager.loadToVao(vertices, uvs), texN);
+		model = new Renderable2dModel(VaoManager.loadToVao2d(vertices, uvs), texN);
 	}
 
 	@Override

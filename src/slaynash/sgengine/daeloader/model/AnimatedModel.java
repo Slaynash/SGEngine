@@ -5,7 +5,6 @@ import org.lwjgl.util.vector.Matrix4f;
 import slaynash.sgengine.daeloader.animation.Animation;
 import slaynash.sgengine.daeloader.animation.Animator;
 import slaynash.sgengine.models.utils.Vao;
-import slaynash.sgengine.textureUtils.TextureDef;
 
 /**
  * 
@@ -23,7 +22,6 @@ public class AnimatedModel {
 
 	// skin
 	private final Vao model;
-	private final TextureDef texture;
 
 	// skeleton
 	private final Joint rootJoint;
@@ -53,9 +51,8 @@ public class AnimatedModel {
 	 *            this entity.
 	 * 
 	 */
-	public AnimatedModel(Vao model, TextureDef texture, Joint rootJoint, int jointCount) {
+	public AnimatedModel(Vao model, Joint rootJoint, int jointCount) {
 		this.model = model;
-		this.texture = texture;
 		this.rootJoint = rootJoint;
 		this.jointCount = jointCount;
 		this.animator = new Animator(this);
@@ -67,13 +64,6 @@ public class AnimatedModel {
 	 */
 	public Vao getModel() {
 		return model;
-	}
-
-	/**
-	 * @return The diffuse texture for this entity.
-	 */
-	public TextureDef getTexture() {
-		return texture;
 	}
 
 	/**

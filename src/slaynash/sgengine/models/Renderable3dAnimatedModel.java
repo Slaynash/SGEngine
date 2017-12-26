@@ -4,45 +4,49 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
+import slaynash.sgengine.daeloader.model.AnimatedModel;
 import slaynash.sgengine.deferredRender.DeferredModelRenderer;
 import slaynash.sgengine.models.utils.Vao;
 import slaynash.sgengine.shaders.ShaderManager;
 import slaynash.sgengine.textureUtils.TextureDef;
 import slaynash.sgengine.textureUtils.TextureManager;
 
-public class Renderable3dModel extends RenderableModel {
+public class Renderable3dAnimatedModel extends RenderableModel{
 
 	//private int listId = 0;
 	private TextureDef textureColor;
 	private TextureDef textureNormal;
 	private TextureDef textureSpecular;
-	private Vao vao;
 	private boolean renderable = true;
+	private AnimatedModel model;
 	
 	
-	public Renderable3dModel(Vao vao, TextureDef textureColor, TextureDef textureNormal, TextureDef textureSpecular){
+	public Renderable3dAnimatedModel(AnimatedModel model, TextureDef textureColor, TextureDef textureNormal, TextureDef textureSpecular){
 		this.textureColor = textureColor != null ? textureColor : TextureManager.getDefaultTexture();
 		this.textureNormal = textureNormal != null ? textureNormal : TextureManager.getDefaultNormalTexture();
 		this.textureSpecular = textureSpecular != null ? textureSpecular : TextureManager.getDefaultSpecularTexture();
 		
-		this.vao = vao;
+		this.model = model;
 	}
 
 	@Override
 	protected void renderToScreen() {
 		if(!renderable) return;
 		else{
-			GL30.glBindVertexArray(vao.getVaoID());
+			GL30.glBindVertexArray(model.getModel().getVaoID());
 			GL20.glEnableVertexAttribArray(0);
 			GL20.glEnableVertexAttribArray(1);
 			GL20.glEnableVertexAttribArray(2);
 			GL20.glEnableVertexAttribArray(3);
+			GL20.glEnableVertexAttribArray(4);
+			GL20.glEnableVertexAttribArray(5);
 			//TODO add ShaderManager.shader_bindShineDamper(shineDamper);
 			//TODO add ShaderManager.shader_bindReflectivity(reflectivity);
 			ShaderManager.shader_bindTextureID(textureColor.getTextureID(), ShaderManager.TEXTURE_COLOR);
 			ShaderManager.shader_bindTextureID(textureNormal.getTextureID(), ShaderManager.TEXTURE_NORMAL);
 			ShaderManager.shader_bindTextureID(textureSpecular.getTextureID(), ShaderManager.TEXTURE_SPECULAR);
-			GL11.glDrawElements(GL11.GL_TRIANGLES, vao.getIndexCount(), GL11.GL_UNSIGNED_INT, 0);
+			GL11.glDrawElements(GL11.GL_TRIANGLES, model.getModel().getIndexCount(), GL11.GL_UNSIGNED_INT, 0);
+			
 		}
 	}
 	
@@ -51,17 +55,19 @@ public class Renderable3dModel extends RenderableModel {
 		
 		if(!renderable) return;
 		else{
-			GL30.glBindVertexArray(vao.getVaoID());
+			GL30.glBindVertexArray(model.getModel().getVaoID());
 			GL20.glEnableVertexAttribArray(0);
 			GL20.glEnableVertexAttribArray(1);
 			GL20.glEnableVertexAttribArray(2);
 			GL20.glEnableVertexAttribArray(3);
+			GL20.glEnableVertexAttribArray(4);
+			GL20.glEnableVertexAttribArray(5);
 			//TODO add ShaderManager.shader_bindShineDamper(shineDamper);
 			//TODO add ShaderManager.shader_bindReflectivity(reflectivity);
 			ShaderManager.shader_bindTextureID(textureColor.getTextureID(), ShaderManager.TEXTURE_COLOR);
 			ShaderManager.shader_bindTextureID(textureNormal.getTextureID(), ShaderManager.TEXTURE_NORMAL);
 			ShaderManager.shader_bindTextureID(textureSpecular.getTextureID(), ShaderManager.TEXTURE_SPECULAR);
-			GL11.glDrawElements(GL11.GL_TRIANGLES, vao.getIndexCount(), GL11.GL_UNSIGNED_INT, 0);
+			GL11.glDrawElements(GL11.GL_TRIANGLES, model.getModel().getIndexCount(), GL11.GL_UNSIGNED_INT, 0);
 		}
 	}
 	
@@ -70,12 +76,16 @@ public class Renderable3dModel extends RenderableModel {
 	}
 
 	public void dispose() {
-		vao.dispose();
+		model.getModel().dispose();
 		renderable = false;
 	}
 	
 	public Vao getVao(){
-		return vao;
+		return model.getModel();
+	}
+	
+	public AnimatedModel getModel(){
+		return model;
 	}
 
 	public int[] getTextureIds() {
@@ -84,13 +94,15 @@ public class Renderable3dModel extends RenderableModel {
 
 	@Override
 	public Class<? extends DeferredModelRenderer> getDeferredRenderer() {
-		return Renderable3dModelDeferredRender.class;
+		return Renderable3dAnimatedModelDeferredRender.class;
 	}
 
 	public boolean[] getTexture3ds() {
 		return new boolean[] {false, false, false};
 	}
 	
-	
+	public void update() {
+		model.update();
+	}
 	
 }

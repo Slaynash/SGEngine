@@ -53,7 +53,7 @@ public class Text2d {
 		TextMeshData data = fontType.loadText(this);
 		vertices = data.getVertexPositions();
 		uvs = data.getTextureCoords();
-		textModel = new Renderable2dModel(VaoManager.loadToVao(vertices, uvs), font.getTextureAtlas());
+		textModel = new Renderable2dModel(VaoManager.loadToVao2d(vertices, uvs), font.getTextureAtlas());
 		
 		text2ds.add(this);
 	}
@@ -226,11 +226,12 @@ public class Text2d {
 			TextMeshData data = t.fontType.loadText(t);
 			t.vertices = data.getVertexPositions();
 			t.uvs = data.getTextureCoords();
-			t.textModel = new Renderable2dModel(VaoManager.loadToVao(t.vertices, t.uvs), t.font.getTextureAtlas());
+			t.textModel = new Renderable2dModel(VaoManager.loadToVao2d(t.vertices, t.uvs), t.font.getTextureAtlas());
 		}
 	}
 	
 	public void release(){
 		text2ds.remove(this);
+		textModel.getVao().dispose();
 	}
 }
