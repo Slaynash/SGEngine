@@ -19,6 +19,7 @@ public class SkyboxShader extends ShaderProgram {
 	protected void getAllUniformLocations() {
 		colorTexture1_location = super.getUniformLocation("textureDiffuse1");
 		colorTexture2_location = super.getUniformLocation("textureDiffuse2");
+		super.getUniformLocation("transition");
 		
 		super.getUniformLocation("pMatrix");
 		super.getUniformLocation("vMatrix");

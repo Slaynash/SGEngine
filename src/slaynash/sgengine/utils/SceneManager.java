@@ -61,6 +61,8 @@ public class SceneManager {
 	private static void createRenderThread(final int x, final int y, final boolean fullscreen) {
 		renderThread = new Thread(new Runnable() {
 			
+			private int err = 0;
+
 			@Override
 			public void run() {
 				
@@ -113,9 +115,12 @@ public class SceneManager {
 							
 							if(Configuration.isVR()) VRUtils.setCurrentRenderEye(VRUtils.EYE_CENTER);
 							currentScene.render();
+							int err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[SceneManager] Scene Render error: OpenGL Error "+err);
 							DebugTimer.outputAndUpdateTime("Render time [main]");
 							deferredRenderCheck(VRUtils.EYE_CENTER);
+							err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[SceneManager] Deferred Render error: OpenGL Error "+err);
 							DebugTimer.outputAndUpdateTime("Render time [defe]");
+							
 							
 							boolean iudr = Configuration.isUsingDeferredRender();
 							Configuration.useDeferredRender(false);
@@ -124,8 +129,9 @@ public class SceneManager {
 								GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 								PlayerWeaponsManager.renderWeapon();
 							}
+							err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[SceneManager] Weapon/Hand Render error: OpenGL Error "+err);
 							if(Configuration.getGUIEnabled()) GUIManager.render();
-							int err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[SceneManager] GUI Render error: OpenGL Error "+err);
+							err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[SceneManager] GUI Render error: OpenGL Error "+err);
 							Configuration.useDeferredRender(iudr);
 							DebugTimer.outputAndUpdateTime("GUI Render time");
 							
@@ -167,6 +173,7 @@ public class SceneManager {
 								AudioManager.update(cpcPos.x, cpcPos.y, cpcPos.z, cpcDir.x, cpcDir.y, cpcDir.z, 0, 1, 0);
 								DebugTimer.outputAndUpdateTime("Audio update time");
 							}
+							err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[SceneManager] VR Render error: OpenGL Error "+err);
 							
 							DeferredRenderer.cleanup();
 							DebugTimer.outputAndUpdateTime("DeferredRenderer cleanup time");

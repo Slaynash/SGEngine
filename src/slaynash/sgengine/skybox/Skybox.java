@@ -136,7 +136,7 @@ public class Skybox extends RenderableModel{
 	
 	@Override
 	public void render() {
-		ShaderManager.getCurrentShaderProgram().bindDataDirect("transition", transition);
+		ShaderManager.getCurrentShaderProgram().bindData("transition", transition);
 		super.render();
 	}
 
