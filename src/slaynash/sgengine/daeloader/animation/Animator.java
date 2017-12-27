@@ -5,8 +5,8 @@ import java.util.Map;
 
 import org.lwjgl.util.vector.Matrix4f;
 
-import slaynash.sgengine.daeloader.model.AnimatedModel;
 import slaynash.sgengine.daeloader.model.Joint;
+import slaynash.sgengine.models.Renderable3dAnimatedModel;
 import slaynash.sgengine.utils.DisplayManager;
 
 /**
@@ -33,7 +33,7 @@ import slaynash.sgengine.utils.DisplayManager;
  */
 public class Animator {
 
-	private final AnimatedModel entity;
+	private final Renderable3dAnimatedModel entity;
 
 	private Animation currentAnimation;
 	private float animationTime = 0;
@@ -42,7 +42,7 @@ public class Animator {
 	 * @param entity
 	 *            - the entity which will by animated by this animator.
 	 */
-	public Animator(AnimatedModel entity) {
+	public Animator(Renderable3dAnimatedModel entity) {
 		this.entity = entity;
 	}
 

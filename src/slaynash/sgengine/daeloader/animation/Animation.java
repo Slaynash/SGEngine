@@ -1,7 +1,5 @@
 package slaynash.sgengine.daeloader.animation;
 
-import slaynash.sgengine.daeloader.model.AnimatedModel;
-
 /**
  * 
  * * Represents an animation that can applied to an {@link AnimatedModel} . It

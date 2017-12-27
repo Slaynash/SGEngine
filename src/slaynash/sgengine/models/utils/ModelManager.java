@@ -11,8 +11,8 @@ import slaynash.sgengine.daeloader.colladaLoader.ColladaLoader;
 import slaynash.sgengine.daeloader.dataStructures.AnimatedModelData;
 import slaynash.sgengine.daeloader.dataStructures.JointData;
 import slaynash.sgengine.daeloader.dataStructures.SkeletonData;
-import slaynash.sgengine.daeloader.model.AnimatedModel;
 import slaynash.sgengine.daeloader.model.Joint;
+import slaynash.sgengine.models.Renderable3dAnimatedModel;
 import slaynash.sgengine.models.Renderable3dModel;
 import slaynash.sgengine.objloader.ObjLoader;
 import slaynash.sgengine.objloader.ObjMeshData;
@@ -30,7 +30,7 @@ public class ModelManager {
 			models.put(path, vao);
 		}
 		return new Renderable3dModel(
-				models.get(path),
+				vao,
 				diffusemap != null ? TextureManager.getTextureDef(diffusemap, TextureManager.TEXTURE_DIFFUSE) : TextureManager.getDefaultTexture(),
 				normalmap != null ? TextureManager.getTextureDef(normalmap, TextureManager.TEXTURE_NORMAL) : TextureManager.getDefaultNormalTexture(),
 				specularmap != null ? TextureManager.getTextureDef(specularmap, TextureManager.TEXTURE_SPECULAR) : TextureManager.getDefaultSpecularTexture()
@@ -38,11 +38,11 @@ public class ModelManager {
 	}
 	
 	
-	public static AnimatedModel loadAnimatedDae(String modelPath) {
+	public static Renderable3dAnimatedModel loadAnimatedDae(String modelPath, String diffusemap, String normalmap, String specularmap) {
 		AnimatedModelData entityData = ColladaLoader.loadColladaModel(modelPath, Configuration.MAX_WEIGHTS);
-		Vao model;
-		if((model = models.get(modelPath)) == null) {
-			model = VaoManager.loadToVao3d(
+		Vao vao;
+		if((vao = models.get(modelPath)) == null) {
+			vao = VaoManager.loadToVao3d(
 					entityData.getMeshData().getVertices(),
 					entityData.getMeshData().getTextureCoords(),
 					entityData.getMeshData().getNormals(),
@@ -55,7 +55,13 @@ public class ModelManager {
 		
 		SkeletonData skeletonData = entityData.getJointsData();
 		Joint headJoint = createJoints(skeletonData.headJoint);
-		return new AnimatedModel(model, headJoint, skeletonData.jointCount);
+		return new Renderable3dAnimatedModel(
+				vao,
+				headJoint, skeletonData.jointCount,
+				diffusemap != null ? TextureManager.getTextureDef(diffusemap, TextureManager.TEXTURE_DIFFUSE) : TextureManager.getDefaultTexture(),
+				normalmap != null ? TextureManager.getTextureDef(normalmap, TextureManager.TEXTURE_NORMAL) : TextureManager.getDefaultNormalTexture(),
+				specularmap != null ? TextureManager.getTextureDef(specularmap, TextureManager.TEXTURE_SPECULAR) : TextureManager.getDefaultSpecularTexture()
+		);
 	}
 	
 	private static Joint createJoints(JointData data) {
