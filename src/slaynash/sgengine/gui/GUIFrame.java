@@ -2,7 +2,6 @@ package slaynash.sgengine.gui;
 
 import org.lwjgl.util.vector.Vector2f;
 
-import slaynash.sgengine.gui.comboBox.GUIComboBox;
 import slaynash.sgengine.gui.text2d.Text2d;
 import slaynash.sgengine.maths.Vector2i;
 import slaynash.sgengine.models.Renderable2dModel;
@@ -226,8 +225,8 @@ public class GUIFrame extends GUIElement {
 		*/
 		renderInside = true;
 		Vector2f mousePos = UserInputUtil.getMousePos();
-		for(GUIElement child:getChildrens()) if(child.getClass() != GUIComboBox.class || (child.getClass() == GUIComboBox.class && !((GUIComboBox)child).isExpanded() && !isInElement(child, mousePos)) )child.render();
-		for(GUIElement child:getChildrens()) if(child.getClass() == GUIComboBox.class && (((GUIComboBox)child).isExpanded()|| isInElement(child, mousePos) )) child.render();
+		for(GUIElement child:getChildrens()) if(!child.isExpandable() || (child.isExpandable() && !child.isExpanded() && !isInElement(child, mousePos)) )child.render();
+		for(GUIElement child:getChildrens()) if(child.isExpandable() && (child.isExpanded()|| isInElement(child, mousePos) )) child.render();
 		renderInside = false;
 		
 		ShaderManager.shader_loadTranslation(getTopLeft());
@@ -373,6 +372,7 @@ public class GUIFrame extends GUIElement {
 		if(focusedChild != null) focusedChild.resetFocus();
 	}
 
+	@Override
 	public void update() {
 		Vector2f mousePos = UserInputUtil.getMousePos();
 		
@@ -413,7 +413,7 @@ public class GUIFrame extends GUIElement {
 		if(isFocused() && UserInputUtil.mouseLeftClicked()){
 			boolean focusFound = false;
 			for(GUIElement element:getChildrens()){
-				if(element.getClass() == GUIComboBox.class && ((GUIComboBox)element).isExpanded()){
+				if(element.isExpandable() && element.isExpanded()){
 					if(!focusFound && isInElement(element, mousePos)){
 						element.setFocus();
 						focusFound = true;
@@ -424,7 +424,7 @@ public class GUIFrame extends GUIElement {
 				}
 			}
 			for(GUIElement element:getChildrens()){
-				if(element.getClass() != GUIComboBox.class || !((GUIComboBox)element).isExpanded())
+				if(!element.isExpandable() || !element.isExpanded())
 				if(!focusFound && isInElement(element, mousePos)){
 					element.setFocus();
 					focusFound = true;

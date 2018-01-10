@@ -165,8 +165,8 @@ public class Renderable3dAnimatedModel extends RenderableModel{
 	 * @param animation
 	 *            - the animation to be carried out.
 	 */
-	public void doAnimation(Animation animation) {
-		animator.doAnimation(animation);
+	public void doAnimation(String name, Animation animation, boolean loop) {
+		animator.doAnimation(name, animation, loop);
 	}
 	
 }

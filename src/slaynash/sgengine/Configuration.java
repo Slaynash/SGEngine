@@ -7,7 +7,7 @@ import java.net.URLDecoder;
 import slaynash.sgengine.playercharacters.PlayerCharacter;
 import slaynash.sgengine.utils.SceneManager;
 
-public class Configuration {
+public abstract class Configuration {
 
 	public static final int MAX_LIGHTS = 8;
 	public static final int MAX_WEIGHTS = 40;

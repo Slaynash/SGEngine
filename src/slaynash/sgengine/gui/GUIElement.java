@@ -90,6 +90,7 @@ public abstract class GUIElement {
 	}
 
 	public void destroy(){
+		if(destroyed) return;
 		destroyed = true;
 		if(!canChild) return;
 		if(parent == null) GUIManager.removeElement(this);

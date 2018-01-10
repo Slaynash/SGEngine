@@ -12,7 +12,6 @@ import slaynash.sgengine.LogSystem;
 import slaynash.sgengine.gui.button.GUIButton;
 import slaynash.sgengine.gui.button.GUIButtonEvent;
 import slaynash.sgengine.gui.button.GUIButtonListener;
-import slaynash.sgengine.gui.comboBox.GUIComboBox;
 import slaynash.sgengine.maths.Vector2i;
 import slaynash.sgengine.models.Renderable2dModel;
 import slaynash.sgengine.models.utils.VaoManager;
@@ -115,7 +114,7 @@ public class GUIManager {
 		if(!elementDragged() && menuShown){
 			for(int i=menuTopLevel;i>=0;i--){
 				for(GUIElement e:menuElements){
-					if(e.getClass() == GUIFrame.class && ((GUIFrame)e).getLevel() == i){
+					if(e.isLevelable() && e.getLevel() == i){
 						if(!overFound && isInElement(e, mousePos)){
 							setMouseInElement(e);
 							overFound = true;
@@ -125,7 +124,7 @@ public class GUIManager {
 				}
 			}
 			for(GUIElement e:menuElements){
-				if(e.getClass() != GUIFrame.class){
+				if(!e.isLevelable() && !(e.isExpandable() && e.isExpanded())){
 					if(!overFound && isInElement(e, mousePos)){
 						setMouseInElement(e);
 						overFound = true;
@@ -134,7 +133,7 @@ public class GUIManager {
 				}
 			}
 			for(GUIElement e:menuElements){
-				if(e.getClass() == GUIComboBox.class && ((GUIComboBox)e).isExpanded()){
+				if(e.isExpandable() && e.isExpanded()){
 					if(!overFound && isInElement(e, mousePos)){
 						setMouseInElement(e);
 						overFound = true;
@@ -147,7 +146,7 @@ public class GUIManager {
 		if(!elementDragged()){
 			for(int i=gameTopLevel;i>=0;i--){
 				for(GUIElement e:gameElements){
-					if(e.getClass() == GUIFrame.class && ((GUIFrame)e).getLevel() == i){
+					if(e.isLevelable() && e.getLevel() == i){
 						if(!overFound && isInElement(e, mousePos)){
 							setMouseInElement(e);
 							overFound = true;
@@ -189,7 +188,7 @@ public class GUIManager {
 					focusedElement = elementUnderMouse;
 					if(elementUnderMouse != null){
 						elementUnderMouse.setFocus();
-						if(elementUnderMouse.getClass() == GUIFrame.class){
+						if(elementUnderMouse.isLevelable()){
 							setTopLevel(elementUnderMouse);
 						}
 					}
@@ -201,8 +200,8 @@ public class GUIManager {
 			for(int i=topLevel;i>0;i--){
 				if(breakAll) break;
 				for(GUIElement element:elements){
-					if(element.getClass() == GUIFrame.class){
-						if(((GUIFrame)element).getLevel() == i && isInElement(element, mousePos)){
+					if(element.isLevelable){
+						if(element.getLevel() == i && isInElement(element, mousePos)){
 							if(focusedElement != null) focusedElement.resetFocus();
 							focusedElement = element.setFocus();
 							setTopFrame(((GUIFrame)focusedElement));
@@ -220,8 +219,8 @@ public class GUIManager {
 				}
 			}
 			*/
-		for(GUIElement e:gameElements) if(e.isLevelable()) e.update();
-		for(GUIElement e:menuElements) if(e.isLevelable()) e.update();
+		for(GUIElement e:gameElements) e.update();
+		for(GUIElement e:menuElements) e.update();
 	}
 
 	private static boolean elementDragged() {
@@ -239,7 +238,6 @@ public class GUIManager {
 	public static void render() {
 		ShaderManager.startGUIShaderDirect();
 		prepare();
-		if(canDrawBackground()) drawBackground();
 		Vector2f mousePos = UserInputUtil.getMousePos();
 		for(GUIElement element:gameElements) if(!element.isLevelable() && !element.isExpandable() || (element.isExpandable() && !element.isExpanded() && !isInElement(element, mousePos)) )element.render();
 		for(GUIElement element:gameElements) if(!element.isLevelable() && element.isExpandable() && (element.isExpanded() || isInElement(element, mousePos) )) element.render();
@@ -253,6 +251,7 @@ public class GUIManager {
 				}
 			}
 		}
+		if(canDrawBackground()) drawBackground();
 		if(menuShown){
 			for(GUIElement element:menuElements) if(!element.isLevelable() && !element.isExpandable() || (element.isExpandable() && !element.isExpanded() && !isInElement(element, mousePos)) )element.render();
 			for(GUIElement element:menuElements) if(!element.isLevelable() && element.isExpandable() && (element.isExpanded() || isInElement(element, mousePos) )) element.render();

@@ -2,7 +2,6 @@ package slaynash.sgengine.gui;
 
 import org.lwjgl.util.vector.Vector2f;
 
-import slaynash.sgengine.gui.comboBox.GUIComboBox;
 import slaynash.sgengine.gui.text2d.Text2d;
 import slaynash.sgengine.maths.Vector2i;
 import slaynash.sgengine.models.Renderable2dModel;
@@ -230,8 +229,8 @@ public class GUIPopup extends GUIElement {
 		renderInside = true;
 		image.render();
 		Vector2f mousePos = UserInputUtil.getMousePos();
-		for(GUIElement child:getChildrens()) if(child.getClass() != GUIComboBox.class || (child.getClass() == GUIComboBox.class && !((GUIComboBox)child).isExpanded() && !isInElement(child, mousePos)) )child.render();
-		for(GUIElement child:getChildrens()) if(child.getClass() == GUIComboBox.class && (((GUIComboBox)child).isExpanded()|| isInElement(child, mousePos) )) child.render();
+		for(GUIElement child:getChildrens()) if(!child.isExpandable() || (child.isExpandable() && !child.isExpanded() && !isInElement(child, mousePos)) )child.render();
+		for(GUIElement child:getChildrens()) if(child.isExpandable() && (child.isExpanded()|| isInElement(child, mousePos) )) child.render();
 		renderInside = false;
 		
 		
@@ -404,7 +403,7 @@ public class GUIPopup extends GUIElement {
 		if(isFocused() && UserInputUtil.mouseLeftClicked()){
 			boolean focusFound = false;
 			for(GUIElement element:getChildrens()){
-				if(!focusFound && isInElement(element, mousePos) && element.getClass() == GUIComboBox.class && ((GUIComboBox)element).isExpanded()){
+				if(!focusFound && isInElement(element, mousePos) && element.isExpandable() && element.isExpanded()){
 					element.setFocus();
 					focusFound = true;
 				}

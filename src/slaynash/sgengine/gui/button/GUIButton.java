@@ -139,6 +139,6 @@ public class GUIButton extends GUIElement{
 	@Override
 	public void destroy(){
 		super.destroy();
-		text.release();
+		if(text != null) text.release();
 	}
 }

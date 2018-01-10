@@ -12,6 +12,7 @@ public class GUIText extends GUIElement{
 	private float fontSize = 300;
 	private String font = "tahoma";
 	private boolean centered = false;
+	boolean tdd = false;
 	
 	public GUIText(String text, String font, float fontSize, int x, int y, int width, boolean centered, GUIElement parent, int location) {
 		super(x, y, width, (int)fontSize/20, parent, false, location);
@@ -28,7 +29,7 @@ public class GUIText extends GUIElement{
 
 	@Override
 	public void render() {
-		text2d.render();
+		if(!tdd) text2d.render();
 	}
 	
 	public void setColor(float r, float g, float b){
@@ -36,10 +37,12 @@ public class GUIText extends GUIElement{
 		text2d.setColour(r, g, b);
 	}
 	
+	
 	@Override
 	public void destroy(){
 		super.destroy();
 		text2d.release();
+		tdd = true;
 	}
 	
 	public void setText(String text) {

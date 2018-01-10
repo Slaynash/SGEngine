@@ -11,6 +11,8 @@ import java.util.List;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
+import slaynash.sgengine.LogSystem;
+
 public class ObjLoader {
 
 	public static ObjMeshData loadObj(File file, String diffusemap, String normalmap, String specularmap) {
@@ -18,7 +20,8 @@ public class ObjLoader {
 		try {
 			isr = new FileReader(file);
 		} catch (FileNotFoundException e) {
-			System.err.println("Unable to load Object: File not found ("+file+")");
+			LogSystem.err_println("Unable to load Object: File not found ("+file+")");
+			return null;//TODO return an ERROR model
 		}
 		BufferedReader reader = new BufferedReader(isr);
 		String line;

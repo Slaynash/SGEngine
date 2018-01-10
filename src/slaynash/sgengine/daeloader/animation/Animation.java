@@ -13,7 +13,7 @@ package slaynash.sgengine.daeloader.animation;
 public class Animation {
 
 	private final float length;//in seconds
-	private final KeyFrame[] keyFrames;
+	private final KeyFrame[] keyFrames;																																											
 
 	/**
 	 * @param lengthInSeconds

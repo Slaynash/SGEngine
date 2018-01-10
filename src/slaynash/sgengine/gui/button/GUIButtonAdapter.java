@@ -7,4 +7,6 @@ public abstract class GUIButtonAdapter implements GUIButtonListener{
 	public void mouseExited(GUIButtonEvent e) {}
 	@Override
 	public void mousePressed(GUIButtonEvent e) {}
+	@Override
+	public void mouseReleased(GUIButtonEvent e) {}
 }

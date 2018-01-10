@@ -93,26 +93,49 @@ public class DeferredRenderer {
 	
 	
 	protected static void renderColor(int eye){
+		int err = 0;
+		err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[DeferredRenderer] Pre-render error: OpenGL Error "+err);
 		if(Configuration.isUsingTimingDebug()) LogSystem.out_println("[DR] rendering "+shaderLists.size()+" shader loops:");
 		int l1=0;
 		for(ShaderRenderlist map:shaderLists){//for each shader phase
 			if(Configuration.isUsingTimingDebug()) LogSystem.out_println("[DR] \tShader "+l1+": rendering "+map.getObjectList().size()+" models");
 			ShaderProgram shader = map.getShader();
 			shader.useDirect();
+			err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[DeferredRenderer] OpenGL Error "+err+" with useDirect() call of "+shader.getClass());
 			if(shader.getShaderType() == ShaderProgram.SHADER_3D_MODERN  || shader.getShaderType() == ShaderProgram.SHADER_VR_MODERN) ShaderManager.shader_loadLights(LightsManager.getPointlights());
+			err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[DeferredRenderer] OpenGL Error "+err+" with shader_loadLights call on "+shader.getClass());
 			int l2=0;
 			for(Entry<Integer, ArrayList<DeferredModelRenderer>> entry:map.getObjectList().entrySet()){//for each models of this type
 				if(Configuration.isUsingTimingDebug()) LogSystem.out_println("[DR] \t\tModel "+l2+": rendering "+entry.getValue().size()+" instances");
 				shader.bindModel(entry.getKey());
+				err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[DeferredRenderer] OpenGL Error "+err+" with bindModel() call of "+shader.getClass());
 				for(DeferredModelRenderer dmr:entry.getValue()){//for each render of this model
 					shader.bindDatasDirect(dmr.getShaderDatas());
+					err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[DeferredRenderer] OpenGL Error "+err+" with bindDatasDirect() call of "+shader.getClass());
 					for(int i=0;i<dmr.getTextureIDs().length;i++){
-						GL13.glActiveTexture(GL13.GL_TEXTURE0+i);
-						if(dmr.getTexture3ds()[i])
-							GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, dmr.getTextureIDs()[i]);
-						else GL11.glBindTexture(GL11.GL_TEXTURE_2D, dmr.getTextureIDs()[i]);
+						if(i >= ShaderManager.TEXTURE_SHADOWSMIN) {
+							GL13.glActiveTexture(GL13.GL_TEXTURE0+i+Configuration.MAX_LIGHTS);
+							if(dmr.getTexture3ds()[i])
+								GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, dmr.getTextureIDs()[i]);
+							else GL11.glBindTexture(GL11.GL_TEXTURE_2D, dmr.getTextureIDs()[i]);
+							err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[DeferredRenderer] OpenGL Error "+err+" with texture binding call "+(i+Configuration.MAX_LIGHTS)+" of "+shader.getClass());
+						}
+						else {
+							GL13.glActiveTexture(GL13.GL_TEXTURE0+i);
+							if(dmr.getTexture3ds()[i])
+								GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, dmr.getTextureIDs()[i]);
+							else GL11.glBindTexture(GL11.GL_TEXTURE_2D, dmr.getTextureIDs()[i]);
+							err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[DeferredRenderer] OpenGL Error "+err+" with texture binding call "+i+" of "+shader.getClass());
+						}
 					}
-					if(eye == VRUtils.EYE_CENTER) dmr.render(); else dmr.renderVR(eye);
+					if(eye == VRUtils.EYE_CENTER) {
+						dmr.render();
+						err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[DeferredRenderer] OpenGL Error "+err+" with render() call of "+dmr.getClass());
+					}
+					else {
+						dmr.renderVR(eye);
+						err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[DeferredRenderer] OpenGL Error "+err+" with renderVR() call of "+dmr.getClass());
+					}
 				}
 				l2++;
 			}

@@ -3,6 +3,8 @@ package slaynash.sgengine.gui.comboBox;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.event.EventListenerList;
+
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
@@ -16,14 +18,16 @@ import slaynash.sgengine.textureUtils.TextureDef;
 import slaynash.sgengine.textureUtils.TextureManager;
 import slaynash.sgengine.utils.UserInputUtil;
 
-public class GUIComboBox extends GUIElement{ //TODO create events for comboBox
+public class GUIComboBox<T> extends GUIElement{ //TODO create events for comboBox
+	
+	private final EventListenerList listeners = new EventListenerList();
 
 	private TextureDef texBox;
 	private TextureDef texMiddle;
 	private TextureDef texEnd;
 	private TextureDef texExpand;
 	
-	private List<?> list;
+	private List<T> list;
 	private List<Text2d> listText;
 	private Text2d selectedText;
 	private int selectedIndex;
@@ -32,7 +36,7 @@ public class GUIComboBox extends GUIElement{ //TODO create events for comboBox
 	private Renderable2dModel modelExp;
 	private static float[] uvs = new float[]{0,0,1,0,1,1,1,1,0,1,0,0};
 
-	public GUIComboBox(int x, int y, int width, List<?> list, GUIElement parent, int location) {
+	public GUIComboBox(int x, int y, int width, List<T> list, GUIElement parent, int location) {
 		super(x, y, width, 20, parent, false, location);
 		this.list = list;
 		
@@ -63,12 +67,12 @@ public class GUIComboBox extends GUIElement{ //TODO create events for comboBox
 	public void render() {
 		if(isFocused()){
 			if(mouseIn && UserInputUtil.mouseLeftClicked()){
+				
 				if(getHeight() == 20){
 					open();
 				}
 				else{
 					Vector2f mousePos = UserInputUtil.getMousePos();
-					LogSystem.out_println("[GUICombobox] "+mousePos.y);
 					if(mousePos.y <= getTopLeft().y+20)
 						close();
 					else{
@@ -166,10 +170,14 @@ public class GUIComboBox extends GUIElement{ //TODO create events for comboBox
 			selectedText.release();
 			selectedText = new Text2d(listText.get(index).getTextString(), "tahoma", 250, new Vector2f(0, 3), getWidth()/2, true, this);
 			selectedText.setNumberOfLines(1);
+			for(GUIComboBoxListener<T> listener : getGUIComboBoxListener()){
+				GUIComboBoxEvent<T> event = new GUIComboBoxEvent<T>(getSelectedItem());
+				listener.selectedObjectChanged(event);
+			}
 		}
 	}
 	
-	public Object getSelectedItem(){
+	public T getSelectedItem(){
 		return list.get(selectedIndex);
 	}
 	
@@ -190,5 +198,20 @@ public class GUIComboBox extends GUIElement{ //TODO create events for comboBox
 	public boolean isExpandable() {
 		return true;
 	}
+	
+	
+	
+	public void addGUIComboBoxListener(GUIComboBoxListener<T> listener) {
+        listeners.add(GUIComboBoxListener.class, listener);
+    }
+ 
+    public void removeGUIComboBoxListener(GUIComboBoxListener<T> listener) {
+        listeners.remove(GUIComboBoxListener.class, listener);
+    }
+    
+    @SuppressWarnings("unchecked")
+	public GUIComboBoxListener<T>[] getGUIComboBoxListener() {
+        return listeners.getListeners(GUIComboBoxListener.class);
+    }
 	
 }

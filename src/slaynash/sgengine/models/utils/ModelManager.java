@@ -26,7 +26,10 @@ public class ModelManager {
 		Vao vao;
 		if((vao = models.get(path)) == null) {
 			ObjMeshData meshdatas = ObjLoader.loadObj(new File(Configuration.getAbsoluteInstallPath()+"/"+path), diffusemap, normalmap, specularmap);
-			vao = VaoManager.loadToVao3d(meshdatas.getVerticesArray(), meshdatas.getTexturesArray(), meshdatas.getNormalsArray(), meshdatas.getTangentsArray(), meshdatas.getIndicesArray());
+			if(meshdatas != null)
+				vao = VaoManager.loadToVao3d(meshdatas.getVerticesArray(), meshdatas.getTexturesArray(), meshdatas.getNormalsArray(), meshdatas.getTangentsArray(), meshdatas.getIndicesArray());
+			else
+				vao = VaoManager.loadToVao3d(new float[] {}, new float[] {}, new float[] {}, new float[] {}, new int[] {});
 			models.put(path, vao);
 		}
 		return new Renderable3dModel(

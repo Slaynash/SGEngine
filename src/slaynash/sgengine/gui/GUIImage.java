@@ -5,16 +5,25 @@ import org.lwjgl.util.vector.Vector2f;
 import slaynash.sgengine.models.Renderable2dModel;
 import slaynash.sgengine.models.utils.VaoManager;
 import slaynash.sgengine.shaders.ShaderManager;
+import slaynash.sgengine.textureUtils.TextureDef;
 import slaynash.sgengine.textureUtils.TextureManager;
 
 public class GUIImage extends GUIElement{
 	
 	private Renderable2dModel model;
 	
-	private static float[] uvs = new float[]{0,0,1,0,1,1,1,1,0,1,0,0};
+	//private static float[] uvs = new float[]{0,0,1,0,1,1,1,1,0,1,0,0};
 
 	public GUIImage(String imagePath, int x, int y, int width, int height, GUIElement parent, int location) {
 		super(x, y, width, height, parent, false, location);
+		
+		TextureDef textureDef = TextureManager.getTextureDef(imagePath, TextureManager.TEXTURE_DIFFUSE);
+		
+		float imageWidth = textureDef.getTexture().getImageWidth();
+		float imageHeight = textureDef.getTexture().getImageHeight();
+		float maxX = (imageWidth/(textureDef.getTexture().getTextureWidth()));
+		float maxY = (imageHeight/(textureDef.getTexture().getTextureHeight()));
+		float[] uvs = new float[] {0,0,maxX,0,maxX,maxY,maxX,maxY,0,maxY,0,0};
 		
 		float[] vertices = new float[12];
 		vertices[0] = 0;
@@ -30,10 +39,9 @@ public class GUIImage extends GUIElement{
 		vertices[9] = height;
 		vertices[10] = 0;
 		vertices[11] = 0;
-
 		
 		
-		model = new Renderable2dModel(VaoManager.loadToVao2d(vertices, uvs), TextureManager.getTextureDef(imagePath, TextureManager.TEXTURE_DIFFUSE));
+		model = new Renderable2dModel(VaoManager.loadToVao2d(vertices, uvs), textureDef);
 	}
 
 	@Override

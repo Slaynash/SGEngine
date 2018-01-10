@@ -19,13 +19,15 @@ import slaynash.sgengine.deferredRender.DeferredRenderer;
 import slaynash.sgengine.textureUtils.TextureManager;
 import slaynash.sgengine.utils.DisplayManager;
 import slaynash.sgengine.world3d.loader.Ent_PointLight;
-
+// ShaderProgram   : Attribution des indexes de texture depuis une autre methode (saut des textures réservé aux ombres)
+// DeferredRenderer: Bind des textures en sautant les indexes réservés
 public class ShaderManager {
 	
 	public static final int TEXTURE_COLOR = 0;
 	public static final int TEXTURE_NORMAL = 1;
 	public static final int TEXTURE_SPECULAR = 2;
 	public static final int TEXTURE_SHADOWSMIN = 3;
+	//3 -> 3+Configuration.MAX_LIGHTS-1: RESERVED
 	
 	
 	private static List<ShaderProgram> shaders = new ArrayList<ShaderProgram>();
@@ -205,7 +207,9 @@ public class ShaderManager {
 		currentShader.bindData("visibility", vis);
 	}
 	public static void shader_bindTextureID(int textureID, int textureType) {
-		GL13.glActiveTexture(GL13.GL_TEXTURE0+textureType);
+		if(textureType > 3)
+			GL13.glActiveTexture(GL13.GL_TEXTURE0+textureType+Configuration.MAX_LIGHTS);
+		else GL13.glActiveTexture(GL13.GL_TEXTURE0+textureType);
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
 	}
 	
