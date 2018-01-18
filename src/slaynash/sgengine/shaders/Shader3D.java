@@ -8,7 +8,7 @@ import slaynash.sgengine.Configuration;
 public class Shader3D extends ShaderProgram {
 	
 	public Shader3D() {
-		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "modern/modern3d.vs", "modern/modern3d.fs", ShaderProgram.SHADER_3D_MODERN);
+		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "modern/modern3d.vs", "modern/modern3d.fs");
 		setShadowShader(new ShadowShader());
 	}
 	
@@ -85,5 +85,10 @@ public class Shader3D extends ShaderProgram {
 		GL20.glEnableVertexAttribArray(1);
 		GL20.glEnableVertexAttribArray(2);
 		GL20.glEnableVertexAttribArray(3);
+	}
+	
+	@Override
+	public boolean isCastingShadow() {
+		return true;
 	}
 }

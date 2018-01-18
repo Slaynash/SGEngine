@@ -12,7 +12,7 @@ public class Shader2D extends ShaderProgram {
 	private int texture_location;
 
 	public Shader2D() {
-		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "modern/modern2d.vs", "modern/modern2d.fs", ShaderProgram.SHADER_GUI_MODERN);
+		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "modern/modern2d.vs", "modern/modern2d.fs");
 	}
 
 	@Override

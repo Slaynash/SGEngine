@@ -17,20 +17,6 @@ import slaynash.sgengine.Configuration;
 import slaynash.sgengine.LogSystem;
 
 public abstract class ShaderProgram {
-
-	public static final int SHADER_NONE = -1;
-	public static final int SHADER_OTHER = 0;
-	public static final int SHADER_3D_FREE = 1;
-	public static final int SHADER_GUI_FREE = 2;
-	public static final int SHADER_VR_FREE = 3;
-	public static final int SHADER_LABEL_FREE = 4;
-	
-	public static final int SHADER_3D_MODERN = 5;
-	public static final int SHADER_GUI_MODERN = 6;
-	public static final int SHADER_VR_MODERN = 7;
-	public static final int SHADER_LABEL_MODERN = 8;
-	
-	public static final int SHADER_3D_SHADOWS = 9;
 	
 	private String vertexShaderPath;
 	private String geometryShaderPath;
@@ -39,7 +25,6 @@ public abstract class ShaderProgram {
 	protected int geometryID;
 	protected int fragmentID;
 	protected int programID;
-	private int shaderType = SHADER_NONE;
 	protected Map<String, Integer> locations = new HashMap<String, Integer>();
 	private Map<String, Object> datas = new HashMap<String, Object>();
 	private ShaderProgram shadowShader = null;
@@ -47,8 +32,7 @@ public abstract class ShaderProgram {
 	
 	protected static FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
 
-	public ShaderProgram(String shaderPath, String vertexShaderName, String fragmentShaderName, int shaderType){
-		this.shaderType = shaderType;
+	public ShaderProgram(String shaderPath, String vertexShaderName, String fragmentShaderName){
 		ShaderManager.registerShader(this);
 		vertexShaderPath = shaderPath+File.separator+vertexShaderName;
 		fragmentShaderPath = shaderPath+File.separator+fragmentShaderName;
@@ -56,8 +40,7 @@ public abstract class ShaderProgram {
 		loadShader(false);
 	}
 	
-	public ShaderProgram(String shaderPath, String vertexShaderName, String fragmentShaderName, String geometryShaderName, int shaderType){
-		this.shaderType = shaderType;
+	public ShaderProgram(String shaderPath, String vertexShaderName, String fragmentShaderName, String geometryShaderName){
 		ShaderManager.registerShader(this);
 		vertexShaderPath = shaderPath+File.separator+vertexShaderName;
 		fragmentShaderPath = shaderPath+File.separator+fragmentShaderName;
@@ -88,7 +71,7 @@ public abstract class ShaderProgram {
 		GL20.glUseProgram(programID);
 		getAllUniformLocations();
 		connectTextureUnits();
-		LogSystem.out_println("[ShaderProgram] Shader loaded ! Type: "+shaderType);
+		LogSystem.out_println("[ShaderProgram] Shader loaded !");
 	}
 
 	protected abstract void bindAttributes();
@@ -117,10 +100,6 @@ public abstract class ShaderProgram {
 	
 	protected void bindAttribute(int attribute, String variableName){
 		GL20.glBindAttribLocation(programID, attribute, variableName);
-	}
-	
-	public int getShaderType(){
-		return shaderType;
 	}
 
 	protected int getLocation(String string) {
@@ -190,5 +169,9 @@ public abstract class ShaderProgram {
 	
 	public ShaderProgram getShadowShader() {
 		return shadowShader;
+	}
+
+	public boolean isCastingShadow() {
+		return false;
 	}
 }

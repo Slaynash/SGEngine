@@ -7,7 +7,6 @@ import org.lwjgl.opengl.GL30;
 
 import slaynash.sgengine.Configuration;
 import slaynash.sgengine.shaders.ShaderManager;
-import slaynash.sgengine.shaders.ShaderProgram;
 
 public class VBlurShader extends DeferredShaderProgram {
 	
@@ -16,7 +15,7 @@ public class VBlurShader extends DeferredShaderProgram {
 	private int colourId;
 
 	public VBlurShader(int outputWidth, int outputHeight) {
-		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "blur/verticalBlur.vs", "blur/blur.fs", ShaderProgram.SHADER_OTHER, outputWidth, outputHeight, GL30.GL_RGBA16F);
+		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "blur/verticalBlur.vs", "blur/blur.fs", outputWidth, outputHeight, GL30.GL_RGBA16F);
 		height = outputHeight;
 	}
 

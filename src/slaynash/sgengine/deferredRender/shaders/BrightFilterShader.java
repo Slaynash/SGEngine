@@ -7,7 +7,6 @@ import org.lwjgl.opengl.GL30;
 
 import slaynash.sgengine.Configuration;
 import slaynash.sgengine.shaders.ShaderManager;
-import slaynash.sgengine.shaders.ShaderProgram;
 
 public class BrightFilterShader extends DeferredShaderProgram {
 
@@ -15,7 +14,7 @@ public class BrightFilterShader extends DeferredShaderProgram {
 	private int texId;
 
 	public BrightFilterShader(int outputWidth, int outputHeight) {
-		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "brightFilter/brightFilter.vs", "brightFilter/brightFilter.fs", ShaderProgram.SHADER_OTHER, outputWidth, outputHeight, GL30.GL_RGBA16F);
+		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "brightFilter/brightFilter.vs", "brightFilter/brightFilter.fs", outputWidth, outputHeight, GL30.GL_RGBA16F);
 	}
 
 	@Override

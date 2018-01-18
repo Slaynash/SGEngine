@@ -7,7 +7,6 @@ import org.lwjgl.opengl.GL30;
 
 import slaynash.sgengine.Configuration;
 import slaynash.sgengine.shaders.ShaderManager;
-import slaynash.sgengine.shaders.ShaderProgram;
 
 public class HBlurShader extends DeferredShaderProgram {
 	
@@ -16,7 +15,7 @@ public class HBlurShader extends DeferredShaderProgram {
 	private int width;
 
 	public HBlurShader(int outputWidth, int outputHeight) {
-		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "blur/horizontalBlur.vs", "blur/blur.fs", ShaderProgram.SHADER_OTHER, outputWidth, outputHeight, GL30.GL_RGBA16F);
+		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "blur/horizontalBlur.vs", "blur/blur.fs", outputWidth, outputHeight, GL30.GL_RGBA16F);
 		width = outputWidth;
 	}
 

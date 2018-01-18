@@ -12,7 +12,7 @@ public class ShaderGUI extends ShaderProgram {
 	private int texture_location;
 
 	public ShaderGUI() {
-		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "modern/modernGUI.vs", "modern/modernGUI.fs", ShaderProgram.SHADER_GUI_MODERN);
+		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "modern/modernGUI.vs", "modern/modernGUI.fs");
 	}
 
 	@Override

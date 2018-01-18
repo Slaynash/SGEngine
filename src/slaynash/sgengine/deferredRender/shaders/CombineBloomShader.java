@@ -7,7 +7,6 @@ import org.lwjgl.opengl.GL30;
 
 import slaynash.sgengine.Configuration;
 import slaynash.sgengine.shaders.ShaderManager;
-import slaynash.sgengine.shaders.ShaderProgram;
 
 public class CombineBloomShader extends DeferredShaderProgram {
 	
@@ -17,7 +16,7 @@ public class CombineBloomShader extends DeferredShaderProgram {
 	private int blurId;
 
 	public CombineBloomShader(int outputWidth, int outputHeight) {
-		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "combineBloom/combineBloom.vs", "combineBloom/combineBloom.fs", ShaderProgram.SHADER_OTHER, outputWidth, outputHeight, GL30.GL_RGBA16F);
+		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "combineBloom/combineBloom.vs", "combineBloom/combineBloom.fs", outputWidth, outputHeight, GL30.GL_RGBA16F);
 	}
 
 	@Override

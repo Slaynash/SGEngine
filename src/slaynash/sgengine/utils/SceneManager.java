@@ -84,6 +84,9 @@ public class SceneManager {
 				initialized = true;
 				throwInitializedEvent();
 				LogSystem.out_println("[SceneManager] Starting render");
+				
+				int err = 0;
+				
 				while(true){
 					try {
 						while(render){
@@ -96,6 +99,9 @@ public class SceneManager {
 								break;
 							}
 							else{
+								
+								/// UPDATE ///
+								
 								DebugTimer.restart();
 								EngineUpdateThread.runAll();
 								UserInputUtil.update();
@@ -110,30 +116,12 @@ public class SceneManager {
 								DebugTimer.outputAndUpdateTime("Update time");
 								
 								
-								
-								
-								if(Configuration.isVR()) VRUtils.setCurrentRenderEye(VRUtils.EYE_CENTER);
-								currentScene.render();
-								int err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[SceneManager] Scene Render error: OpenGL Error "+err);
-								DebugTimer.outputAndUpdateTime("Render time [main]");
-								deferredRenderCheck(VRUtils.EYE_CENTER);
-								err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[SceneManager] Deferred Render error: OpenGL Error "+err);
-								DebugTimer.outputAndUpdateTime("Render time [defe]");
-								
-								
+								/// RENDER ///
+
 								boolean iudr = Configuration.isUsingDeferredRender();
-								Configuration.useDeferredRender(false);
-								if(Configuration.isHandRendered()) {
-									VRUtils.setCurrentRenderEye(VRUtils.EYE_CENTER);
-									GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
-									PlayerWeaponsManager.renderWeapon();
-								}
-								err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[SceneManager] Weapon/Hand Render error: OpenGL Error "+err);
-								if(Configuration.getGUIEnabled()) GUIManager.render();
-								err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[SceneManager] GUI Render error: OpenGL Error "+err);
-								Configuration.useDeferredRender(iudr);
-								DebugTimer.outputAndUpdateTime("GUI Render time");
 								
+								
+								//VR
 								if(Configuration.isVR()){
 									VRUtils.setCurrentRenderEye(VRUtils.EYE_LEFT);
 									currentScene.renderVR(VRUtils.EYE_LEFT);
@@ -147,6 +135,8 @@ public class SceneManager {
 									}
 									Configuration.useDeferredRender(iudr);
 									DebugTimer.outputAndUpdateTime("VR Render time[Left][Defe]");
+									
+									
 									VRUtils.setCurrentRenderEye(VRUtils.EYE_RIGHT);
 									currentScene.renderVR(VRUtils.EYE_RIGHT);
 									DebugTimer.outputAndUpdateTime("VR Render time [Right][Main]");
@@ -159,6 +149,9 @@ public class SceneManager {
 									}
 									Configuration.useDeferredRender(iudr);
 									DebugTimer.outputAndUpdateTime("VR Render time [Right][Defe]");
+									
+									
+									VRUtils.setCurrentRenderEye(VRUtils.EYE_CENTER);
 									
 									Vector3f cpcPos = Configuration.getPlayerCharacter().getPosition();
 									Vector3f cpcDir = Configuration.getPlayerCharacter().getViewDirection();
@@ -174,12 +167,42 @@ public class SceneManager {
 								}
 								err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[SceneManager] VR Render error: OpenGL Error "+err);
 								
+								
+								
+
+								
+								//SCREEN
+								if(Configuration.isVR()) VRUtils.setCurrentRenderEye(VRUtils.EYE_CENTER);
+								currentScene.render();
+								err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[SceneManager] Scene Render error: OpenGL Error "+err);
+								DebugTimer.outputAndUpdateTime("Render time [main]");
+								deferredRenderCheck(VRUtils.EYE_CENTER);
+								err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[SceneManager] Deferred Render error: OpenGL Error "+err);
+								DebugTimer.outputAndUpdateTime("Render time [defe]");
+								
+								
+								Configuration.useDeferredRender(false);
+								if(Configuration.isHandRendered()) {
+									VRUtils.setCurrentRenderEye(VRUtils.EYE_CENTER);
+									GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
+									PlayerWeaponsManager.renderWeapon();
+								}
+								err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[SceneManager] Weapon/Hand Render error: OpenGL Error "+err);
+								if(Configuration.getGUIEnabled()) GUIManager.render();
+								err = 0; if((err = GL11.glGetError()) != 0) LogSystem.out_println("[SceneManager] GUI Render error: OpenGL Error "+err);
+								Configuration.useDeferredRender(iudr);
+								DebugTimer.outputAndUpdateTime("GUI Render time");
+								
+								
+								
+								
 								DeferredRenderer.cleanup();
 								DebugTimer.outputAndUpdateTime("DeferredRenderer cleanup time");
 								//GL11.glFinish();
 								
 								DisplayManager.updateDisplay();
 								if(Configuration.isUsingTimingDebug()) {
+									//GL11.glFinish();
 									DebugTimer.outputAndUpdateTime("Update display time");
 									
 									DebugTimer.finishUpdate();
@@ -196,6 +219,7 @@ public class SceneManager {
 									firstRenderNotLabel = true;
 								}
 							}
+							
 						}
 					}
 					catch(final Exception e) {

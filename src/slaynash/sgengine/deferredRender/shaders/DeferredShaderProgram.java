@@ -14,13 +14,13 @@ public abstract class DeferredShaderProgram extends ShaderProgram {
 	FrameBufferedObject fbo;
 	private Vao quadVao;
 	
-	public DeferredShaderProgram(String shaderPath, String vertexShaderName, String fragmentShaderName, int shaderType, int outputWidth, int outputHeight, int outputColorBufferFormat) {
-		super(shaderPath, vertexShaderName, fragmentShaderName, shaderType);
+	public DeferredShaderProgram(String shaderPath, String vertexShaderName, String fragmentShaderName, int outputWidth, int outputHeight, int outputColorBufferFormat) {
+		super(shaderPath, vertexShaderName, fragmentShaderName);
 		fbo = new FrameBufferedObject(outputWidth, outputHeight, FrameBufferedObject.DEPTH_TEXTURE, false, 1, outputColorBufferFormat);
 	}
 	
-	public DeferredShaderProgram(String shaderPath, String vertexShaderName, String fragmentShaderName, String geometryShaderName, int shaderType, int outputWidth, int outputHeight, int outputColorBufferFormat) {
-		super(shaderPath, vertexShaderName, fragmentShaderName, geometryShaderName, shaderType);
+	public DeferredShaderProgram(String shaderPath, String vertexShaderName, String fragmentShaderName, String geometryShaderName, int outputWidth, int outputHeight, int outputColorBufferFormat) {
+		super(shaderPath, vertexShaderName, fragmentShaderName, geometryShaderName);
 		fbo = new FrameBufferedObject(outputWidth, outputHeight, FrameBufferedObject.DEPTH_TEXTURE, false, 1, outputColorBufferFormat);
 	}
 	

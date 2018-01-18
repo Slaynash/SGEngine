@@ -9,8 +9,6 @@ import java.util.Random;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
-import org.lwjgl.opengl.GL11;
-
 public class DebugTimer {
 	
 	private static long startTime = 0;
@@ -23,7 +21,7 @@ public class DebugTimer {
 	
 	public static void outputAndUpdateTime(String string) {
 		if(Configuration.isUsingTimingDebug()) {
-			GL11.glFinish();
+			//GL11.glFinish();
 			//LogSystem.out_println("[TIMING] VR Render time [Left][Defe]: "+((System.nanoTime()-startTime)/1e6f)+"ms");
 			times.add(new DebugTime(((System.nanoTime()-startTime)/1e6f), string));
 			startTime = System.nanoTime();

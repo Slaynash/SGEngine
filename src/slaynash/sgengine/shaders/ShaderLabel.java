@@ -12,7 +12,7 @@ public class ShaderLabel extends ShaderProgram {
 	private int texture_location;
 
 	public ShaderLabel() {
-		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "modern/modernLabel.vs", "modern/modernLabel.fs", ShaderProgram.SHADER_LABEL_MODERN);
+		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "modern/modernLabel.vs", "modern/modernLabel.fs");
 	}
 
 	@Override

@@ -12,7 +12,7 @@ import slaynash.sgengine.LogSystem;
 public class ShadowShader extends ShaderProgram {
 
 	public ShadowShader() {
-		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "shadows/shadows.vs", "shadows/shadows.fs", "shadows/shadows.gs", ShaderProgram.SHADER_3D_SHADOWS);
+		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "shadows/shadows.vs", "shadows/shadows.fs", "shadows/shadows.gs");
 		
 	}
 

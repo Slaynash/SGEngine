@@ -8,7 +8,7 @@ import slaynash.sgengine.Configuration;
 public class SkyboxShader extends ShaderProgram {
 	
 	public SkyboxShader() {
-		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "skybox/skybox.vs", "skybox/skybox.fs", ShaderProgram.SHADER_3D_MODERN);
+		super(Configuration.getAbsoluteInstallPath()+"/"+Configuration.getRelativeShaderPath(), "skybox/skybox.vs", "skybox/skybox.fs");
 	}
 	
 	private int colorTexture1_location;
