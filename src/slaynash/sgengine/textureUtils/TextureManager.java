@@ -79,7 +79,7 @@ public class TextureManager {
 				default:
 					if((tex = textureList.get("res/textures/default.png")) != null) return tex;
 					try {
-						TextureDef textureDef = new TextureDef(getSlickTexture(new File(Configuration.getAbsoluteInstallPath()+"/"+"res/textures/tile_white.png")), texturePath, type);
+						TextureDef textureDef = new TextureDef(getSlickTexture(new File(Configuration.getAbsoluteInstallPath()+"/"+"res/textures/default.png")), texturePath, type);
 						textureList.put(texturePath, textureDef);
 						return textureDef;
 					}
