@@ -15,6 +15,7 @@ import org.lwjgl.util.vector.Vector3f;
 
 import slaynash.sgengine.Configuration;
 import slaynash.sgengine.LogSystem;
+import slaynash.sgengine.maths.Vector2i;
 
 public abstract class ShaderProgram {
 	
@@ -140,6 +141,9 @@ public abstract class ShaderProgram {
 			}else if(value instanceof Vector2f){
 				Vector2f v = new Vector2f().set((Vector2f) value);
 				GL20.glUniform2f(location, v.x, v.y);
+			}else if(value instanceof Vector2i){
+				Vector2i v = (Vector2i) value;
+				GL20.glUniform2i(location, v.x, v.y);
 			}
 			else{
 				LogSystem.err_println("[ShaderProgram] Unable to bind data of type "+value.getClass()+" in shader "+this.getClass()+".");

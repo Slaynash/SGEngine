@@ -2,7 +2,6 @@ package slaynash.sgengine.gui.button;
 
 import javax.swing.event.EventListenerList;
 
-import org.lwjgl.util.vector.Vector2f;
 import org.newdawn.slick.Color;
 
 import slaynash.sgengine.gui.GUIElement;
@@ -65,7 +64,7 @@ public class GUIButton extends GUIElement{
 			
 			ShaderManager.shader_loadTranslation(getTopLeft());
 			model.render();
-			ShaderManager.shader_loadTranslation(new Vector2f());
+			ShaderManager.shader_loadTranslation(new Vector2i());
 			
 		}
 		if(textEnable){
@@ -121,9 +120,9 @@ public class GUIButton extends GUIElement{
 	public void setText(String string, boolean centered) {
 		if(text != null) text.release();
 		if(centered)
-			text = new Text2d(string, "tahoma", 400, new Vector2f(2,3), getWidth()/2, centered, this);
+			text = new Text2d(string, "tahoma", 400, new Vector2i(0,0), getWidth()/2, getHeight()/2, centered, true, this);
 		else
-			text = new Text2d(string, "tahoma", 400, new Vector2f(5,3), getWidth()-3, centered, this);
+			text = new Text2d(string, "tahoma", 400, new Vector2i(0,0), getWidth()-3, getHeight()/2, centered, true, this);
 		textEnable = true;
 	}
 	

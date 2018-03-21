@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.vector.Vector2f;
 
 import slaynash.sgengine.LogSystem;
 import slaynash.sgengine.gui.button.GUIButton;
@@ -95,7 +94,7 @@ public class GUIManager {
 		gameElementsToAdd.clear();
 		removeElements();
 		
-		Vector2f mousePos = UserInputUtil.getMousePos();
+		Vector2i mousePos = UserInputUtil.getMousePos();
 		boolean overFound = false;
 		//check popup
 		if(isPopup){
@@ -113,7 +112,8 @@ public class GUIManager {
 		//check menu
 		if(!elementDragged() && menuShown){
 			for(int i=menuTopLevel;i>=0;i--){
-				for(GUIElement e:menuElements){
+				for(int j=menuElements.size()-1;j>=0;j--) {
+					GUIElement e = menuElements.get(j);
 					if(e.isLevelable() && e.getLevel() == i){
 						if(!overFound && isInElement(e, mousePos)){
 							setMouseInElement(e);
@@ -123,6 +123,7 @@ public class GUIManager {
 					}
 				}
 			}
+			/* BAD ORDER
 			for(GUIElement e:menuElements){
 				if(!e.isLevelable() && !(e.isExpandable() && e.isExpanded())){
 					if(!overFound && isInElement(e, mousePos)){
@@ -141,11 +142,33 @@ public class GUIManager {
 					else e.setMouseIn(false);
 				}
 			}
+			*/
+			for(int i=menuElements.size()-1;i>=0;i--) {
+				GUIElement e = menuElements.get(i);
+				if(!e.isLevelable() && !(e.isExpandable() && e.isExpanded())){
+					if(!overFound && isInElement(e, mousePos)){
+						setMouseInElement(e);
+						overFound = true;
+					}
+					else e.setMouseIn(false);
+				}
+			}
+			for(int i=menuElements.size()-1;i>=0;i--) {
+				GUIElement e = menuElements.get(i);
+				if(e.isExpandable() && e.isExpanded()){
+					if(!overFound && isInElement(e, mousePos)){
+						setMouseInElement(e);
+						overFound = true;
+					}
+					else e.setMouseIn(false);
+				}
+			}
 		}
 		//check in-game
 		if(!elementDragged()){
 			for(int i=gameTopLevel;i>=0;i--){
-				for(GUIElement e:gameElements){
+				for(int j=gameElements.size()-1;j>=0;j--) {
+					GUIElement e = gameElements.get(j);
 					if(e.isLevelable() && e.getLevel() == i){
 						if(!overFound && isInElement(e, mousePos)){
 							setMouseInElement(e);
@@ -155,7 +178,8 @@ public class GUIManager {
 					}
 				}
 			}
-			for(GUIElement e:gameElements){
+			for(int i=gameElements.size()-1;i>=0;i--) {
+				GUIElement e = gameElements.get(i);
 				if(e.isExpandable() && e.isExpanded()){
 					if(!overFound && isInElement(e, mousePos)){
 						setMouseInElement(e);
@@ -164,7 +188,8 @@ public class GUIManager {
 					else e.setMouseIn(false);
 				}
 			}
-			for(GUIElement e:gameElements){
+			for(int i=gameElements.size()-1;i>=0;i--) {
+				GUIElement e = gameElements.get(i);
 				if(!e.isDraggable()){
 					if(!overFound && isInElement(e, mousePos)){
 						setMouseInElement(e);
@@ -219,8 +244,14 @@ public class GUIManager {
 				}
 			}
 			*/
-		for(GUIElement e:gameElements) e.update();
-		for(GUIElement e:menuElements) e.update();
+		for(int i=gameElements.size()-1;i>=0;i--) {
+			GUIElement e = gameElements.get(i);
+			e.update();
+		}
+		for(int i=menuElements.size()-1;i>=0;i--) {
+			GUIElement e = menuElements.get(i);
+			e.update();
+		}
 	}
 
 	private static boolean elementDragged() {
@@ -238,7 +269,7 @@ public class GUIManager {
 	public static void render() {
 		ShaderManager.startGUIShaderDirect();
 		prepare();
-		Vector2f mousePos = UserInputUtil.getMousePos();
+		Vector2i mousePos = UserInputUtil.getMousePos();
 		for(GUIElement element:gameElements) if(!element.isLevelable() && !element.isExpandable() || (element.isExpandable() && !element.isExpanded() && !isInElement(element, mousePos)) )element.render();
 		for(GUIElement element:gameElements) if(!element.isLevelable() && element.isExpandable() && (element.isExpanded() || isInElement(element, mousePos) )) element.render();
 		
@@ -456,9 +487,9 @@ public class GUIManager {
 		}
 	}
 	
-	private static boolean isInElement(GUIElement element, Vector2f pos) {
-		Vector2f tl = element.getTopLeft();
-		Vector2f br = element.getBottomRight();
+	private static boolean isInElement(GUIElement element, Vector2i pos) {
+		Vector2i tl = element.getTopLeft();
+		Vector2i br = element.getBottomRight();
 		return tl.x < pos.x && tl.y < pos.y && br.x > pos.x && br.y > pos.y;
 	}
 

@@ -16,6 +16,7 @@ import org.lwjgl.util.vector.Vector3f;
 import slaynash.sgengine.Configuration;
 import slaynash.sgengine.LogSystem;
 import slaynash.sgengine.deferredRender.DeferredRenderer;
+import slaynash.sgengine.maths.Vector2i;
 import slaynash.sgengine.textureUtils.TextureManager;
 import slaynash.sgengine.utils.DisplayManager;
 import slaynash.sgengine.world3d.loader.Ent_PointLight;
@@ -235,7 +236,7 @@ public class ShaderManager {
 		currentShader.bindData("colour", colour);
 	}
 	
-	public static void shader_loadTranslation(Vector2f position) {
+	public static void shader_loadTranslation(Vector2i position) {
 		currentShader.bindData("translation", position);
 	}
 	public static void shader_setColorsInverted(boolean inverted) {

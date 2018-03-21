@@ -1,7 +1,6 @@
 package slaynash.sgengine.gui;
 
-import org.lwjgl.util.vector.Vector2f;
-
+import slaynash.sgengine.maths.Vector2i;
 import slaynash.sgengine.models.Renderable2dModel;
 import slaynash.sgengine.models.utils.VaoManager;
 import slaynash.sgengine.shaders.ShaderManager;
@@ -48,7 +47,7 @@ public class GUIImage extends GUIElement{
 	public void render() {
 		ShaderManager.shader_loadTranslation(getTopLeft());
 		model.render();
-		ShaderManager.shader_loadTranslation(new Vector2f());
+		ShaderManager.shader_loadTranslation(new Vector2i());
 		/*
 		GL11.glBegin(GL11.GL_QUADS);
 			GL11.glTexCoord2f(0      , 0);

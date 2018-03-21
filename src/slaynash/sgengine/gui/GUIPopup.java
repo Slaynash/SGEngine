@@ -23,7 +23,7 @@ public class GUIPopup extends GUIElement {
 	private Text2d title;
 	private Text2d message;
 	private boolean dragged = false;
-	private Vector2f mouseOldPos;
+	private Vector2i mouseOldPos;
 	private GUIImage image;
 	
 	private TextureDef texBack;
@@ -206,7 +206,7 @@ public class GUIPopup extends GUIElement {
 		renderInside = false;
 		ShaderManager.shader_loadTranslation(getTopLeft());
 		modelBack.render();
-		ShaderManager.shader_loadTranslation(new Vector2f());
+		ShaderManager.shader_loadTranslation(new Vector2i());
 		/*
 		float t = getTopLeft().y;
 		float l = getTopLeft().x;
@@ -228,7 +228,7 @@ public class GUIPopup extends GUIElement {
 		
 		renderInside = true;
 		image.render();
-		Vector2f mousePos = UserInputUtil.getMousePos();
+		Vector2i mousePos = UserInputUtil.getMousePos();
 		for(GUIElement child:getChildrens()) if(!child.isExpandable() || (child.isExpandable() && !child.isExpanded() && !isInElement(child, mousePos)) )child.render();
 		for(GUIElement child:getChildrens()) if(child.isExpandable() && (child.isExpanded()|| isInElement(child, mousePos) )) child.render();
 		renderInside = false;
@@ -254,7 +254,7 @@ public class GUIPopup extends GUIElement {
 		modelClose.render();
 
 		if(mouseInClose) ShaderManager.shader_setColorsInverted(false);
-		ShaderManager.shader_loadTranslation(new Vector2f());
+		ShaderManager.shader_loadTranslation(new Vector2i());
 		
 		
 		renderInside = true;
@@ -347,12 +347,12 @@ public class GUIPopup extends GUIElement {
 	
 	public void setTitle(String title){
 		if(this.title != null)this.title.release();
-		this.title = new Text2d(title, "tahoma", 250, new Vector2f(5,1), getWidth(), false, this);
+		this.title = new Text2d(title, "tahoma", 250, new Vector2i(5,1), getWidth(), false, this);
 	}
 	
 	public void setMessage(String message){
 		if(this.message != null)this.message.release();
-		this.message = new Text2d(message, "tahoma", 300, new Vector2f(150,30), 100, true, this);
+		this.message = new Text2d(message, "tahoma", 300, new Vector2i(150,30), 100, true, this);
 	}
 	
 	private void setImage(int popupType) {
@@ -367,9 +367,10 @@ public class GUIPopup extends GUIElement {
 	}
 	
 	public void update() {
-		Vector2f mousePos = UserInputUtil.getMousePos();
+		Vector2i mousePos = UserInputUtil.getMousePos();
 		
-		for(GUIElement element:getChildrens()){
+		for(int i=getChildrens().size()-1;i>=0;i--) {
+			GUIElement element = getChildrens().get(i);
 			if(mouseIn && isInElement(element, mousePos))
 				element.setMouseIn(true);
 			else
@@ -386,14 +387,14 @@ public class GUIPopup extends GUIElement {
 			}
 			if(!dragged && getTopLeft().x < mousePos.x && mousePos.x < getBottomRight().x && getTopLeft().y < mousePos.y && mousePos.y < getTopLeft().y+topPadding){
 				dragged = true;
-				mouseOldPos = new Vector2f(mousePos);
+				mouseOldPos = new Vector2i(mousePos);
 			}
 		}
 		if(isFocused() && UserInputUtil.mouseLeftPressed()){
 			if(dragged){
 				Vector2f mouseD = new Vector2f(mousePos.x - mouseOldPos.x, mousePos.y - mouseOldPos.y);
 				translate(mouseD);
-				mouseOldPos = new Vector2f(mousePos);
+				mouseOldPos = new Vector2i(mousePos);
 				return;
 			}
 		}
@@ -402,13 +403,15 @@ public class GUIPopup extends GUIElement {
 		}
 		if(isFocused() && UserInputUtil.mouseLeftClicked()){
 			boolean focusFound = false;
-			for(GUIElement element:getChildrens()){
+			for(int i=getChildrens().size()-1;i>=0;i--) {
+				GUIElement element = getChildrens().get(i);
 				if(!focusFound && isInElement(element, mousePos) && element.isExpandable() && element.isExpanded()){
 					element.setFocus();
 					focusFound = true;
 				}
 			}
-			for(GUIElement element:getChildrens()){
+			for(int i=getChildrens().size()-1;i>=0;i++) {
+				GUIElement element = getChildrens().get(i);
 				if(!focusFound && isInElement(element, mousePos)){
 					element.setFocus();
 					focusFound = true;
@@ -425,6 +428,11 @@ public class GUIPopup extends GUIElement {
 		else{
 			mouseInClose = false;
 		}
+		
+		for(int i=getChildrens().size()-1;i>=0;i--) {
+			GUIElement element = getChildrens().get(i);
+			element.update();
+		}
 	}
 
 	private void translate(Vector2f translation) {
@@ -432,9 +440,9 @@ public class GUIPopup extends GUIElement {
 		this.y += translation.y;
 	}
 
-	private static boolean isInElement(GUIElement element, Vector2f pos) {
-		Vector2f tl = element.getTopLeft();
-		Vector2f br = element.getBottomRight();
+	private static boolean isInElement(GUIElement element, Vector2i pos) {
+		Vector2i tl = element.getTopLeft();
+		Vector2i br = element.getBottomRight();
 		if(tl.x < pos.x && tl.y < pos.y && br.x > pos.x && br.y > pos.y)
 			return true;
 		return false;

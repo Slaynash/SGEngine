@@ -3,14 +3,14 @@ package slaynash.sgengine.gui.text2d;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
-import slaynash.sgengine.models.Renderable2dModel;
-import slaynash.sgengine.models.utils.VaoManager;
 import slaynash.sgengine.gui.GUIElement;
 import slaynash.sgengine.gui.text2d.fontMeshCreator.FontType;
 import slaynash.sgengine.gui.text2d.fontMeshCreator.TextMeshData;
+import slaynash.sgengine.maths.Vector2i;
+import slaynash.sgengine.models.Renderable2dModel;
+import slaynash.sgengine.models.utils.VaoManager;
 import slaynash.sgengine.shaders.ShaderManager;
 import slaynash.sgengine.utils.DisplayManager;
 
@@ -25,20 +25,23 @@ public class Text2d {
 	private int vertexCount;
 	private Vector3f colour = new Vector3f(1f, 1f, 1f);
 
-	private Vector2f position;
+	private Vector2i position;
 	private float lineMaxSize;
+	private float maxHeight;
 	private int numberOfLines;
 
 	private FontType font;
 
 	private boolean centerText = false;
+	private boolean centerVerticallyText = false;
 	private GUIElement parent;
 	
 	private FontType fontType;
 	
 	private Renderable2dModel textModel;
+
 	
-	public Text2d(String text, String fontLocation, float fontSize, Vector2f position, float maxLineLength, boolean centered, GUIElement parent){
+	public Text2d(String text, String fontLocation, float fontSize, Vector2i position, float maxLineLength, boolean centered, GUIElement parent){
 		fontType = FontManager.createFont(fontLocation);
 		
 		this.textString = text;
@@ -46,7 +49,31 @@ public class Text2d {
 		this.font = fontType;
 		this.position = position;
 		this.lineMaxSize = maxLineLength;
+		this.maxHeight = -1;
 		this.centerText = centered;
+		this.centerVerticallyText = false;
+		
+		this.parent = parent;
+		
+		TextMeshData data = fontType.loadText(this);
+		vertices = data.getVertexPositions();
+		uvs = data.getTextureCoords();
+		textModel = new Renderable2dModel(VaoManager.loadToVao2d(vertices, uvs), font.getTextureAtlas());
+		
+		text2ds.add(this);
+	}
+	
+	public Text2d(String text, String fontLocation, float fontSize, Vector2i position, float maxLineLength, float maxHeight, boolean centered, boolean centeredVertically, GUIElement parent){
+		fontType = FontManager.createFont(fontLocation);
+		
+		this.textString = text;
+		this.fontSize = fontSize;
+		this.font = fontType;
+		this.position = position;
+		this.lineMaxSize = maxLineLength;
+		this.maxHeight = maxHeight;
+		this.centerText = centered;
+		this.centerVerticallyText = centeredVertically;
 		
 		this.parent = parent;
 		
@@ -62,13 +89,13 @@ public class Text2d {
 	public void render(){
 		ShaderManager.shader_setTextMode();
 		ShaderManager.shader_loadColor(getColour());
-		float px = position.x;
-		float py = position.y;
+		int px = position.x;
+		int py = position.y;
 		if(parent != null){
 			px += parent.getTopLeft().x;
 			py += parent.getTopLeft().y;
 		}
-		ShaderManager.shader_loadTranslation(new Vector2f(px, -DisplayManager.getHeight()+py));
+		ShaderManager.shader_loadTranslation(new Vector2i(px, -DisplayManager.getHeight()+py));
 		/*
 		GL11.glBegin(GL11.GL_TRIANGLES);
 		for(int i=0;i<vertices.length;i+=2){
@@ -78,7 +105,7 @@ public class Text2d {
 		GL11.glEnd();
 		*/
 		textModel.render();
-		ShaderManager.shader_loadTranslation(new Vector2f());
+		ShaderManager.shader_loadTranslation(new Vector2i());
 		ShaderManager.shader_exitTextMode();
 	}
 	
@@ -159,7 +186,7 @@ public class Text2d {
 	 *         (0, 0) is the top left corner of the screen, (1, 1) is the bottom
 	 *         right.
 	 */
-	public Vector2f getPosition() {
+	public Vector2i getPosition() {
 		return position;
 	}
 	/*
@@ -233,5 +260,13 @@ public class Text2d {
 	public void release(){
 		text2ds.remove(this);
 		textModel.getVao().dispose();
+	}
+
+	public float getMaxHeight() {
+		return maxHeight;
+	}
+
+	public boolean isCenteredVertically() {
+		return centerVerticallyText;
 	}
 }

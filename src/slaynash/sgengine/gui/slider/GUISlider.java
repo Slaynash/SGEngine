@@ -2,11 +2,10 @@ package slaynash.sgengine.gui.slider;
 
 import javax.swing.event.EventListenerList;
 
-import org.lwjgl.util.vector.Vector2f;
-
+import slaynash.sgengine.gui.GUIElement;
+import slaynash.sgengine.maths.Vector2i;
 import slaynash.sgengine.models.Renderable2dModel;
 import slaynash.sgengine.models.utils.VaoManager;
-import slaynash.sgengine.gui.GUIElement;
 import slaynash.sgengine.shaders.ShaderManager;
 import slaynash.sgengine.textureUtils.TextureDef;
 import slaynash.sgengine.textureUtils.TextureManager;
@@ -81,9 +80,9 @@ public class GUISlider extends GUIElement{
 		}
 		ShaderManager.shader_loadTranslation(getTopLeft());
 		trackModel.render();
-		ShaderManager.shader_loadTranslation(new Vector2f(getTopLeft().x+(trackPercent/100)*getWidth(), getTopLeft().y));
+		ShaderManager.shader_loadTranslation(new Vector2i((int)(getTopLeft().x+(trackPercent/100)*getWidth()), getTopLeft().y));
 		thumbModel.render();
-		ShaderManager.shader_loadTranslation(new Vector2f());
+		ShaderManager.shader_loadTranslation(new Vector2i());
 		/*
 		
 		float cy = getTopLeft().y+getHeight()/2;

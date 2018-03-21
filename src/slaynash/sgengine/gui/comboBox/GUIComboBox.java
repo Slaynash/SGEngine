@@ -6,11 +6,11 @@ import java.util.List;
 import javax.swing.event.EventListenerList;
 
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.vector.Vector2f;
 
 import slaynash.sgengine.LogSystem;
 import slaynash.sgengine.gui.GUIElement;
 import slaynash.sgengine.gui.text2d.Text2d;
+import slaynash.sgengine.maths.Vector2i;
 import slaynash.sgengine.models.Renderable2dModel;
 import slaynash.sgengine.models.utils.VaoManager;
 import slaynash.sgengine.shaders.ShaderManager;
@@ -50,11 +50,11 @@ public class GUIComboBox<T> extends GUIElement{ //TODO create events for comboBo
 		int yp = 0;
 		for(Object o:list){
 			yp+=20;
-			listText.add(new Text2d(o.toString(), "tahoma", 250, new Vector2f(0, yp+3), width/2, true, this));
+			listText.add(new Text2d(o.toString(), "tahoma", 250, new Vector2i(0, yp+3), width/2, true, this));
 		}
 		
 		selectedIndex = 0;
-		selectedText = new Text2d(listText.get(selectedIndex).getTextString(), "tahoma", 250, new Vector2f(0, 3), width/2, true, this);
+		selectedText = new Text2d(listText.get(selectedIndex).getTextString(), "tahoma", 250, new Vector2i(0, 3), width/2, true, this);
 		
 		float[] verticesBox = new float[]{0,0,width,0,width,20,width,20,0,20,0,0};
 		modelBox = new Renderable2dModel(VaoManager.loadToVao2d(verticesBox, uvs), texBox);
@@ -72,7 +72,7 @@ public class GUIComboBox<T> extends GUIElement{ //TODO create events for comboBo
 					open();
 				}
 				else{
-					Vector2f mousePos = UserInputUtil.getMousePos();
+					Vector2i mousePos = UserInputUtil.getMousePos();
 					if(mousePos.y <= getTopLeft().y+20)
 						close();
 					else{
@@ -98,9 +98,9 @@ public class GUIComboBox<T> extends GUIElement{ //TODO create events for comboBo
 			if(i<listText.size()-1) modelBox.setTexture(texMiddle);
 			else modelBox.setTexture(texEnd);
 			
-			ShaderManager.shader_loadTranslation(new Vector2f(getTopLeft().x, getTopLeft().y+(i+1)*20));
+			ShaderManager.shader_loadTranslation(new Vector2i(getTopLeft().x, getTopLeft().y+(i+1)*20));
 			modelBox.render();
-			ShaderManager.shader_loadTranslation(new Vector2f());
+			ShaderManager.shader_loadTranslation(new Vector2i());
 			/*
 			GL11.glBegin(GL11.GL_QUADS);
 				GL11.glTexCoord2f(0      , 0);
@@ -133,7 +133,7 @@ public class GUIComboBox<T> extends GUIElement{ //TODO create events for comboBo
 		*/
 		selectedText.render();
 		
-		ShaderManager.shader_loadTranslation(new Vector2f(getBottomRight().x, getTopLeft().y));
+		ShaderManager.shader_loadTranslation(new Vector2i(getBottomRight().x, getTopLeft().y));
 		modelExp.render();
 		/*
 		GL11.glBegin(GL11.GL_QUADS);
@@ -147,7 +147,7 @@ public class GUIComboBox<T> extends GUIElement{ //TODO create events for comboBo
 			GL11.glVertex2f  (getBottomRight().x-20, getTopLeft().y+20);
 		GL11.glEnd();
 		*/
-		ShaderManager.shader_loadTranslation(new Vector2f());
+		ShaderManager.shader_loadTranslation(new Vector2i());
 		
 		ShaderManager.shader_setComboBoxMode(false);
 		
@@ -168,7 +168,7 @@ public class GUIComboBox<T> extends GUIElement{ //TODO create events for comboBo
 			selectedIndex = index;
 			selectedText = listText.get(index);
 			selectedText.release();
-			selectedText = new Text2d(listText.get(index).getTextString(), "tahoma", 250, new Vector2f(0, 3), getWidth()/2, true, this);
+			selectedText = new Text2d(listText.get(index).getTextString(), "tahoma", 250, new Vector2i(0, 3), getWidth()/2, true, this);
 			selectedText.setNumberOfLines(1);
 			for(GUIComboBoxListener<T> listener : getGUIComboBoxListener()){
 				GUIComboBoxEvent<T> event = new GUIComboBoxEvent<T>(getSelectedItem());

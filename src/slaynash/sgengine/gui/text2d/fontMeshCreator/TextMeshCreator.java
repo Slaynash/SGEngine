@@ -35,6 +35,7 @@ public class TextMeshCreator {
 				boolean added = currentLine.attemptToAddWord(currentWord);
 				if (!added) {
 					lines.add(currentLine);
+					if(text.getMaxHeight() > 0 && (lines.size()+1)*LINE_HEIGHT*text.getFontSize() > text.getMaxHeight()) return lines;
 					currentLine = new Line(metaData.getSpaceWidth(), text.getFontSize(), text.getMaxLineSize());
 					currentLine.attemptToAddWord(currentWord);
 				}
@@ -68,6 +69,9 @@ public class TextMeshCreator {
 		for (Line line : lines) {
 			if (text.isCentered()) {
 				curserX = (line.getMaxLength() - line.getLineLength()) / 2;
+			}
+			if (text.isCenteredVertically()) {
+				curserY = (text.getMaxHeight() - lines.size()*LINE_HEIGHT*text.getFontSize())/2;
 			}
 			for (Word word : line.getWords()) {
 				for (Character letter : word.getCharacters()) {

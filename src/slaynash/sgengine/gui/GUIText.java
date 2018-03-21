@@ -1,8 +1,7 @@
 package slaynash.sgengine.gui;
 
-import org.lwjgl.util.vector.Vector2f;
-
 import slaynash.sgengine.gui.text2d.Text2d;
+import slaynash.sgengine.maths.Vector2i;
 
 public class GUIText extends GUIElement{
 	
@@ -19,12 +18,12 @@ public class GUIText extends GUIElement{
 		this.fontSize = fontSize;
 		this.font = font;
 		this.centered = centered;
-		this.text2d = new Text2d(text, font, fontSize, new Vector2f(0,0), width/2, centered, this);
+		this.text2d = new Text2d(text, font, fontSize, new Vector2i(0,0), width/2, centered, this);
 	}
 	
 	public GUIText(String text, int x, int y, int width, GUIElement parent, int location) {
 		super(x, y, width, 20, parent, false, location);			 //y+17
-		this.text2d = new Text2d(text, "tahoma", 300, new Vector2f(0,0), width/2, false, this);
+		this.text2d = new Text2d(text, "tahoma", 300, new Vector2i(0,0), width/2, false, this);
 	}
 
 	@Override
@@ -48,7 +47,7 @@ public class GUIText extends GUIElement{
 	public void setText(String text) {
 		if(text2d.getTextString().equals(text)) return;
 		if(text2d != null) text2d.release();
-		this.text2d = new Text2d(text, font, fontSize, new Vector2f(0,0), getWidth()/2, centered, this);
+		this.text2d = new Text2d(text, font, fontSize, new Vector2i(0,0), getWidth()/2, centered, this);
 		text2d.setColour(color[0], color[1], color[2]);
 	}
 

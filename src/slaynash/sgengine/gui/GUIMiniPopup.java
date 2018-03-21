@@ -1,7 +1,5 @@
 package slaynash.sgengine.gui;
 
-import org.lwjgl.util.vector.Vector2f;
-
 import slaynash.sgengine.maths.Vector2i;
 import slaynash.sgengine.models.Renderable2dModel;
 import slaynash.sgengine.models.utils.VaoManager;
@@ -51,7 +49,7 @@ public class GUIMiniPopup extends GUIElement {
 		ShaderManager.shader_loadTranslation(getTopLeft());
 		
 		model.render();
-		ShaderManager.shader_loadTranslation(new Vector2f());
+		ShaderManager.shader_loadTranslation(new Vector2i());
 		
 		for(GUIElement child:getChildrens()) child.render();
 	}

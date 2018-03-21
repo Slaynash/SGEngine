@@ -3,8 +3,6 @@ package slaynash.sgengine.gui;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.lwjgl.util.vector.Vector2f;
-
 import slaynash.sgengine.maths.Vector2i;
 import slaynash.sgengine.utils.UserInputUtil;
 
@@ -109,18 +107,18 @@ public abstract class GUIElement {
 		return childrens;
 	}
 
-	public Vector2f getTopLeft() {
+	public Vector2i getTopLeft() {
 		if(parent != null)
-			return new Vector2f(x+parent.getContainerPos().x, y+parent.getContainerPos().y);
+			return new Vector2i(x+parent.getContainerPos().x, y+parent.getContainerPos().y);
 		else
-			return new Vector2f(x, y);
+			return new Vector2i(x, y);
 	}
 	
-	public Vector2f getBottomRight() {
+	public Vector2i getBottomRight() {
 		if(parent != null)
-			return new Vector2f(x+parent.getContainerPos().x+width, y+parent.getContainerPos().y+height);
+			return new Vector2i(x+parent.getContainerPos().x+width, y+parent.getContainerPos().y+height);
 		else
-			return new Vector2f(x+width, y+height);
+			return new Vector2i(x+width, y+height);
 	}
 
 	public void setFocus() {
@@ -140,8 +138,13 @@ public abstract class GUIElement {
 	}
 	
 	public Vector2i getContainerPos(){
+		if(parent != null) {
+			if(containerPadding == null) return new Vector2i(x+parent.getTopLeft().x,y+parent.getTopLeft().y);
+			return new Vector2i(x+containerPadding.x+parent.getTopLeft().x, y+containerPadding.y+parent.getTopLeft().y);
+		}
 		if(containerPadding == null) return new Vector2i(x,y);
 		return new Vector2i(x+containerPadding.x, y+containerPadding.y);
+		
 	}
 	public Vector2i getContainerSize(){
 		if(containerSize == null) return new Vector2i(0,0);

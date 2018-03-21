@@ -2,11 +2,10 @@ package slaynash.sgengine.gui.checkBox;
 
 import javax.swing.event.EventListenerList;
 
-import org.lwjgl.util.vector.Vector2f;
-
+import slaynash.sgengine.gui.GUIElement;
+import slaynash.sgengine.maths.Vector2i;
 import slaynash.sgengine.models.Renderable2dModel;
 import slaynash.sgengine.models.utils.VaoManager;
-import slaynash.sgengine.gui.GUIElement;
 import slaynash.sgengine.shaders.ShaderManager;
 import slaynash.sgengine.textureUtils.TextureDef;
 import slaynash.sgengine.textureUtils.TextureManager;
@@ -61,7 +60,7 @@ public class GUICheckBox extends GUIElement{
 		if(checked) model.setTexture(texY);
 		else model.setTexture(texN);
 		model.render();
-		ShaderManager.shader_loadTranslation(new Vector2f());
+		ShaderManager.shader_loadTranslation(new Vector2i());
 	}
 
 	private void toggle() {

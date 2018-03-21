@@ -3,9 +3,9 @@ package slaynash.sgengine.utils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-import org.lwjgl.util.vector.Vector2f;
 
 import slaynash.sgengine.LogSystem;
+import slaynash.sgengine.maths.Vector2i;
 
 public class UserInputUtil {
 	
@@ -21,7 +21,7 @@ public class UserInputUtil {
 		} catch (LWJGLException e) {e.printStackTrace(LogSystem.getErrStream());}
 	}
 
-	private static Vector2f mousePos = new Vector2f(0,0);
+	private static Vector2i mousePos = new Vector2i(0,0);
 	
 	public static void update(){
 		boolean b0 = Mouse.isButtonDown(0);
@@ -43,7 +43,7 @@ public class UserInputUtil {
 		Mouse.setGrabbed(grabbed);
 	}
 
-	public static Vector2f getMousePos() {
+	public static Vector2i getMousePos() {
 		return mousePos;
 	}
 

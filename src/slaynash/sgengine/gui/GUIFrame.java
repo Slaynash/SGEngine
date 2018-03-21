@@ -22,7 +22,7 @@ public class GUIFrame extends GUIElement {
 	private boolean renderInside = true;
 	private Text2d title;
 	private boolean dragged = false;
-	private Vector2f mouseOldPos;
+	private Vector2i mouseOldPos;
 	
 	private TextureDef texBack;
 	private TextureDef texBottom;
@@ -205,7 +205,7 @@ public class GUIFrame extends GUIElement {
 		renderInside = false;
 		ShaderManager.shader_loadTranslation(getTopLeft());
 		modelBack.render();
-		ShaderManager.shader_loadTranslation(new Vector2f());
+		ShaderManager.shader_loadTranslation(new Vector2i());
 		/*
 		float t = getTopLeft().y;
 		float l = getTopLeft().x;
@@ -224,7 +224,7 @@ public class GUIFrame extends GUIElement {
 		GL11.glEnd();
 		*/
 		renderInside = true;
-		Vector2f mousePos = UserInputUtil.getMousePos();
+		Vector2i mousePos = UserInputUtil.getMousePos();
 		for(GUIElement child:getChildrens()) if(!child.isExpandable() || (child.isExpandable() && !child.isExpanded() && !isInElement(child, mousePos)) )child.render();
 		for(GUIElement child:getChildrens()) if(child.isExpandable() && (child.isExpanded()|| isInElement(child, mousePos) )) child.render();
 		renderInside = false;
@@ -248,7 +248,7 @@ public class GUIFrame extends GUIElement {
 		modelClose.render();
 
 		if(mouseInClose) ShaderManager.shader_setColorsInverted(false);
-		ShaderManager.shader_loadTranslation(new Vector2f());
+		ShaderManager.shader_loadTranslation(new Vector2i());
 		
 		renderInside = true;
 		
@@ -350,7 +350,7 @@ public class GUIFrame extends GUIElement {
 	
 	public void setTitle(String title){
 		if(this.title != null) this.title.release();
-		this.title = new Text2d(title, "tahoma", 250, new Vector2f(5,1), getWidth()-topPadding, false, this);
+		this.title = new Text2d(title, "tahoma", 250, new Vector2i(5,1), getWidth()-topPadding, false, this);
 		this.title.setNumberOfLines(1);
 	}
 
@@ -374,9 +374,10 @@ public class GUIFrame extends GUIElement {
 
 	@Override
 	public void update() {
-		Vector2f mousePos = UserInputUtil.getMousePos();
+		Vector2i mousePos = UserInputUtil.getMousePos();
 		
-		for(GUIElement element:getChildrens()){
+		for(int i=getChildrens().size()-1;i>=0;i--) {
+			GUIElement element = getChildrens().get(i);
 			if(mouseIn && isInElement(element, mousePos)){
 				element.setMouseIn(true);
 			}
@@ -395,14 +396,14 @@ public class GUIFrame extends GUIElement {
 			}
 			if(!dragged && getTopLeft().x < mousePos.x && mousePos.x < getBottomRight().x && getTopLeft().y < mousePos.y && mousePos.y < getTopLeft().y+topPadding){
 				dragged = true;
-				mouseOldPos = new Vector2f(mousePos);
+				mouseOldPos = new Vector2i(mousePos);
 			}
 		}
 		if(isFocused() && UserInputUtil.mouseLeftPressed()){
 			if(dragged){
 				Vector2f mouseD = new Vector2f(mousePos.x - mouseOldPos.x, mousePos.y - mouseOldPos.y);
 				translate(mouseD);
-				mouseOldPos = new Vector2f(mousePos);
+				mouseOldPos = new Vector2i(mousePos);
 				//LogSystem.out_println("frame moved to "+mouseD.x+";"+mouseD.y);
 				return;
 			}
@@ -412,7 +413,8 @@ public class GUIFrame extends GUIElement {
 		}
 		if(isFocused() && UserInputUtil.mouseLeftClicked()){
 			boolean focusFound = false;
-			for(GUIElement element:getChildrens()){
+			for(int i=getChildrens().size()-1;i>=0;i--) {
+				GUIElement element = getChildrens().get(i);
 				if(element.isExpandable() && element.isExpanded()){
 					if(!focusFound && isInElement(element, mousePos)){
 						element.setFocus();
@@ -423,7 +425,8 @@ public class GUIFrame extends GUIElement {
 					}
 				}
 			}
-			for(GUIElement element:getChildrens()){
+			for(int i=getChildrens().size()-1;i>=0;i--) {
+				GUIElement element = getChildrens().get(i);
 				if(!element.isExpandable() || !element.isExpanded())
 				if(!focusFound && isInElement(element, mousePos)){
 					element.setFocus();
@@ -444,6 +447,11 @@ public class GUIFrame extends GUIElement {
 		else{
 			mouseInClose = false;
 		}
+		
+		for(int i=getChildrens().size()-1;i>=0;i--) {
+			GUIElement element = getChildrens().get(i);
+			element.update();
+		}
 	}
 
 	private void translate(Vector2f translation) {
@@ -451,9 +459,9 @@ public class GUIFrame extends GUIElement {
 		this.y += translation.y;
 	}
 
-	private static boolean isInElement(GUIElement element, Vector2f pos) {
-		Vector2f tl = element.getTopLeft();
-		Vector2f br = element.getBottomRight();
+	private static boolean isInElement(GUIElement element, Vector2i pos) {
+		Vector2i tl = element.getTopLeft();
+		Vector2i br = element.getBottomRight();
 		if(tl.x < pos.x && tl.y < pos.y && br.x > pos.x && br.y > pos.y)
 			return true;
 		return false;

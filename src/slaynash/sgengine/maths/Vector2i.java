@@ -14,4 +14,9 @@ public class Vector2i {
 		this.y = y;
 	}
 	
+	public Vector2i(Vector2i vec) {
+		this.x = vec.x;
+		this.y = vec.y;
+	}
+	
 }
