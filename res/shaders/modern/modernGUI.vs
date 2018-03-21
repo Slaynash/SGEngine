@@ -5,7 +5,7 @@ in vec2 textureCoordinates;
 
 out vec2 textureCoords;
 
-uniform vec2 translation;
+uniform ivec2 translation;
 uniform vec2 screenSize;
 
 void main(void){
